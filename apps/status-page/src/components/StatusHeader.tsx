@@ -3,7 +3,7 @@ import { Activity, Bell, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import RefreshCountdown from './RefreshCountdown';
 import { useSystemStatus } from '@/hooks/use-system-status';
-import { LanguageSwitcher, ThemeToggle } from '@autional-cn/ui';
+import { LanguageSwitcher, ThemeToggle } from '@autional/ui';
 import { useTranslation } from 'react-i18next';
 
 interface StatusHeaderProps {

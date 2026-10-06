@@ -9,7 +9,7 @@ import {
 	ReferenceLine,
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@autional-cn/ui';
+import { useTheme } from '@autional/ui';
 
 interface LatencyData {
 	time: string;

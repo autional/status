@@ -22,7 +22,7 @@ import {
 	KeyRound,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Toggle } from '@autional-cn/ui';
+import { Toggle } from '@autional/ui';
 
 const emailSchema = z.object({
 	email: z.string().email(),

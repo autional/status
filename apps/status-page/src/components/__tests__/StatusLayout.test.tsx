@@ -23,7 +23,7 @@ vi.mock('@/hooks/use-system-status', () => ({
 	useOverview: vi.fn(),
 }));
 
-vi.mock('@autional-cn/ui', () => ({
+vi.mock('@autional/ui', () => ({
 	ThemeToggle: () => null,
 	LanguageSwitcher: () => null,
 }));

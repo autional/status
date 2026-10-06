@@ -1,4 +1,4 @@
-import { ErrorBoundary as SharedErrorBoundary } from '@autional-cn/ui';
+import { ErrorBoundary as SharedErrorBoundary } from '@autional/ui';
 import i18n from '@/i18n';
 import { type ReactNode } from 'react';
 

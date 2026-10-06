@@ -8,7 +8,7 @@ import {
 	ResponsiveContainer,
 	Cell,
 } from 'recharts';
-import { useTheme } from '@autional-cn/ui';
+import { useTheme } from '@autional/ui';
 
 interface UptimeData {
 	time: string;

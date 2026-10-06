@@ -6,7 +6,7 @@ Autional 公开状态页面，用于实时展示所有微服务的健康状态�
 
 - Vite 6 + React 19 + TypeScript
 - React Router v7
-- Tailwind CSS 3 + `@autional-cn/tailwind-preset`
+- Tailwind CSS 3 + `@autional/tailwind-preset`
 - TanStack Query (数据获取与缓存)
 - lucide-react (图标)
 

@@ -1,15 +1,15 @@
 {
-  "name": "@autional-cn/status",
+  "name": "@autional/status",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @autional-cn/status-page dev",
-    "build": "pnpm --filter @autional-cn/status-page... build",
-    "preview": "pnpm --filter @autional-cn/status-page preview",
-    "typecheck": "pnpm --filter @autional-cn/status-page typecheck",
-    "lint": "pnpm --filter @autional-cn/status-page lint",
-    "test": "pnpm --filter @autional-cn/status-page test"
+    "dev": "pnpm --filter @autional/status-page dev",
+    "build": "pnpm --filter @autional/status-page... build",
+    "preview": "pnpm --filter @autional/status-page preview",
+    "typecheck": "pnpm --filter @autional/status-page typecheck",
+    "lint": "pnpm --filter @autional/status-page lint",
+    "test": "pnpm --filter @autional/status-page test"
   },
   "packageManager": "pnpm@11.0.8",
   "engines": {
