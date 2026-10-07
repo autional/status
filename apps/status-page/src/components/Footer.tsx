@@ -59,7 +59,7 @@ export default function Footer() {
 							<Mail size={16} />
 						</a>
 						<span className="text-xs">
-							© {new Date().getFullYear()} 深圳市天艺网络技术有限公司 粤ICP备08016466号
+							© {new Date().getFullYear()} Autional
 						</span>
 					</div>
 				</div>
