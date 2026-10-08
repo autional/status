@@ -5,3 +5,9 @@ dist/
 .env
 .env.local
 *.log
+
+# B3 区域生成物（构建前由 scripts/gen-env.mjs 生成；勿手改、勿入库）
+apps/status-page/public/env.js
+apps/status-page/public/robots.txt
+apps/status-page/public/sitemap.xml
+apps/status-page/public/.well-known/security.txt

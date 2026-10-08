@@ -5,8 +5,8 @@
   "type": "module",
   "description": "Autional Status Page — Public service health dashboard and incident history (Vite + React Router + Tailwind)",
   "scripts": {
-    "dev": "vite --port 13106",
-    "build": "tsc && vite build",
+    "dev": "node ../../scripts/gen-env.mjs && vite --port 13106",
+    "build": "node ../../scripts/gen-env.mjs && tsc && vite build",
     "preview": "vite preview --port 13106",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
