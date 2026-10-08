@@ -60,8 +60,9 @@ export default function ServiceDetailPage() {
 			let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
 			if (value < 95) status = 'unhealthy';
 			else if (value < 99.9) status = 'degraded';
+			// HH:mm（含分钟）——只给小时会在细粒度采样下把多个点压成重复刻度（Q-02）
 			return {
-				time: `${date.getHours()}:00`,
+				time: `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`,
 				uptime: Math.round(value * 100) / 100,
 				status,
 			};
@@ -78,7 +79,7 @@ export default function ServiceDetailPage() {
 			if (valueMs > 1000) status = 'unhealthy';
 			else if (valueMs > 500) status = 'degraded';
 			return {
-				time: `${date.getHours()}:00`,
+				time: `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`,
 				latency: Math.round(valueMs * 100) / 100,
 				status,
 			};
@@ -113,13 +114,13 @@ export default function ServiceDetailPage() {
 	if (!service) {
 		return (
 			<div className="mx-auto max-w-4xl px-4 py-12 text-center">
-				<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-700">
-					<Server size={32} className="text-[var(--color-text-muted)]" />
+				<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
+					<Server size={32} className="text-muted" />
 				</div>
-				<h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+				<h2 className="text-lg font-semibold text-neutral-900">
 					{t('service.notFound')}
 				</h2>
-				<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
+				<p className="mt-2 text-sm text-muted">
 					{t('service.notFoundDesc')}
 				</p>
 				<Link
@@ -146,6 +147,10 @@ export default function ServiceDetailPage() {
 			bg: 'bg-danger-soft text-danger-text dark:bg-danger-soft/30 dark:text-danger-text',
 			border: 'border-danger-soft',
 		},
+		unknown: {
+			bg: 'bg-neutral-50 text-[var(--color-text-secondary)] dark:bg-surface/30 dark:text-[var(--color-text-muted)]',
+			border: 'border-neutral-200 dark:border-neutral-700',
+		},
 	};
 	const cfg = statusConfig[service.status];
 
@@ -156,14 +161,14 @@ export default function ServiceDetailPage() {
 			? 'text-danger-text'
 			: latencyTrend === 'down'
 				? 'text-success-text'
-				: 'text-[var(--color-text-muted)]';
+				: 'text-muted';
 
 	return (
 		<div className="mx-auto max-w-4xl px-4 py-8">
 			{/* Back link */}
 			<Link
 				to="/"
-				className="inline-flex items-center gap-1 text-sm font-medium text-neutral-500 hover:text-neutral-800 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200"
+				className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-neutral-800"
 			>
 				<ArrowLeft size={14} />
 				{t('service.back')}
@@ -173,8 +178,8 @@ export default function ServiceDetailPage() {
 			<div className={`mt-6 rounded-xl border p-6 ${cfg.bg} ${cfg.border}`}>
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-4">
-						<div className="flex h-14 w-14 items-center justify-center rounded-lg bg-white/80 dark:bg-neutral-800/80">
-							<Server size={28} className="text-neutral-500 dark:text-[var(--color-text-muted)]" />
+						<div className="flex h-14 w-14 items-center justify-center rounded-lg bg-neutral-0/80">
+							<Server size={28} className="text-muted" />
 						</div>
 						<div>
 							<h1 className="text-2xl font-bold">{t('service.name.' + service.id)}</h1>
@@ -185,14 +190,14 @@ export default function ServiceDetailPage() {
 				</div>
 
 				<div className="mt-6 grid gap-4 sm:grid-cols-3">
-					<div className="rounded-lg bg-white/60 p-4 dark:bg-neutral-800/60">
+					<div className="rounded-lg bg-neutral-0/60 p-4">
 						<div className="flex items-center gap-2 text-sm opacity-70">
 							<Clock size={14} />
 							{t('service.latency')}
 						</div>
 						<p className="mt-1 text-xl font-semibold">{service.latency || '—'}</p>
 					</div>
-					<div className="rounded-lg bg-white/60 p-4 dark:bg-neutral-800/60">
+					<div className="rounded-lg bg-neutral-0/60 p-4">
 						<div className="flex items-center gap-2 text-sm opacity-70">
 							<Activity size={14} />
 							{t('service.uptime', { range })}
@@ -201,7 +206,7 @@ export default function ServiceDetailPage() {
 							{avgUptime !== null ? `${avgUptime}%` : uptimeLoading ? t('service.loading') : '—'}
 						</p>
 					</div>
-					<div className="rounded-lg bg-white/60 p-4 dark:bg-neutral-800/60">
+					<div className="rounded-lg bg-neutral-0/60 p-4">
 						<div className="flex items-center gap-2 text-sm opacity-70">
 							<AlertTriangle size={14} />
 							{t('service.incidentCount')}
@@ -213,7 +218,7 @@ export default function ServiceDetailPage() {
 
 			{/* Range Selector */}
 			<div className="mt-6 flex items-center gap-2">
-				<span className="text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
+				<span className="text-sm text-muted">
 					{t('service.rangeLabel')}
 				</span>
 				{RANGE_OPTIONS.map((opt) => (
@@ -223,7 +228,7 @@ export default function ServiceDetailPage() {
 						className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
 							range === opt.value
 								? 'bg-primary-600 text-white'
-								: 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700'
+								: 'bg-neutral-0 text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
 						}`}
 					>
 						{t(opt.label)}
@@ -232,9 +237,9 @@ export default function ServiceDetailPage() {
 			</div>
 
 			{/* Uptime Chart */}
-			<div className="mt-6 rounded-lg border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+			<div className="mt-6 rounded-lg border border-neutral-200 bg-neutral-0 p-6 shadow-card">
 				<div className="flex items-center justify-between">
-					<h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
+					<h2 className="text-lg font-bold text-neutral-900">
 						{t('service.uptimeTitle', { range })}
 					</h2>
 					{avgUptime !== null && (
@@ -248,12 +253,12 @@ export default function ServiceDetailPage() {
 				<div className="mt-4 h-64">
 					{uptimeLoading ? (
 						<div className="flex h-full items-center justify-center">
-							<div className="h-4 w-32 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+							<div className="h-4 w-32 animate-pulse rounded-xs bg-neutral-200" />
 						</div>
 					) : uptimeChartData.length > 0 ? (
 						<UptimeChart data={uptimeChartData || []} tooltipLabel={t('service.uptimeTooltip')} />
 					) : (
-						<div className="flex h-full flex-col items-center justify-center text-[var(--color-text-muted)] dark:text-neutral-500">
+						<div className="flex h-full flex-col items-center justify-center text-muted">
 							<Activity size={32} />
 							<p className="mt-2 text-sm">{t('service.noUptime')}</p>
 							<p className="text-xs">{t('service.prometheusHint')}</p>
@@ -263,14 +268,14 @@ export default function ServiceDetailPage() {
 			</div>
 
 			{/* Latency Chart */}
-			<div className="mt-6 rounded-lg border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+			<div className="mt-6 rounded-lg border border-neutral-200 bg-neutral-0 p-6 shadow-card">
 				<div className="flex items-center justify-between">
-					<h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
+					<h2 className="text-lg font-bold text-neutral-900">
 						{t('service.latencyTitle', { range })}
 					</h2>
 					<div className="flex items-center gap-2">
 						{avgLatency !== null && (
-							<span className="text-sm font-medium text-neutral-600 dark:text-[var(--color-text-muted)]">
+							<span className="text-sm font-medium text-neutral-600">
 								{t('service.latencyAvg')} {avgLatency}ms
 							</span>
 						)}
@@ -280,12 +285,12 @@ export default function ServiceDetailPage() {
 				<div className="mt-4 h-64">
 					{latencyLoading ? (
 						<div className="flex h-full items-center justify-center">
-							<div className="h-4 w-32 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+							<div className="h-4 w-32 animate-pulse rounded-xs bg-neutral-200" />
 						</div>
 					) : latencyChartData.length > 0 ? (
 						<LatencyChart data={latencyChartData || []} />
 					) : (
-						<div className="flex h-full flex-col items-center justify-center text-[var(--color-text-muted)] dark:text-neutral-500">
+						<div className="flex h-full flex-col items-center justify-center text-muted">
 							<Clock size={32} />
 							<p className="mt-2 text-sm">{t('service.noLatency')}</p>
 							<p className="text-xs">{t('service.prometheusHint')}</p>
@@ -297,7 +302,7 @@ export default function ServiceDetailPage() {
 			{/* Related Incidents */}
 			{incidents.length > 0 && (
 				<div className="mt-8">
-					<h2 className="mb-4 text-lg font-bold text-neutral-900 dark:text-neutral-100">
+					<h2 className="mb-4 text-lg font-bold text-neutral-900">
 						{t('service.relatedIncidents')}
 					</h2>
 					<IncidentTimeline incidents={incidents} linkToDetail />

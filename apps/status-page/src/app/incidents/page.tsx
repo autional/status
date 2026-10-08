@@ -22,7 +22,7 @@ const statusFilters: { value: IncidentStatus | 'all'; label: string }[] = [
 ];
 
 function FilterSkeleton() {
-	return <div className="h-7 w-16 animate-pulse rounded-full bg-neutral-100 dark:bg-neutral-700" />;
+	return <div className="h-7 w-16 animate-pulse rounded-full bg-neutral-100" />;
 }
 
 export default function IncidentsPage() {
@@ -43,17 +43,17 @@ export default function IncidentsPage() {
 	return (
 		<div className="mx-auto max-w-4xl px-4 py-8">
 			<div className="mb-6">
-				<h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+				<h1 className="text-2xl font-bold text-neutral-900">
 					{t('incidents.title')}
 				</h1>
-				<p className="mt-1 text-sm text-neutral-500 dark:text-neutral-300">
+				<p className="mt-1 text-sm text-muted">
 					{t('incidents.subtitle')}
 				</p>
 			</div>
 
 			{/* Filters */}
 			<div className="mb-6 flex flex-wrap items-center gap-3">
-				<div className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
+				<div className="flex items-center gap-1.5 text-sm text-muted">
 					<Filter size={14} />
 					<span>{t('filter.severity')}</span>
 				</div>
@@ -76,7 +76,7 @@ export default function IncidentsPage() {
 									className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
 										severityFilter === f.value
 											? 'bg-primary-600 text-white'
-											: 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700'
+											: 'bg-neutral-0 text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
 									}`}
 								>
 									{t(f.label)}
@@ -91,7 +91,7 @@ export default function IncidentsPage() {
 									className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
 										statusFilter === f.value
 											? 'bg-primary-600 text-white'
-											: 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50 dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700'
+											: 'bg-neutral-0 text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
 									}`}
 								>
 									{t(f.label)}
@@ -107,19 +107,19 @@ export default function IncidentsPage() {
 					{Array.from({ length: 4 }).map((_, i) => (
 						<div
 							key={i}
-							className="h-24 animate-pulse rounded-lg bg-neutral-100 dark:bg-neutral-700"
+							className="h-24 animate-pulse rounded-lg bg-neutral-100"
 						/>
 					))}
 				</div>
 			) : filteredIncidents.length === 0 ? (
-				<div className="rounded-lg border border-neutral-200 bg-white p-12 text-center dark:border-neutral-700 dark:bg-neutral-800">
+				<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-12 text-center">
 					<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft/30">
 						<AlertTriangle size={20} className="text-success-text" />
 					</div>
-					<h3 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+					<h3 className="text-sm font-medium text-neutral-900">
 						{t('incidents.empty')}
 					</h3>
-					<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+					<p className="mt-1 text-xs text-muted">
 						{t('incidents.emptyHint')}
 					</p>
 				</div>

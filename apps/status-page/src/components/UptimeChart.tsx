@@ -8,7 +8,6 @@ import {
 	ResponsiveContainer,
 	Cell,
 } from 'recharts';
-import { useTheme } from '@autional/ui';
 
 interface UptimeData {
 	time: string;
@@ -39,11 +38,10 @@ const chartColors = {
 };
 
 export function UptimeChart({ data, tooltipLabel }: UptimeChartProps) {
-	const { theme } = useTheme();
 	const c = chartColors;
 	return (
 		<div style={{ width: '100%', height: 260 }}>
-			<ResponsiveContainer width="100%" height="100%">
+			<ResponsiveContainer width="100%" height="100%" minWidth={1}>
 				<BarChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
 					<CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
 					<XAxis
@@ -51,7 +49,8 @@ export function UptimeChart({ data, tooltipLabel }: UptimeChartProps) {
 						tick={{ fontSize: 11, fill: c.tick }}
 						axisLine={false}
 						tickLine={false}
-						interval={3}
+						interval="preserveStartEnd"
+						minTickGap={28}
 					/>
 					<YAxis
 						domain={[0, 100]}

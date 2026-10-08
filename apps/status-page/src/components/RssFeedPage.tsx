@@ -35,8 +35,8 @@ function RssFeedContent() {
 		return (
 			<div className="flex min-h-[50vh] items-center justify-center">
 				<div className="text-center">
-					<Loader2 className="mx-auto h-8 w-8 animate-spin text-[var(--color-text-muted)]" />
-					<p className="mt-3 text-sm text-neutral-500">{t('rss.generating')}</p>
+					<Loader2 className="mx-auto h-8 w-8 animate-spin text-muted" />
+					<p className="mt-3 text-sm text-muted">{t('rss.generating')}</p>
 				</div>
 			</div>
 		);
@@ -47,7 +47,7 @@ function RssFeedContent() {
 			<div className="flex min-h-[50vh] items-center justify-center">
 				<div className="text-center">
 					<AlertTriangle className="mx-auto h-8 w-8 text-warning" />
-					<p className="mt-3 text-sm text-neutral-500">{t('rss.error')}</p>
+					<p className="mt-3 text-sm text-muted">{t('rss.error')}</p>
 				</div>
 			</div>
 		);
@@ -61,10 +61,10 @@ function RssFeedContent() {
 						<Rss className="h-5 w-5" />
 					</div>
 					<div>
-						<h1 className="text-xl font-bold text-neutral-900 dark:text-white">
+						<h1 className="text-xl font-bold text-neutral-900">
 							{t('rss.pageTitle')}
 						</h1>
-						<p className="text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
+						<p className="text-sm text-muted">
 							{t('rss.pageDesc', {
 								incidents: incidents?.length ?? 0,
 								maintenances: maintenances?.length ?? 0,
@@ -72,8 +72,8 @@ function RssFeedContent() {
 						</p>
 					</div>
 				</div>
-				<div className="rounded-xl border border-neutral-200 bg-neutral-50 p-6 dark:border-neutral-800 dark:bg-surface/50">
-					<pre className="max-h-[80vh] overflow-auto text-xs font-mono leading-relaxed whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">
+				<div className="rounded-xl border border-neutral-200 bg-neutral-50 p-6 dark:bg-surface/50">
+					<pre className="max-h-[80vh] overflow-auto text-xs font-mono leading-relaxed whitespace-pre-wrap text-neutral-700">
 						{displayXml}
 					</pre>
 				</div>

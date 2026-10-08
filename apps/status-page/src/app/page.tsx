@@ -19,10 +19,10 @@ import type { ServiceGroup as ServiceGroupType, ServiceStatus } from '@/types';
 
 function StatCardSkeleton() {
 	return (
-		<div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
-			<div className="h-3 w-20 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-			<div className="mt-2 h-8 w-16 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
-			<div className="mt-2 h-3 w-32 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700" />
+		<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-card">
+			<div className="h-3 w-20 animate-pulse rounded-xs bg-neutral-200" />
+			<div className="mt-2 h-8 w-16 animate-pulse rounded-xs bg-neutral-200" />
+			<div className="mt-2 h-3 w-32 animate-pulse rounded-xs bg-neutral-200" />
 		</div>
 	);
 }
@@ -66,6 +66,13 @@ export default function DashboardPage() {
 	const servicesTotal = services?.length ?? overview?.servicesTotal ?? 0;
 	const servicesHealthy =
 		services?.filter((s) => s.status === 'healthy').length ?? overview?.servicesHealthy ?? 0;
+	// degraded/unhealthy 合称"异常"；unknown（无监控数据）单独报——绝不并入 healthy 凑数（V-01）
+	const servicesDegraded = services
+		? services.filter((s) => s.status === 'degraded' || s.status === 'unhealthy').length
+		: overview
+			? Math.max((overview.servicesTotal ?? 0) - (overview.servicesHealthy ?? 0), 0)
+			: 0;
+	const servicesUnknown = services?.filter((s) => s.status === 'unknown').length ?? 0;
 	const activeIncidents = useMemo(() => {
 		if (overview?.activeIncidents != null) return overview.activeIncidents;
 		return (
@@ -98,13 +105,13 @@ export default function DashboardPage() {
 					</>
 				) : (
 					<>
-						<div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+						<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-card">
 							<div className="flex items-center justify-between">
 								<div>
-									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-[var(--color-text-muted)]">
+									<p className="text-xs font-medium text-muted uppercase tracking-wide">
 										{t('stat.services')}
 									</p>
-									<p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+									<p className="mt-1 text-2xl font-bold text-neutral-900">
 										{servicesHealthy}/{servicesTotal}
 									</p>
 								</div>
@@ -112,20 +119,22 @@ export default function DashboardPage() {
 									<Shield size={20} />
 								</div>
 							</div>
-							<p className="mt-2 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
-								{servicesHealthy === servicesTotal
-									? t('stat.services.allOk')
-									: t('stat.services.degraded', { n: servicesTotal - servicesHealthy })}
+							<p className="mt-2 text-xs text-muted">
+								{servicesDegraded > 0
+									? t('stat.services.degraded', { n: servicesDegraded })
+									: servicesUnknown > 0
+										? t('stat.services.unknown', { n: servicesUnknown })
+										: t('stat.services.allOk')}
 							</p>
 						</div>
 
-						<div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+						<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-card">
 							<div className="flex items-center justify-between">
 								<div>
-									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-[var(--color-text-muted)]">
+									<p className="text-xs font-medium text-muted uppercase tracking-wide">
 										{t('stat.incidents')}
 									</p>
-									<p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+									<p className="mt-1 text-2xl font-bold text-neutral-900">
 										{activeIncidents}
 									</p>
 								</div>
@@ -133,18 +142,18 @@ export default function DashboardPage() {
 									<AlertTriangle size={20} />
 								</div>
 							</div>
-							<p className="mt-2 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+							<p className="mt-2 text-xs text-muted">
 								{activeIncidents > 0 ? t('stat.incidents.active') : t('stat.incidents.none')}
 							</p>
 						</div>
 
-						<div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+						<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-card">
 							<div className="flex items-center justify-between">
 								<div>
-									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-[var(--color-text-muted)]">
+									<p className="text-xs font-medium text-muted uppercase tracking-wide">
 										{t('stat.maintenance')}
 									</p>
-									<p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+									<p className="mt-1 text-2xl font-bold text-neutral-900">
 										{plannedMaintenances.length}
 									</p>
 								</div>
@@ -152,34 +161,34 @@ export default function DashboardPage() {
 									<Wrench size={20} />
 								</div>
 							</div>
-							<p className="mt-2 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+							<p className="mt-2 text-xs text-muted">
 								{plannedMaintenances.length
 									? t('stat.maintenance.upcoming')
 									: t('stat.maintenance.none')}
 							</p>
 						</div>
 
-						<div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+						<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-card">
 							<div className="flex items-center justify-between">
 								<div>
-									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-[var(--color-text-muted)]">
+									<p className="text-xs font-medium text-muted uppercase tracking-wide">
 										{t('lastUpdated')}
 									</p>
-									<p className="mt-1 text-lg font-bold text-neutral-900 tabular-nums dark:text-neutral-100">
+									<p className="mt-1 text-lg font-bold text-neutral-900 tabular-nums">
 										{lastUpdated ? formatTimeWithSeconds(lastUpdated) : '--:--:--'}
 									</p>
 								</div>
 								<button
 									onClick={() => refetchStatus()}
 									disabled={isFetching}
-									className="flex h-10 w-10 items-center justify-center rounded-md bg-neutral-50 text-neutral-500 hover:bg-neutral-100 transition-colors dark:bg-neutral-700 dark:text-[var(--color-text-muted)] dark:hover:bg-neutral-600"
+									className="flex h-10 w-10 items-center justify-center rounded-md bg-neutral-50 text-muted hover:bg-neutral-100 transition-colors"
 									title={t('refresh')}
 								>
 									<RefreshCw size={18} className={isFetching ? 'animate-spin' : ''} />
 								</button>
 							</div>
 							<div className="mt-2 flex items-center justify-between">
-								<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">{t('autoRefresh')}</p>
+								<p className="text-xs text-muted">{t('autoRefresh')}</p>
 								<RefreshCountdown intervalMs={30000} onRefresh={() => refetchStatus()} />
 							</div>
 						</div>
@@ -188,7 +197,7 @@ export default function DashboardPage() {
 			</div>
 
 			{/* Legend */}
-			<div className="mb-6 flex flex-wrap items-center gap-4 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+			<div className="mb-6 flex flex-wrap items-center gap-4 text-xs text-muted">
 				<span className="flex items-center gap-1.5">
 					<StatusIndicator status="healthy" size="sm" /> {t('status.operational')}
 				</span>
@@ -197,6 +206,9 @@ export default function DashboardPage() {
 				</span>
 				<span className="flex items-center gap-1.5">
 					<StatusIndicator status="unhealthy" size="sm" /> {t('status.down')}
+				</span>
+				<span className="flex items-center gap-1.5">
+					<StatusIndicator status="unknown" size="sm" /> {t('status.unknown')}
 				</span>
 			</div>
 
@@ -207,7 +219,7 @@ export default function DashboardPage() {
 						{Array.from({ length: 3 }).map((_, i) => (
 							<div
 								key={i}
-								className="h-16 animate-pulse rounded-xl bg-neutral-100 dark:bg-neutral-700"
+								className="h-16 animate-pulse rounded-xl bg-neutral-100"
 							/>
 						))}
 					</div>
@@ -219,9 +231,11 @@ export default function DashboardPage() {
 					displayGroups.map((group) => {
 						const groupServices = grouped.get(group.id) || [];
 						if (groupServices.length === 0) return null;
-						// 组名/描述优先用 catalog（后端 registry 权威中文），缺失时回退 i18n key
-						const groupName = group.name || t('service.group.' + group.id);
-						const groupDesc = group.description || t('service.group.' + group.id + '.desc');
+						// 组名/描述以本地 i18n 为尊（随语言切换），键缺失时回退 catalog 字面量（后端 registry 中文）
+						const groupName = t('service.group.' + group.id, { defaultValue: group.name });
+						const groupDesc = t('service.group.' + group.id + '.desc', {
+							defaultValue: group.description,
+						});
 						return (
 							<ServiceGroup
 								key={group.id}
@@ -239,7 +253,7 @@ export default function DashboardPage() {
 			{/* Recent Incidents */}
 			<div>
 				<div className="mb-4 flex items-center justify-between">
-					<h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
+					<h2 className="text-lg font-bold text-neutral-900">
 						{t('incidents.recent')}
 					</h2>
 					<Link
@@ -254,14 +268,14 @@ export default function DashboardPage() {
 			</div>
 
 			{/* Uptime Promise */}
-			<div className="mt-8 rounded-lg border border-neutral-200 bg-white p-6 text-center dark:border-neutral-700 dark:bg-neutral-800">
+			<div className="mt-8 rounded-lg border border-neutral-200 bg-neutral-0 p-6 text-center">
 				<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 dark:bg-primary-900/30">
 					<Clock size={20} className="text-primary-600 dark:text-primary-400" />
 				</div>
-				<h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+				<h3 className="text-base font-semibold text-neutral-900">
 					{t('uptime.title')}
 				</h3>
-				<p className="mx-auto mt-1 max-w-lg text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
+				<p className="mx-auto mt-1 max-w-lg text-sm text-muted">
 					{t('uptime.desc')}
 				</p>
 			</div>

@@ -68,8 +68,11 @@ export async function fetchGatewayHealth(): Promise<GatewayHealthResponse | null
  * /ready check key 规律（micro-pkg/health + micro-middleware/gateway/health.go）：
  *   - HTTP upstream check: `{service}:{port}`（gateway 路由 upstream host:port）
  *   - gRPC check: `grpc:{service}`（hash-standard/hash-sm 等仅 gRPC 服务）
- *   - gateway-service 无 self-check（/ready 由它自身提供），缺省视为 healthy
+ *   - gateway-service 无 self-check（/ready 由它自身提供），health 可达时视为 healthy
  *   - grafana:3000 等非 catalog 检查被自然忽略
+ *
+ * 无 check 映射 / health 整体不可达 ⇒ 'unknown'（绝不默认 healthy——那会把"没监控"
+ * 渲染成"全绿"，见 status 内容审计 V-01）。
  */
 export function buildServiceStatuses(
 	catalog: ServiceCatalogResponse | null,
@@ -84,9 +87,15 @@ export function buildServiceStatuses(
 
 	return items.map((item) => {
 		const checkKey = findStatusCheckKey(checks, item);
+		let status: HealthStatus = 'unknown';
+		if (checkKey) {
+			status = checks[checkKey];
+		} else if (health && item.id === 'gateway-service') {
+			status = 'healthy';
+		}
 		return {
 			id: item.id,
-			status: (checkKey ? checks[checkKey] : 'healthy') as HealthStatus,
+			status,
 			latency: checkKey ? latencies[checkKey] : undefined,
 			lastChecked: health?.timestamp ?? new Date().toISOString(),
 		};
@@ -131,24 +140,26 @@ export interface OverviewData {
 /**
  * overall status 归一化 —— 两个数据源词表不同：
  *   - gateway /ready:      healthy / degraded / unhealthy
- *   - status-service:      operational / degraded / unavailable
- * 未知取值按 unhealthy 处理（状态页宁可误报也不误报全绿），且任何词表漂移都不得再让整站白屏。
+ *   - status-service:      operational / degraded / unavailable（unavailable = 服务端无法聚合，
+ *     不等于"挂着"，映射 unknown 灰显）
+ * 未知取值按 unknown 处理（灰显，既不得误报全绿也不得把"未知"渲染成"故障"），
+ * 且任何词表漂移都不得再让整站白屏。
  */
 const OVERALL_STATUS_MAP: Record<string, HealthStatus> = {
 	healthy: 'healthy',
 	operational: 'healthy',
 	degraded: 'degraded',
 	unhealthy: 'unhealthy',
-	unavailable: 'unhealthy',
+	unavailable: 'unknown',
 };
 
 export function normalizeOverallStatus(raw?: string | null): HealthStatus | null {
 	if (!raw) return null;
 	const mapped = OVERALL_STATUS_MAP[raw];
 	if (!mapped) {
-		devWarn(`[StatusPage] unknown overall status "${raw}" — rendering as unhealthy`);
+		devWarn(`[StatusPage] unknown overall status "${raw}" — rendering as unknown`);
 	}
-	return mapped ?? 'unhealthy';
+	return mapped ?? 'unknown';
 }
 
 // ═══════════════════════════════════════════════════════════════

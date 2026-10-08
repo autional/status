@@ -1,7 +1,8 @@
 /**
  * 服务健康状态
+ * unknown = 无法判定（无监控 check 或 /ready 不可达）——不得折叠为 healthy/degraded
  */
-export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy';
+export type HealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
 
 /**
  * Gateway 聚合健康检查响应

@@ -44,7 +44,7 @@ function buildSeverityConfig(
 		maintenance: {
 			icon: <Wrench size={20} />,
 			label: t('severity.maintenance'),
-			color: 'text-[var(--color-text-primary)] dark:text-[var(--color-text-muted)]',
+			color: 'text-[var(--color-text-secondary)] dark:text-[var(--color-text-muted)]',
 			border: 'border-neutral-200 dark:border-neutral-700',
 			bg: 'bg-neutral-50 dark:bg-surface/50',
 		},
@@ -77,7 +77,7 @@ export default function IncidentDetailPage() {
 		return (
 			<div className="mx-auto max-w-3xl px-4 py-12 text-center">
 				<Loader2 size={32} className="mx-auto animate-spin text-primary-600" />
-				<p className="mt-4 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
+				<p className="mt-4 text-sm text-muted">
 					{t('incidents.loading')}
 				</p>
 			</div>
@@ -87,13 +87,13 @@ export default function IncidentDetailPage() {
 	if (!incident) {
 		return (
 			<div className="mx-auto max-w-3xl px-4 py-12 text-center">
-				<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-700">
-					<AlertTriangle size={32} className="text-[var(--color-text-muted)]" />
+				<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
+					<AlertTriangle size={32} className="text-muted" />
 				</div>
-				<h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+				<h2 className="text-lg font-semibold text-neutral-900">
 					{t('incidents.notFound')}
 				</h2>
-				<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
+				<p className="mt-2 text-sm text-muted">
 					{t('incidents.notFoundDesc')}
 				</p>
 				<Link
@@ -114,7 +114,7 @@ export default function IncidentDetailPage() {
 			{/* Back link */}
 			<Link
 				to="/incidents"
-				className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200"
+				className="inline-flex items-center gap-1 text-sm text-muted hover:text-neutral-800"
 			>
 				<ArrowLeft size={16} />
 				{t('incidents.backToList')}
@@ -131,10 +131,10 @@ export default function IncidentDetailPage() {
 							</span>
 							<StatusBadge status={incident.status} />
 						</div>
-						<h1 className="mt-2 text-xl font-bold text-neutral-900 dark:text-neutral-100">
+						<h1 className="mt-2 text-xl font-bold text-neutral-900">
 							{incident.title}
 						</h1>
-						<p className="mt-1 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
+						<p className="mt-1 text-sm text-neutral-600">
 							{incident.description}
 						</p>
 					</div>
@@ -142,7 +142,7 @@ export default function IncidentDetailPage() {
 
 				{/* Meta */}
 				<div className="mt-5 grid gap-3 sm:grid-cols-3">
-					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
+					<div className="flex items-center gap-2 text-sm text-neutral-600">
 						<Clock size={14} />
 						<span>
 							{t('incidents.createdAt')}
@@ -158,7 +158,7 @@ export default function IncidentDetailPage() {
 							</span>
 						</div>
 					)}
-					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
+					<div className="flex items-center gap-2 text-sm text-neutral-600">
 						<MessageSquare size={14} />
 						<span>
 							{(incident.updates || []).length}
@@ -169,9 +169,9 @@ export default function IncidentDetailPage() {
 			</div>
 
 			{/* Affected Services */}
-			<div className="mt-6 rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
-				<h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-					<Server size={16} className="text-neutral-500" />
+			<div className="mt-6 rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-card">
+				<h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+					<Server size={16} className="text-muted" />
 					{t('incidents.affectedServices')}
 				</h2>
 				<div className="mt-3 flex flex-wrap gap-2">
@@ -179,7 +179,7 @@ export default function IncidentDetailPage() {
 						<Link
 							key={sid}
 							to={`/services/${sid}`}
-							className="inline-flex items-center gap-1.5 rounded-md bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-200 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+							className="inline-flex items-center gap-1.5 rounded-md bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-700 transition-colors hover:bg-neutral-200"
 						>
 							<Server size={12} />
 							{t('service.shortName.' + sid)}
@@ -190,41 +190,41 @@ export default function IncidentDetailPage() {
 
 			{/* Timeline */}
 			<div className="mt-6">
-				<h2 className="mb-4 text-lg font-bold text-neutral-900 dark:text-neutral-100">
+				<h2 className="mb-4 text-lg font-bold text-neutral-900">
 					{t('incidents.timeline')}
 				</h2>
 				{(incident.updates || []).length === 0 ? (
-					<div className="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-800">
-						<Clock size={24} className="mx-auto text-[var(--color-text-muted)]" />
-						<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
+					<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-8 text-center">
+						<Clock size={24} className="mx-auto text-muted" />
+						<p className="mt-2 text-sm text-muted">
 							{t('incidents.noUpdates')}
 						</p>
 					</div>
 				) : (
 					<div className="relative space-y-4 pl-6">
-						<div className="absolute left-2 top-2 bottom-2 w-px bg-neutral-200 dark:bg-neutral-600" />
+						<div className="absolute left-2 top-2 bottom-2 w-px bg-neutral-200" />
 						{(incident.updates || []).map((update, index) => (
 							<div key={update.id} className="relative">
 								<div
 									className={`absolute -left-4 top-1.5 h-3 w-3 rounded-full border-2 ${
 										index === 0
 											? 'border-primary-500 bg-primary-500'
-											: 'border-neutral-300 bg-white dark:border-neutral-500 dark:bg-neutral-800'
+											: 'border-neutral-300 bg-neutral-0'
 									}`}
 								/>
-								<div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+								<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-4 shadow-card">
 									<div className="flex flex-wrap items-center justify-between gap-2">
 										<div className="flex items-center gap-2">
 											<StatusBadge status={update.status} />
-											<span className="text-xs text-[var(--color-text-muted)] dark:text-neutral-500">
+											<span className="text-xs text-muted">
 												{formatRelativeTime(update.createdAt)}
 											</span>
 										</div>
-										<span className="text-xs text-[var(--color-text-muted)] dark:text-neutral-500">
+										<span className="text-xs text-muted">
 											{formatDateTime(update.createdAt)}
 										</span>
 									</div>
-									<p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300">
+									<p className="mt-2 text-sm text-neutral-700">
 										{update.message}
 									</p>
 								</div>

@@ -9,7 +9,6 @@ import {
 	ReferenceLine,
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@autional/ui';
 
 interface LatencyData {
 	time: string;
@@ -34,13 +33,12 @@ const chartColors = {
 
 export default function LatencyChart({ data }: LatencyChartProps) {
 	const { t } = useTranslation();
-	const { theme } = useTheme();
 	const c = chartColors;
 	const maxLatency = Math.max(...data.map((d) => d.latency), 100);
 	const threshold = maxLatency > 500 ? 500 : 200;
 
 	return (
-		<ResponsiveContainer width="100%" height="100%">
+		<ResponsiveContainer width="100%" height="100%" minWidth={1}>
 			<LineChart data={data} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
 				<CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
 				<XAxis
@@ -48,7 +46,8 @@ export default function LatencyChart({ data }: LatencyChartProps) {
 					tick={{ fontSize: 11, fill: c.tick }}
 					axisLine={false}
 					tickLine={false}
-					interval={Math.floor(data.length / 6)}
+					interval="preserveStartEnd"
+					minTickGap={28}
 				/>
 				<YAxis
 					tick={{ fontSize: 11, fill: c.tick }}

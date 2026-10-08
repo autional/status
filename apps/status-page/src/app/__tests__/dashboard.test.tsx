@@ -12,7 +12,11 @@ vi.mock('react-i18next', async () => {
 	const actual = await vi.importActual('react-i18next');
 	return {
 		...actual,
-		useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'zh-CN' } }),
+		// 忠实模拟 i18next 的 defaultValue 回退：服务名/组名走 catalog 中文名（见 page.tsx I-01）
+		useTranslation: () => ({
+			t: (key: string, opts?: { defaultValue?: string }) => opts?.defaultValue ?? key,
+			i18n: { language: 'zh-CN' },
+		}),
 	};
 });
 

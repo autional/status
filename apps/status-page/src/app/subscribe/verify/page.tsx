@@ -74,10 +74,10 @@ function VerifyContent() {
 					<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
 						<AlertTriangle size={32} className="text-amber-600 dark:text-amber-400" />
 					</div>
-					<h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
+					<h1 className="text-xl font-bold text-neutral-900">
 						{t('verify.timeoutTitle')}
 					</h1>
-					<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
+					<p className="mt-2 text-sm text-muted">
 						{t('verify.timeoutDesc')}
 					</p>
 					<div className="mt-8 flex flex-col items-center gap-3">
@@ -107,10 +107,10 @@ function VerifyContent() {
 				{loading ? (
 					<>
 						<Loader2 size={40} className="mx-auto animate-spin text-primary-600" />
-						<h1 className="mt-6 text-xl font-bold text-neutral-900 dark:text-neutral-100">
+						<h1 className="mt-6 text-xl font-bold text-neutral-900">
 							{t('verify.title')}
 						</h1>
-						<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
+						<p className="mt-2 text-sm text-muted">
 							{t('verify.subtitle')}
 						</p>
 					</>
@@ -119,11 +119,11 @@ function VerifyContent() {
 						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-soft/30">
 							<CheckCircle size={32} className="text-success-text" />
 						</div>
-						<h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
+						<h1 className="text-xl font-bold text-neutral-900">
 							{t('verify.success')}
 						</h1>
-						<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">{result.message}</p>
-						<p className="mt-4 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
+						<p className="mt-2 text-sm text-muted">{result.message}</p>
+						<p className="mt-4 text-sm text-neutral-600">
 							{t('verify.successDesc')}
 						</p>
 					</>
@@ -132,11 +132,11 @@ function VerifyContent() {
 						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-danger-soft/30">
 							<XCircle size={32} className="text-danger-text" />
 						</div>
-						<h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
+						<h1 className="text-xl font-bold text-neutral-900">
 							{t('verify.fail')}
 						</h1>
-						<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">{result?.message}</p>
-						<p className="mt-4 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
+						<p className="mt-2 text-sm text-muted">{result?.message}</p>
+						<p className="mt-4 text-sm text-neutral-600">
 							{t('verify.failDesc')}
 						</p>
 					</>

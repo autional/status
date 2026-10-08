@@ -64,15 +64,13 @@ export default function RefreshCountdown({ intervalMs = 30000, onRefresh }: Refr
 
 	return (
 		<div className="flex items-center gap-2">
-			<div className="relative h-1.5 w-16 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-700">
+			<div className="relative h-1.5 w-16 overflow-hidden rounded-full bg-neutral-100">
 				<div
 					className={`absolute left-0 top-0 h-full rounded-full bg-primary-500 transition-all duration-1000 ease-linear ${paused ? 'opacity-50' : ''}`}
 					style={{ width: `${progress}%` }}
 				/>
 			</div>
-			<span
-				className={`text-xs tabular-nums ${paused ? 'text-[var(--color-text-muted)] dark:text-neutral-500' : 'text-neutral-500 dark:text-[var(--color-text-muted)]'}`}
-			>
+			<span className="text-xs tabular-nums text-muted">
 				{paused ? t('paused') : `${seconds}s`}
 			</span>
 			<button
@@ -80,14 +78,14 @@ export default function RefreshCountdown({ intervalMs = 30000, onRefresh }: Refr
 					onRefresh?.();
 					setRemaining(effectiveInterval);
 				}}
-				className="rounded p-1 text-[var(--color-text-muted)] hover:bg-neutral-100 hover:text-neutral-600 transition-colors dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+				className="rounded-xs p-1 text-muted hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
 				title={t('refresh')}
 			>
 				<RefreshCw size={12} />
 			</button>
 			<button
 				onClick={() => setPaused((p) => !p)}
-				className="rounded p-1 text-[var(--color-text-muted)] hover:bg-neutral-100 hover:text-neutral-600 transition-colors dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+				className="rounded-xs p-1 text-muted hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
 				title={paused ? t('resume') : t('pause')}
 			>
 				{paused ? <Play size={12} /> : <Pause size={12} />}

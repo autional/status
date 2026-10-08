@@ -60,10 +60,10 @@ describe('StatusLayout 横幅词表归一化', () => {
 		expect(screen.getByText('banner.healthy')).toBeInTheDocument();
 	});
 
-	it('overview 返回 unavailable → 渲染"异常"横幅', () => {
+	it('overview 返回 unavailable → 渲染"未知"横幅（服务端无法聚合 ≠ 故障）', () => {
 		mockSources(null, { overallStatus: 'unavailable' });
 		renderLayout();
-		expect(screen.getByText('banner.unhealthy')).toBeInTheDocument();
+		expect(screen.getByText('banner.unknown')).toBeInTheDocument();
 	});
 
 	it('/ready 优先于 overview（gateway 词表直通）', () => {
@@ -72,19 +72,19 @@ describe('StatusLayout 横幅词表归一化', () => {
 		expect(screen.getByText('banner.degraded')).toBeInTheDocument();
 	});
 
-	it('两个来源都无数据 → 回退 healthy 默认', () => {
+	it('两个来源都无数据 → 回退"未知"横幅（绝不默认 healthy 全绿，V-01）', () => {
 		mockSources(undefined, undefined);
 		renderLayout();
-		expect(screen.getByText('banner.healthy')).toBeInTheDocument();
+		expect(screen.getByText('banner.unknown')).toBeInTheDocument();
 	});
 
-	it('StatusHeader 收到表外出值 → 按 unhealthy 渲染，不白屏', () => {
+	it('StatusHeader 收到表外出值 → 按 unknown 渲染，不白屏不误报', () => {
 		render(
 			<MemoryRouter>
 				<StatusHeader overallStatus={'weird-value' as any} />
 			</MemoryRouter>,
 		);
-		expect(screen.getByText('banner.unhealthy')).toBeInTheDocument();
+		expect(screen.getByText('banner.unknown')).toBeInTheDocument();
 	});
 });
 
@@ -94,13 +94,13 @@ describe('normalizeOverallStatus', () => {
 		expect(normalizeOverallStatus('operational')).toBe('healthy');
 		expect(normalizeOverallStatus('degraded')).toBe('degraded');
 		expect(normalizeOverallStatus('unhealthy')).toBe('unhealthy');
-		expect(normalizeOverallStatus('unavailable')).toBe('unhealthy');
+		expect(normalizeOverallStatus('unavailable')).toBe('unknown');
 	});
 
-	it('空值返回 null（调用方回退默认），未知值返回 unhealthy', () => {
+	it('空值返回 null（调用方回退默认），未知值返回 unknown（不误报全绿也不误报故障）', () => {
 		expect(normalizeOverallStatus(undefined)).toBeNull();
 		expect(normalizeOverallStatus(null)).toBeNull();
 		expect(normalizeOverallStatus('')).toBeNull();
-		expect(normalizeOverallStatus('something-new')).toBe('unhealthy');
+		expect(normalizeOverallStatus('something-new')).toBe('unknown');
 	});
 });

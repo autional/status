@@ -1,5 +1,5 @@
-# status.autional.com — 公开服务状态页，欢迎收录。
+# status.autional.cn — 公开服务状态页，欢迎收录。
 User-agent: *
 Allow: /
 
-Sitemap: https://status.autional.com/sitemap.xml
+Sitemap: https://status.autional.cn/sitemap.xml

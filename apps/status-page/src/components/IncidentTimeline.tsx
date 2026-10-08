@@ -32,14 +32,14 @@ export default function IncidentTimeline({
 
 	if (incidents.length === 0) {
 		return (
-			<div className="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-800">
+			<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-8 text-center">
 				<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft/30">
 					<Clock size={20} className="text-success-text" />
 				</div>
-				<h3 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+				<h3 className="text-sm font-medium text-neutral-900">
 					{t('incidents.recentNone')}
 				</h3>
-				<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+				<p className="mt-1 text-xs text-muted">
 					{t('incidents.recentNoneHint')}
 				</p>
 			</div>
@@ -53,7 +53,7 @@ export default function IncidentTimeline({
 				return (
 					<div
 						key={incident.id}
-						className="rounded-lg border border-neutral-200 bg-white shadow-sm transition-all hover:shadow-md dark:border-neutral-700 dark:bg-neutral-800"
+						className="rounded-lg border border-neutral-200 bg-neutral-0 shadow-card transition-all hover:border-neutral-300"
 					>
 						<button
 							onClick={() => setExpandedId(isExpanded ? null : incident.id)}
@@ -69,19 +69,19 @@ export default function IncidentTimeline({
 											<Link
 												to={`/incidents/${incident.id}`}
 												onClick={(e) => e.stopPropagation()}
-												className="text-sm font-semibold text-neutral-900 hover:text-primary-600 dark:text-neutral-100 dark:hover:text-primary-400"
+												className="text-sm font-semibold text-neutral-900 hover:text-primary-600 dark:hover:text-primary-400"
 											>
 												{incident.title}
 											</Link>
 										) : (
-											<h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+											<h3 className="text-sm font-semibold text-neutral-900">
 												{incident.title}
 											</h3>
 										)}
 										<StatusBadge status={incident.status} />
 										<StatusBadge status={incident.severity} />
 									</div>
-									<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+									<p className="mt-1 text-xs text-muted">
 										{(incident.affectedServices || [])
 											.map((s) => t('service.shortName.' + s))
 											.join(t('common.listSeparator'))}{' '}
@@ -91,13 +91,13 @@ export default function IncidentTimeline({
 							</div>
 							<ChevronRight
 								size={16}
-								className={`mt-1 shrink-0 text-[var(--color-text-muted)] transition-transform dark:text-neutral-500 ${isExpanded ? 'rotate-90' : ''}`}
+								className={`mt-1 shrink-0 text-muted transition-transform ${isExpanded ? 'rotate-90' : ''}`}
 							/>
 						</button>
 
 						{isExpanded && (
-							<div className="border-t border-neutral-100 px-4 pb-4 pt-3 dark:border-neutral-700">
-								<p className="text-sm text-neutral-700 dark:text-neutral-300">
+							<div className="border-t border-neutral-100 px-4 pb-4 pt-3">
+								<p className="text-sm text-neutral-700">
 									{incident.description}
 								</p>
 
@@ -114,22 +114,22 @@ export default function IncidentTimeline({
 
 								{incident.updates.length > 0 && (
 									<div className="mt-4 space-y-3">
-										<h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-[var(--color-text-muted)]">
+										<h4 className="text-xs font-semibold uppercase tracking-wide text-muted">
 											{t('incidents.progress')}
 										</h4>
 										<div className="relative space-y-3 pl-4">
-											<div className="absolute left-1.5 top-1.5 bottom-1.5 w-px bg-neutral-200 dark:bg-neutral-600" />
+											<div className="absolute left-1.5 top-1.5 bottom-1.5 w-px bg-neutral-200" />
 											{incident.updates.map((update) => (
 												<div key={update.id} className="relative">
-													<div className="absolute -left-2.5 top-1.5 h-2 w-2 rounded-full bg-neutral-300 dark:bg-neutral-600" />
-													<div className="rounded-md bg-neutral-50 p-3 dark:bg-neutral-700/50">
+													<div className="absolute -left-2.5 top-1.5 h-2 w-2 rounded-full bg-neutral-300" />
+													<div className="rounded-md bg-neutral-50 p-3">
 														<div className="flex items-center gap-2">
 															<StatusBadge status={update.status} />
-															<span className="text-xs text-[var(--color-text-muted)] dark:text-neutral-500">
+															<span className="text-xs text-muted">
 																{formatShortDateTime(update.createdAt)}
 															</span>
 														</div>
-														<p className="mt-1.5 text-sm text-neutral-700 dark:text-neutral-300">
+														<p className="mt-1.5 text-sm text-neutral-700">
 															{update.message}
 														</p>
 													</div>

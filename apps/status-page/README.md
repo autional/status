@@ -38,7 +38,7 @@ pnpm build
 
 | 路由 | 页面 | 说明 |
 |------|------|------|
-| `/` | 状态总览 | 系统整体状态、15 个服务卡片、最近事件 |
+| `/` | 状态总览 | 系统整体状态、服务卡片（catalog 全量 6 组）、最近事件 |
 | `/incidents` | 事件历史 | 完整事件列表，支持按严重级别/状态筛选 |
 | `/incidents/:id` | 事件详情 | 事件时间线、受影响服务、进展更新 |
 | `/services/:serviceId` | 服务详情 | 延迟/可用率趋势图、关联事件 |
@@ -46,19 +46,19 @@ pnpm build
 | `/subscribe/verify` | 订阅验证 | 邮箱验证确认 |
 | `/maintenance` | 维护日历 | 计划维护日历、维护记录列表 |
 | `/maintenance/:id` | 维护详情 | 维护状态、进度时间线、受影响服务 |
-| `/feed.xml` | RSS Feed | 系统事件 RSS Feed |
+| `/rss` | RSS Feed 预览 | 事件与维护的 Feed 预览；真实订阅地址 `/feed.xml`（rewrite 至 API） |
 
 ## 数据来源
 
 ### 实时健康状态
 
-通过 Gateway `/ready` 端点获取聚合的健康状态：
+通过站点 `/ready`（rewrite 至 `https://api.autional.cn/ready`）获取网关聚合的健康状态：
 
 ```
-GET /health → Gateway 聚合所有上游服务状态
+GET /ready → 网关聚合所有上游服务状态（checks / checks_latency）
 ```
 
-当 Gateway 不可达时，自动 fallback 到 mock 数据（所有服务显示正常）。
+无监控 check 的服务显示「未知（unknown）」，不会回填为正常；`/ready` 不可达时全部服务显示未知。
 
 ### 事件历史
 通过 status-service REST API 获取事件列表和详情。

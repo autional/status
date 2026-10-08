@@ -1,24 +1,22 @@
 import { Link } from 'react-router';
 import { Activity, Bell, Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import RefreshCountdown from './RefreshCountdown';
-import { useSystemStatus } from '@/hooks/use-system-status';
 import { LanguageSwitcher, ThemeToggle } from '@autional/ui';
 import { useTranslation } from 'react-i18next';
 
 interface StatusHeaderProps {
-	overallStatus?: 'healthy' | 'degraded' | 'unhealthy';
+	overallStatus?: 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
 }
 
-export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeaderProps) {
+export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeaderProps) {
 	const { t } = useTranslation();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-	const { refetch } = useSystemStatus();
 
 	const bannerText = {
 		healthy: t('banner.healthy'),
 		degraded: t('banner.degraded'),
 		unhealthy: t('banner.unhealthy'),
+		unknown: t('banner.unknown'),
 	};
 
 	const bannerConfig = {
@@ -34,19 +32,23 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 			bg: 'bg-danger',
 			icon: <Activity size={20} className="animate-pulse-soft" />,
 		},
+		unknown: {
+			bg: 'bg-[var(--color-text-muted)]',
+			icon: <Activity size={20} />,
+		},
 	};
 
-	// 词表漂移防线：props 类型拦不住运行时的网络数据，落表外的取值按 unhealthy 渲染而非崩溃
+	// 词表漂移防线：props 类型拦不住运行时的网络数据，落表外的取值按 unknown 渲染而非崩溃
 	const status: keyof typeof bannerConfig =
-		overallStatus in bannerConfig ? overallStatus : 'unhealthy';
+		overallStatus in bannerConfig ? overallStatus : 'unknown';
 
 	const config = bannerConfig[status];
 
+	// /subscribe 只保留顶部 CTA 一处入口（导航项与其重复，见内容审计 N-01）
 	const navItems = [
 		{ to: '/', key: 'nav.status' as const },
 		{ to: '/incidents', key: 'nav.incidents' as const },
 		{ to: '/maintenance', key: 'nav.maintenance' as const },
-		{ to: '/subscribe', key: 'nav.subscribe' as const },
 	];
 
 	return (
@@ -64,7 +66,7 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 				<div className="mx-auto flex h-full max-w-6xl items-center justify-between px-4">
 					<Link
 						to="/"
-						className="flex items-center gap-2 text-lg font-bold text-neutral-900 dark:text-neutral-100"
+						className="flex items-center gap-2 text-lg font-bold text-neutral-900"
 					>
 						{/* 这里此前是 <Activity size={22} /> —— 那是 lucide 的**状态**图标，
 						    被当成了**品牌标**用。状态图标表达「系统现在怎么样」，品牌标表达
@@ -80,7 +82,7 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 							<Link
 								key={item.to}
 								to={item.to}
-								className="text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-100"
+								className="text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
 							>
 								{t(item.key)}
 							</Link>
@@ -93,7 +95,7 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 							{t('subscribe')}
 						</Link>
 						<ThemeToggle
-							className="text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 dark:text-[var(--color-text-muted)] dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+							className="text-muted hover:bg-neutral-100 hover:text-neutral-800"
 							iconSize={16}
 							labelLight={t('theme.switchToLight')}
 							labelDark={t('theme.switchToDark')}
@@ -103,8 +105,10 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 
 					{/* Mobile menu button */}
 					<button
-						className="md:hidden text-neutral-600 hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200"
+						className="md:hidden text-neutral-600 hover:text-neutral-900"
 						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+						aria-label={mobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
+						aria-expanded={mobileMenuOpen}
 					>
 						{mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
 					</button>
@@ -112,21 +116,33 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 
 				{/* Mobile Nav */}
 				{mobileMenuOpen && (
-					<div className="border-t border-neutral-100 bg-white px-4 py-3 md:hidden dark:border-neutral-700 dark:bg-neutral-900">
+					<div className="border-t border-neutral-100 bg-neutral-0 px-4 py-3 md:hidden">
 						<div className="flex flex-col gap-3">
 							{navItems.map((item) => (
 								<Link
 									key={item.to}
 									to={item.to}
 									onClick={() => setMobileMenuOpen(false)}
-									className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-100"
+									className="text-sm font-medium text-neutral-600 hover:text-neutral-900"
 								>
 									{t(item.key)}
 								</Link>
 							))}
-							<div className="flex items-center justify-between pt-3 border-t border-neutral-100 dark:border-neutral-700">
+							<Link
+								to="/subscribe"
+								onClick={() => setMobileMenuOpen(false)}
+								className="flex w-fit items-center gap-1.5 rounded-md bg-primary-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+							>
+								<Bell size={14} />
+								{t('subscribe')}
+							</Link>
+							<div className="flex items-center justify-between pt-3 border-t border-neutral-100">
 								<div className="flex items-center gap-3">
-									<ThemeToggle iconSize={14} />
+									<ThemeToggle
+										iconSize={14}
+										labelLight={t('theme.switchToLight')}
+										labelDark={t('theme.switchToDark')}
+									/>
 									<LanguageSwitcher labelEn={t('lang.en')} labelZh={t('lang.zh')} />
 								</div>
 							</div>

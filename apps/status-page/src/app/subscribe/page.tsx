@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -9,7 +9,7 @@ import {
 	fetchSubscriptionPreferences,
 	updateSubscriptionPreferences,
 } from '@/lib/api';
-import type { SubscribeResult, SubscriptionPreferences } from '@/lib/api';
+import type { SubscriptionPreferences } from '@/lib/api';
 import {
 	Bell,
 	CheckCircle,
@@ -22,7 +22,7 @@ import {
 	KeyRound,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Toggle } from '@autional/ui';
+import { Toggle, Input } from '@autional/ui';
 
 const emailSchema = z.object({
 	email: z.string().email(),
@@ -66,6 +66,9 @@ export default function SubscribePage() {
 		resolver: zodResolver(prefTokenSchema),
 		defaultValues: { prefToken: '' },
 	});
+	// getValues 不触发重渲染 ⇒ 加载按钮的 disabled 恒为初始值（S-01）。
+	// useWatch 订阅表单值变化，setValue/输入/自动回填都能实时解除禁用。
+	const watchedPrefToken = useWatch({ control: prefForm.control, name: 'prefToken' });
 
 	// Preferences state
 	const [prefsLoading, setPrefsLoading] = useState(false);
@@ -219,18 +222,25 @@ export default function SubscribePage() {
 				<div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-50 dark:bg-primary-900/30">
 					<Bell size={24} className="text-primary-600 dark:text-primary-400" />
 				</div>
-				<h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+				<h1 className="text-2xl font-bold text-neutral-900">
 					{t('subscribe.title')}
 				</h1>
-				<p className="mx-auto mt-2 max-w-md text-sm text-neutral-500 dark:text-neutral-300">
+				<p className="mx-auto mt-2 max-w-md text-sm text-muted">
 					{t('subscribe.desc')}
 				</p>
 			</div>
 
 			{/* Mode Toggle */}
 			<div className="mt-8 flex justify-center">
-				<div className="inline-flex rounded-lg border border-neutral-200 bg-white p-1 dark:border-neutral-700 dark:bg-neutral-800">
+				<div
+					role="tablist"
+					className="inline-flex rounded-lg border border-neutral-200 bg-neutral-0 p-1"
+				>
 					<button
+						role="tab"
+						id="tab-subscribe"
+						aria-selected={mode === 'subscribe'}
+						aria-controls="panel-subscribe"
 						onClick={() => {
 							setMode('subscribe');
 							setResult(null);
@@ -238,12 +248,16 @@ export default function SubscribePage() {
 						className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
 							mode === 'subscribe'
 								? 'bg-primary-600 text-white'
-								: 'text-neutral-600 hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200'
+								: 'text-neutral-600 hover:text-neutral-900'
 						}`}
 					>
 						{t('subscribe.subscribeTab')}
 					</button>
 					<button
+						role="tab"
+						id="tab-unsubscribe"
+						aria-selected={mode === 'unsubscribe'}
+						aria-controls="panel-unsubscribe"
 						onClick={() => {
 							setMode('unsubscribe');
 							setResult(null);
@@ -251,12 +265,16 @@ export default function SubscribePage() {
 						className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
 							mode === 'unsubscribe'
 								? 'bg-primary-600 text-white'
-								: 'text-neutral-600 hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200'
+								: 'text-neutral-600 hover:text-neutral-900'
 						}`}
 					>
 						{t('subscribe.unsubscribeTab')}
 					</button>
 					<button
+						role="tab"
+						id="tab-preferences"
+						aria-selected={mode === 'preferences'}
+						aria-controls="panel-preferences"
 						onClick={() => {
 							setMode('preferences');
 							setResult(null);
@@ -264,7 +282,7 @@ export default function SubscribePage() {
 						className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
 							mode === 'preferences'
 								? 'bg-primary-600 text-white'
-								: 'text-neutral-600 hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200'
+								: 'text-neutral-600 hover:text-neutral-900'
 						}`}
 					>
 						{t('subscribe.preferencesTab')}
@@ -272,29 +290,30 @@ export default function SubscribePage() {
 				</div>
 			</div>
 
-			<div className="mt-6 rounded-lg border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+			<div
+				role="tabpanel"
+				id={`panel-${mode}`}
+				aria-labelledby={`tab-${mode}`}
+				className="mt-6 rounded-lg border border-neutral-200 bg-neutral-0 p-6 shadow-card"
+			>
 				{mode === 'subscribe' ? (
 					<form onSubmit={emailForm.handleSubmit(handleSubscribe)} className="space-y-4">
 						<div>
 							<label
 								htmlFor="email"
-								className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-200"
+								className="mb-1.5 block text-sm font-medium text-neutral-700"
 							>
 								{t('subscribe.emailLabel')}
 							</label>
-							<div className="relative">
-								<Mail
-									size={16}
-									className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] dark:text-neutral-500"
-								/>
-								<input
-									id="email"
-									type="email"
-									{...emailForm.register('email')}
-									placeholder="your@email.com"
-									className="w-full rounded-md border border-neutral-300 bg-white py-2.5 pl-9 pr-4 text-sm text-neutral-900 placeholder:text-[var(--color-text-muted)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500"
-								/>
-							</div>
+							{/* 图标几何交给设计系统的 Input prefix 槽（第 61 轮）：
+							    原来这里是 absolute 图标 + 算出来的 pl-9（12 起点 + 16 图标 + 8 间隙）。 */}
+							<Input
+								id="email"
+								type="email"
+								{...emailForm.register('email')}
+								placeholder="your@email.com"
+								prefix={<Mail size={16} />}
+							/>
 							{emailForm.formState.errors.email && (
 								<p className="mt-1 text-xs text-danger-text">{t('subscribe.invalidEmail')}</p>
 							)}
@@ -323,27 +342,21 @@ export default function SubscribePage() {
 						<div>
 							<label
 								htmlFor="token"
-								className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-200"
+								className="mb-1.5 block text-sm font-medium text-neutral-700"
 							>
 								{t('subscribe.tokenLabel')}
 							</label>
-							<div className="relative">
-								<XCircle
-									size={16}
-									className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] dark:text-neutral-500"
-								/>
-								<input
-									id="token"
-									type="text"
-									{...tokenForm.register('token')}
-									placeholder={t('subscribe.tokenPlaceholder')}
-									className="w-full rounded-md border border-neutral-300 bg-white py-2.5 pl-9 pr-4 text-sm text-neutral-900 placeholder:text-[var(--color-text-muted)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500"
-								/>
-							</div>
+							<Input
+								id="token"
+								type="text"
+								{...tokenForm.register('token')}
+								placeholder={t('subscribe.tokenPlaceholder')}
+								prefix={<XCircle size={16} />}
+							/>
 							{tokenForm.formState.errors.token && (
 								<p className="mt-1 text-xs text-danger-text">{t('subscribe.tokenRequired')}</p>
 							)}
-							<p className="mt-1.5 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+							<p className="mt-1.5 text-xs text-muted">
 								{t('subscribe.tokenHint')}
 							</p>
 						</div>
@@ -351,7 +364,7 @@ export default function SubscribePage() {
 						<button
 							type="submit"
 							disabled={loading}
-							className="flex w-full items-center justify-center gap-2 rounded-md bg-neutral-700 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed dark:bg-neutral-600 dark:hover:bg-neutral-500"
+							className="flex w-full items-center justify-center gap-2 rounded-md bg-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-0 transition-colors hover:bg-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed"
 						>
 							{loading ? (
 								<>
@@ -369,10 +382,10 @@ export default function SubscribePage() {
 				) : (
 					/* ─── Preferences Form ─── */
 					<div className="space-y-4">
-						<h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
+						<h3 className="text-base font-semibold text-neutral-900">
 							{t('subscribe.preferences.title')}
 						</h3>
-						<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+						<p className="text-xs text-muted">
 							{t('subscribe.preferences.desc')}
 						</p>
 
@@ -380,17 +393,13 @@ export default function SubscribePage() {
 						<div>
 							<label
 								htmlFor="pref-token"
-								className="mb-1.5 block text-sm font-medium text-neutral-700 dark:text-neutral-200"
+								className="mb-1.5 block text-sm font-medium text-neutral-700"
 							>
 								{t('subscribe.preferences.tokenLabel')}
 							</label>
 							<div className="flex gap-2">
-								<div className="relative flex-1">
-									<KeyRound
-										size={16}
-										className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] dark:text-neutral-500"
-									/>
-									<input
+								<div className="flex-1">
+									<Input
 										id="pref-token"
 										type="text"
 										{...prefForm.register('prefToken')}
@@ -399,14 +408,13 @@ export default function SubscribePage() {
 											setPrefsLoaded(false);
 										}}
 										placeholder={t('subscribe.preferences.tokenPlaceholder')}
-										className="w-full rounded-md border border-neutral-300 bg-white py-2.5 pl-9 pr-4 text-sm text-neutral-900 placeholder:text-[var(--color-text-muted)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500"
 									/>
 								</div>
 								<button
 									type="button"
 									onClick={prefForm.handleSubmit(() => handleLoadPreferences())}
-									disabled={prefsLoading || !prefForm.getValues('prefToken').trim()}
-									className="flex items-center gap-1.5 rounded-md bg-neutral-100 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-200 transition-colors disabled:opacity-50 dark:bg-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-600"
+									disabled={prefsLoading || !(watchedPrefToken ?? '').trim()}
+									className="flex items-center gap-1.5 rounded-md bg-neutral-100 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-200 transition-colors disabled:opacity-50"
 								>
 									{prefsLoading ? (
 										<Loader2 size={14} className="animate-spin" />
@@ -421,7 +429,7 @@ export default function SubscribePage() {
 									{t('subscribe.preferences.tokenRequired')}
 								</p>
 							)}
-							<p className="mt-1.5 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+							<p className="mt-1.5 text-xs text-muted">
 								{t('subscribe.preferences.tokenHint')}
 							</p>
 						</div>
@@ -436,14 +444,14 @@ export default function SubscribePage() {
 
 						{/* Preferences toggles */}
 						{prefsLoaded && prefs && (
-							<div className="space-y-3 rounded-md border border-neutral-100 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
+							<div className="space-y-3 rounded-md border border-neutral-100 bg-neutral-50 p-4">
 								{/* Notify Incidents */}
 								<label className="flex items-center justify-between cursor-pointer">
 									<div>
-										<span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
+										<span className="text-sm font-medium text-neutral-800">
 											{t('subscribe.preferences.notifyIncidents')}
 										</span>
-										<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+										<p className="text-xs text-muted">
 											{t('subscribe.preferences.notifyIncidentsDesc')}
 										</p>
 									</div>
@@ -457,10 +465,10 @@ export default function SubscribePage() {
 								{/* Notify Maintenance */}
 								<label className="flex items-center justify-between cursor-pointer">
 									<div>
-										<span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
+										<span className="text-sm font-medium text-neutral-800">
 											{t('subscribe.preferences.notifyMaintenance')}
 										</span>
-										<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+										<p className="text-xs text-muted">
 											{t('subscribe.preferences.notifyMaintenanceDesc')}
 										</p>
 									</div>
@@ -474,10 +482,10 @@ export default function SubscribePage() {
 								{/* Notify Recovery */}
 								<label className="flex items-center justify-between cursor-pointer">
 									<div>
-										<span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
+										<span className="text-sm font-medium text-neutral-800">
 											{t('subscribe.preferences.notifyRecovery')}
 										</span>
-										<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+										<p className="text-xs text-muted">
 											{t('subscribe.preferences.notifyRecoveryDesc')}
 										</p>
 									</div>
@@ -489,14 +497,14 @@ export default function SubscribePage() {
 								</label>
 
 								{/* Digest Frequency */}
-								<div className="pt-2 border-t border-neutral-200 dark:border-neutral-700">
-									<label className="mb-2 block text-sm font-medium text-neutral-800 dark:text-neutral-200">
+								<div className="pt-2 border-t border-neutral-200">
+									<label className="mb-2 block text-sm font-medium text-neutral-800">
 										{t('subscribe.preferences.digestFrequency')}
 									</label>
 									<select
 										value={prefs.digestFrequency}
 										onChange={(e) => handleDigestChange(e.target.value)}
-										className="w-full rounded-md border border-neutral-300 bg-white py-2 px-3 text-sm text-neutral-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100"
+										className="w-full rounded-md border border-neutral-300 bg-neutral-0 py-2 px-3 text-sm text-neutral-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
 									>
 										{DIGEST_OPTIONS.map((opt) => (
 											<option key={opt.value} value={opt.value}>
@@ -570,36 +578,36 @@ export default function SubscribePage() {
 
 			{/* Subscription Benefits */}
 			<div className="mt-8 grid gap-4 sm:grid-cols-3">
-				<div className="rounded-lg border border-neutral-200 bg-white p-4 text-center dark:border-neutral-700 dark:bg-neutral-800">
+				<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-4 text-center">
 					<div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-success-soft text-success-text dark:bg-success-soft/30 dark:text-success-text">
 						<Rss size={18} />
 					</div>
-					<h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+					<h3 className="text-sm font-semibold text-neutral-900">
 						{t('subscribe.benefit.realtime')}
 					</h3>
-					<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+					<p className="mt-1 text-xs text-muted">
 						{t('subscribe.benefit.realtimeDesc')}
 					</p>
 				</div>
-				<div className="rounded-lg border border-neutral-200 bg-white p-4 text-center dark:border-neutral-700 dark:bg-neutral-800">
+				<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-4 text-center">
 					<div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-info-soft text-info-text dark:bg-info-soft/30 dark:text-info-text">
 						<CheckCircle size={18} />
 					</div>
-					<h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+					<h3 className="text-sm font-semibold text-neutral-900">
 						{t('subscribe.benefit.resolve')}
 					</h3>
-					<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+					<p className="mt-1 text-xs text-muted">
 						{t('subscribe.benefit.resolveDesc')}
 					</p>
 				</div>
-				<div className="rounded-lg border border-neutral-200 bg-white p-4 text-center dark:border-neutral-700 dark:bg-neutral-800">
+				<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-4 text-center">
 					<div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
 						<Bell size={18} />
 					</div>
-					<h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+					<h3 className="text-sm font-semibold text-neutral-900">
 						{t('subscribe.benefit.advance')}
 					</h3>
-					<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
+					<p className="mt-1 text-xs text-muted">
 						{t('subscribe.benefit.advanceDesc')}
 					</p>
 				</div>
