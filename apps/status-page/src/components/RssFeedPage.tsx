@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useMemo } from 'react';
 import { generateRSS } from '@/lib/rss';
+import { SITE_URL } from '@/lib/site-env';
 
 function RssFeedContent() {
 	const { t } = useTranslation();
@@ -66,6 +67,7 @@ function RssFeedContent() {
 						</h1>
 						<p className="text-sm text-muted">
 							{t('rss.pageDesc', {
+								feedUrl: `${SITE_URL}/feed.xml`,
 								incidents: incidents?.length ?? 0,
 								maintenances: maintenances?.length ?? 0,
 							})}

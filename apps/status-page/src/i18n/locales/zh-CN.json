@@ -206,7 +206,7 @@
   "rss.generating": "正在生成 RSS Feed...",
   "rss.error": "RSS Feed 生成失败，请稍后重试。",
   "rss.pageTitle": "RSS Feed",
-  "rss.pageDesc": "订阅地址 https://status.autional.cn/feed.xml —— 请将该地址添加到 RSS 阅读器；本页仅为预览（当前 {{incidents}} 条事件、{{maintenances}} 条维护记录）。",
+  "rss.pageDesc": "订阅地址 {{feedUrl}} —— 请将该地址添加到 RSS 阅读器；本页仅为预览（当前 {{incidents}} 条事件、{{maintenances}} 条维护记录）。",
   "notFound.title": "页面未找到",
   "notFound.description": "您访问的页面不存在或已被移动。请检查链接是否正确，或使用下方导航回到有效页面。",
   "notFound.goHome": "返回首页",

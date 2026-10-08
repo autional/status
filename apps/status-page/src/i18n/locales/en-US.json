@@ -206,7 +206,7 @@
   "rss.generating": "Generating RSS Feed...",
   "rss.error": "Failed to generate RSS Feed. Please try again later.",
   "rss.pageTitle": "RSS Feed",
-  "rss.pageDesc": "Feed URL: https://status.autional.cn/feed.xml — add it to your RSS reader; this page is a preview (currently {{incidents}} incidents and {{maintenances}} maintenance records).",
+  "rss.pageDesc": "Feed URL: {{feedUrl}} — add it to your RSS reader; this page is a preview (currently {{incidents}} incidents and {{maintenances}} maintenance records).",
   "notFound.title": "Page Not Found",
   "notFound.description": "The page you are looking for does not exist or has been moved. Please check the link or use the navigation below to find what you need.",
   "notFound.goHome": "Back to Home",
