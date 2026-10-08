@@ -71,7 +71,7 @@ export default function RefreshCountdown({ intervalMs = 30000, onRefresh }: Refr
 				/>
 			</div>
 			<span
-				className={`text-xs tabular-nums ${paused ? 'text-neutral-400 dark:text-neutral-500' : 'text-neutral-500 dark:text-neutral-400'}`}
+				className={`text-xs tabular-nums ${paused ? 'text-[var(--color-text-muted)] dark:text-neutral-500' : 'text-neutral-500 dark:text-[var(--color-text-muted)]'}`}
 			>
 				{paused ? t('paused') : `${seconds}s`}
 			</span>
@@ -80,14 +80,14 @@ export default function RefreshCountdown({ intervalMs = 30000, onRefresh }: Refr
 					onRefresh?.();
 					setRemaining(effectiveInterval);
 				}}
-				className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+				className="rounded p-1 text-[var(--color-text-muted)] hover:bg-neutral-100 hover:text-neutral-600 transition-colors dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
 				title={t('refresh')}
 			>
 				<RefreshCw size={12} />
 			</button>
 			<button
 				onClick={() => setPaused((p) => !p)}
-				className="rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
+				className="rounded p-1 text-[var(--color-text-muted)] hover:bg-neutral-100 hover:text-neutral-600 transition-colors dark:text-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
 				title={paused ? t('resume') : t('pause')}
 			>
 				{paused ? <Play size={12} /> : <Pause size={12} />}

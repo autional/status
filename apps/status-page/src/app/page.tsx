@@ -101,18 +101,18 @@ export default function DashboardPage() {
 						<div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
 							<div className="flex items-center justify-between">
 								<div>
-									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-neutral-400">
+									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-[var(--color-text-muted)]">
 										{t('stat.services')}
 									</p>
 									<p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
 										{servicesHealthy}/{servicesTotal}
 									</p>
 								</div>
-								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-success-soft text-success-text dark:bg-success-soft/30 dark:text-success-text">
 									<Shield size={20} />
 								</div>
 							</div>
-							<p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+							<p className="mt-2 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 								{servicesHealthy === servicesTotal
 									? t('stat.services.allOk')
 									: t('stat.services.degraded', { n: servicesTotal - servicesHealthy })}
@@ -122,18 +122,18 @@ export default function DashboardPage() {
 						<div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
 							<div className="flex items-center justify-between">
 								<div>
-									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-neutral-400">
+									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-[var(--color-text-muted)]">
 										{t('stat.incidents')}
 									</p>
 									<p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
 										{activeIncidents}
 									</p>
 								</div>
-								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-rose-50 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400">
+								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-danger-soft text-danger-text dark:bg-danger-soft/30 dark:text-danger-text">
 									<AlertTriangle size={20} />
 								</div>
 							</div>
-							<p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+							<p className="mt-2 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 								{activeIncidents > 0 ? t('stat.incidents.active') : t('stat.incidents.none')}
 							</p>
 						</div>
@@ -141,18 +141,18 @@ export default function DashboardPage() {
 						<div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
 							<div className="flex items-center justify-between">
 								<div>
-									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-neutral-400">
+									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-[var(--color-text-muted)]">
 										{t('stat.maintenance')}
 									</p>
 									<p className="mt-1 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
 										{plannedMaintenances.length}
 									</p>
 								</div>
-								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-info-soft text-info-text dark:bg-info-soft/30 dark:text-info-text">
 									<Wrench size={20} />
 								</div>
 							</div>
-							<p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+							<p className="mt-2 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 								{plannedMaintenances.length
 									? t('stat.maintenance.upcoming')
 									: t('stat.maintenance.none')}
@@ -162,7 +162,7 @@ export default function DashboardPage() {
 						<div className="rounded-lg border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
 							<div className="flex items-center justify-between">
 								<div>
-									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-neutral-400">
+									<p className="text-xs font-medium text-neutral-500 uppercase tracking-wide dark:text-[var(--color-text-muted)]">
 										{t('lastUpdated')}
 									</p>
 									<p className="mt-1 text-lg font-bold text-neutral-900 tabular-nums dark:text-neutral-100">
@@ -172,14 +172,14 @@ export default function DashboardPage() {
 								<button
 									onClick={() => refetchStatus()}
 									disabled={isFetching}
-									className="flex h-10 w-10 items-center justify-center rounded-md bg-neutral-50 text-neutral-500 hover:bg-neutral-100 transition-colors dark:bg-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-600"
+									className="flex h-10 w-10 items-center justify-center rounded-md bg-neutral-50 text-neutral-500 hover:bg-neutral-100 transition-colors dark:bg-neutral-700 dark:text-[var(--color-text-muted)] dark:hover:bg-neutral-600"
 									title={t('refresh')}
 								>
 									<RefreshCw size={18} className={isFetching ? 'animate-spin' : ''} />
 								</button>
 							</div>
 							<div className="mt-2 flex items-center justify-between">
-								<p className="text-xs text-neutral-500 dark:text-neutral-400">{t('autoRefresh')}</p>
+								<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">{t('autoRefresh')}</p>
 								<RefreshCountdown intervalMs={30000} onRefresh={() => refetchStatus()} />
 							</div>
 						</div>
@@ -188,7 +188,7 @@ export default function DashboardPage() {
 			</div>
 
 			{/* Legend */}
-			<div className="mb-6 flex flex-wrap items-center gap-4 text-xs text-neutral-500 dark:text-neutral-400">
+			<div className="mb-6 flex flex-wrap items-center gap-4 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 				<span className="flex items-center gap-1.5">
 					<StatusIndicator status="healthy" size="sm" /> {t('status.operational')}
 				</span>
@@ -261,7 +261,7 @@ export default function DashboardPage() {
 				<h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
 					{t('uptime.title')}
 				</h3>
-				<p className="mx-auto mt-1 max-w-lg text-sm text-neutral-500 dark:text-neutral-400">
+				<p className="mx-auto mt-1 max-w-lg text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
 					{t('uptime.desc')}
 				</p>
 			</div>

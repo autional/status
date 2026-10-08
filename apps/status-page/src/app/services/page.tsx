@@ -114,12 +114,12 @@ export default function ServiceDetailPage() {
 		return (
 			<div className="mx-auto max-w-4xl px-4 py-12 text-center">
 				<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-700">
-					<Server size={32} className="text-neutral-400" />
+					<Server size={32} className="text-[var(--color-text-muted)]" />
 				</div>
 				<h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
 					{t('service.notFound')}
 				</h2>
-				<p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+				<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
 					{t('service.notFoundDesc')}
 				</p>
 				<Link
@@ -135,16 +135,16 @@ export default function ServiceDetailPage() {
 
 	const statusConfig = {
 		healthy: {
-			bg: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-			border: 'border-emerald-200 dark:border-emerald-800',
+			bg: 'bg-success-soft text-success-text dark:bg-success-soft/30 dark:text-success-text',
+			border: 'border-success-soft',
 		},
 		degraded: {
-			bg: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-			border: 'border-amber-200 dark:border-amber-800',
+			bg: 'bg-warning-soft text-warning-text dark:bg-warning/30 dark:text-warning-text',
+			border: 'border-warning-soft',
 		},
 		unhealthy: {
-			bg: 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
-			border: 'border-rose-200 dark:border-rose-800',
+			bg: 'bg-danger-soft text-danger-text dark:bg-danger-soft/30 dark:text-danger-text',
+			border: 'border-danger-soft',
 		},
 	};
 	const cfg = statusConfig[service.status];
@@ -153,17 +153,17 @@ export default function ServiceDetailPage() {
 		latencyTrend === 'up' ? TrendingUp : latencyTrend === 'down' ? TrendingDown : Minus;
 	const trendColor =
 		latencyTrend === 'up'
-			? 'text-rose-500'
+			? 'text-danger-text'
 			: latencyTrend === 'down'
-				? 'text-emerald-500'
-				: 'text-neutral-400';
+				? 'text-success-text'
+				: 'text-[var(--color-text-muted)]';
 
 	return (
 		<div className="mx-auto max-w-4xl px-4 py-8">
 			{/* Back link */}
 			<Link
 				to="/"
-				className="inline-flex items-center gap-1 text-sm font-medium text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+				className="inline-flex items-center gap-1 text-sm font-medium text-neutral-500 hover:text-neutral-800 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200"
 			>
 				<ArrowLeft size={14} />
 				{t('service.back')}
@@ -174,7 +174,7 @@ export default function ServiceDetailPage() {
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-4">
 						<div className="flex h-14 w-14 items-center justify-center rounded-lg bg-white/80 dark:bg-neutral-800/80">
-							<Server size={28} className="text-neutral-500 dark:text-neutral-400" />
+							<Server size={28} className="text-neutral-500 dark:text-[var(--color-text-muted)]" />
 						</div>
 						<div>
 							<h1 className="text-2xl font-bold">{t('service.name.' + service.id)}</h1>
@@ -213,7 +213,7 @@ export default function ServiceDetailPage() {
 
 			{/* Range Selector */}
 			<div className="mt-6 flex items-center gap-2">
-				<span className="text-sm text-neutral-500 dark:text-neutral-400">
+				<span className="text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
 					{t('service.rangeLabel')}
 				</span>
 				{RANGE_OPTIONS.map((opt) => (
@@ -239,7 +239,7 @@ export default function ServiceDetailPage() {
 					</h2>
 					{avgUptime !== null && (
 						<span
-							className={`flex items-center gap-1 text-sm font-medium ${avgUptime >= 99.9 ? 'text-emerald-600' : avgUptime >= 95 ? 'text-amber-600' : 'text-rose-600'}`}
+							className={`flex items-center gap-1 text-sm font-medium ${avgUptime >= 99.9 ? 'text-success-text' : avgUptime >= 95 ? 'text-warning-text' : 'text-danger-text'}`}
 						>
 							{t('service.uptimeAvg')} {avgUptime}%
 						</span>
@@ -253,7 +253,7 @@ export default function ServiceDetailPage() {
 					) : uptimeChartData.length > 0 ? (
 						<UptimeChart data={uptimeChartData || []} tooltipLabel={t('service.uptimeTooltip')} />
 					) : (
-						<div className="flex h-full flex-col items-center justify-center text-neutral-400 dark:text-neutral-500">
+						<div className="flex h-full flex-col items-center justify-center text-[var(--color-text-muted)] dark:text-neutral-500">
 							<Activity size={32} />
 							<p className="mt-2 text-sm">{t('service.noUptime')}</p>
 							<p className="text-xs">{t('service.prometheusHint')}</p>
@@ -270,7 +270,7 @@ export default function ServiceDetailPage() {
 					</h2>
 					<div className="flex items-center gap-2">
 						{avgLatency !== null && (
-							<span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+							<span className="text-sm font-medium text-neutral-600 dark:text-[var(--color-text-muted)]">
 								{t('service.latencyAvg')} {avgLatency}ms
 							</span>
 						)}
@@ -285,7 +285,7 @@ export default function ServiceDetailPage() {
 					) : latencyChartData.length > 0 ? (
 						<LatencyChart data={latencyChartData || []} />
 					) : (
-						<div className="flex h-full flex-col items-center justify-center text-neutral-400 dark:text-neutral-500">
+						<div className="flex h-full flex-col items-center justify-center text-[var(--color-text-muted)] dark:text-neutral-500">
 							<Clock size={32} />
 							<p className="mt-2 text-sm">{t('service.noLatency')}</p>
 							<p className="text-xs">{t('service.prometheusHint')}</p>

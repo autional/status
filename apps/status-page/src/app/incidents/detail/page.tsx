@@ -23,30 +23,30 @@ function buildSeverityConfig(
 		critical: {
 			icon: <AlertTriangle size={20} />,
 			label: t('incidents.criticalEvent'),
-			color: 'text-rose-700 dark:text-rose-400',
-			border: 'border-rose-200 dark:border-rose-800',
-			bg: 'bg-rose-50 dark:bg-rose-900/20',
+			color: 'text-danger-text',
+			border: 'border-danger-soft',
+			bg: 'bg-danger-soft/20',
 		},
 		major: {
 			icon: <AlertTriangle size={20} />,
 			label: t('incidents.majorEvent'),
-			color: 'text-orange-700 dark:text-orange-400',
-			border: 'border-orange-200 dark:border-orange-800',
-			bg: 'bg-orange-50 dark:bg-orange-900/20',
+			color: 'text-warning-text',
+			border: 'border-warning-soft',
+			bg: 'bg-warning-soft/20',
 		},
 		minor: {
 			icon: <AlertTriangle size={20} />,
 			label: t('incidents.minorEvent'),
-			color: 'text-amber-700 dark:text-amber-400',
-			border: 'border-amber-200 dark:border-amber-800',
-			bg: 'bg-amber-50 dark:bg-amber-900/20',
+			color: 'text-warning-text',
+			border: 'border-warning-soft',
+			bg: 'bg-warning-soft dark:bg-warning/20',
 		},
 		maintenance: {
 			icon: <Wrench size={20} />,
 			label: t('severity.maintenance'),
-			color: 'text-slate-700 dark:text-slate-400',
-			border: 'border-slate-200 dark:border-slate-700',
-			bg: 'bg-slate-50 dark:bg-slate-800/50',
+			color: 'text-[var(--color-text-primary)] dark:text-[var(--color-text-muted)]',
+			border: 'border-neutral-200 dark:border-neutral-700',
+			bg: 'bg-neutral-50 dark:bg-surface/50',
 		},
 	};
 }
@@ -77,7 +77,7 @@ export default function IncidentDetailPage() {
 		return (
 			<div className="mx-auto max-w-3xl px-4 py-12 text-center">
 				<Loader2 size={32} className="mx-auto animate-spin text-primary-600" />
-				<p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400">
+				<p className="mt-4 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
 					{t('incidents.loading')}
 				</p>
 			</div>
@@ -88,12 +88,12 @@ export default function IncidentDetailPage() {
 		return (
 			<div className="mx-auto max-w-3xl px-4 py-12 text-center">
 				<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-700">
-					<AlertTriangle size={32} className="text-neutral-400" />
+					<AlertTriangle size={32} className="text-[var(--color-text-muted)]" />
 				</div>
 				<h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
 					{t('incidents.notFound')}
 				</h2>
-				<p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+				<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
 					{t('incidents.notFoundDesc')}
 				</p>
 				<Link
@@ -114,7 +114,7 @@ export default function IncidentDetailPage() {
 			{/* Back link */}
 			<Link
 				to="/incidents"
-				className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+				className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200"
 			>
 				<ArrowLeft size={16} />
 				{t('incidents.backToList')}
@@ -134,7 +134,7 @@ export default function IncidentDetailPage() {
 						<h1 className="mt-2 text-xl font-bold text-neutral-900 dark:text-neutral-100">
 							{incident.title}
 						</h1>
-						<p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+						<p className="mt-1 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
 							{incident.description}
 						</p>
 					</div>
@@ -142,7 +142,7 @@ export default function IncidentDetailPage() {
 
 				{/* Meta */}
 				<div className="mt-5 grid gap-3 sm:grid-cols-3">
-					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
 						<Clock size={14} />
 						<span>
 							{t('incidents.createdAt')}
@@ -150,7 +150,7 @@ export default function IncidentDetailPage() {
 						</span>
 					</div>
 					{incident.resolvedAt && (
-						<div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
+						<div className="flex items-center gap-2 text-sm text-success-text">
 							<Clock size={14} />
 							<span>
 								{t('incidents.resolvedLabel')}
@@ -158,7 +158,7 @@ export default function IncidentDetailPage() {
 							</span>
 						</div>
 					)}
-					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
 						<MessageSquare size={14} />
 						<span>
 							{(incident.updates || []).length}
@@ -195,8 +195,8 @@ export default function IncidentDetailPage() {
 				</h2>
 				{(incident.updates || []).length === 0 ? (
 					<div className="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-800">
-						<Clock size={24} className="mx-auto text-neutral-400" />
-						<p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+						<Clock size={24} className="mx-auto text-[var(--color-text-muted)]" />
+						<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
 							{t('incidents.noUpdates')}
 						</p>
 					</div>
@@ -216,11 +216,11 @@ export default function IncidentDetailPage() {
 									<div className="flex flex-wrap items-center justify-between gap-2">
 										<div className="flex items-center gap-2">
 											<StatusBadge status={update.status} />
-											<span className="text-xs text-neutral-400 dark:text-neutral-500">
+											<span className="text-xs text-[var(--color-text-muted)] dark:text-neutral-500">
 												{formatRelativeTime(update.createdAt)}
 											</span>
 										</div>
-										<span className="text-xs text-neutral-400 dark:text-neutral-500">
+										<span className="text-xs text-[var(--color-text-muted)] dark:text-neutral-500">
 											{formatDateTime(update.createdAt)}
 										</span>
 									</div>
@@ -234,17 +234,17 @@ export default function IncidentDetailPage() {
 						{/* Resolved endpoint */}
 						{incident.status === 'resolved' && (
 							<div className="relative">
-								<div className="absolute -left-4 top-1.5 h-3 w-3 rounded-full border-2 border-emerald-500 bg-emerald-500" />
-								<div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20">
+								<div className="absolute -left-4 top-1.5 h-3 w-3 rounded-full border-2 border-success-soft bg-success" />
+								<div className="rounded-lg border border-success-soft bg-success-soft p-4 dark:border-success-soft dark:bg-success-soft/20">
 									<div className="flex items-center gap-2">
 										<StatusBadge status="resolved" />
-										<span className="text-xs text-emerald-600 dark:text-emerald-400">
+										<span className="text-xs text-success-text">
 											{incident.resolvedAt
 												? formatDateTime(incident.resolvedAt)
 												: t('incidents.resolvedStatus')}
 										</span>
 									</div>
-									<p className="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
+									<p className="mt-1 text-sm text-success-text">
 										{t('incidents.resolvedDesc')}
 									</p>
 								</div>

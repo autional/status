@@ -20,28 +20,28 @@ const statusConfig: Record<
 	scheduled: {
 		label: 'maintenance.status.scheduled',
 		icon: <Calendar size={16} />,
-		color: 'text-blue-700 dark:text-blue-400',
-		border: 'border-blue-200 dark:border-blue-800',
-		bg: 'bg-blue-50 dark:bg-blue-900/20',
+		color: 'text-info-text',
+		border: 'border-info-soft',
+		bg: 'bg-info-soft/20',
 	},
 	in_progress: {
 		label: 'maintenance.status.inProgress',
 		icon: <Wrench size={16} />,
-		color: 'text-amber-700 dark:text-amber-400',
-		border: 'border-amber-200 dark:border-amber-800',
-		bg: 'bg-amber-50 dark:bg-amber-900/20',
+		color: 'text-warning-text',
+		border: 'border-warning-soft',
+		bg: 'bg-warning-soft dark:bg-warning/20',
 	},
 	completed: {
 		label: 'maintenance.status.completed',
 		icon: <CheckCircle2 size={16} />,
-		color: 'text-emerald-700 dark:text-emerald-400',
-		border: 'border-emerald-200 dark:border-emerald-800',
-		bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+		color: 'text-success-text',
+		border: 'border-success-soft',
+		bg: 'bg-success-soft/20',
 	},
 	cancelled: {
 		label: 'maintenance.status.cancelled',
 		icon: <AlertCircle size={16} />,
-		color: 'text-neutral-700 dark:text-neutral-400',
+		color: 'text-neutral-700 dark:text-[var(--color-text-muted)]',
 		border: 'border-neutral-200 dark:border-neutral-700',
 		bg: 'bg-neutral-50 dark:bg-neutral-800/50',
 	},
@@ -56,7 +56,7 @@ export default function MaintenanceDetailPage() {
 		return (
 			<div className="mx-auto max-w-3xl px-4 py-12 text-center">
 				<Loader2 size={32} className="mx-auto animate-spin text-primary-600" />
-				<p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400">
+				<p className="mt-4 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
 					{t('maintenance.loading')}
 				</p>
 			</div>
@@ -67,12 +67,12 @@ export default function MaintenanceDetailPage() {
 		return (
 			<div className="mx-auto max-w-3xl px-4 py-12 text-center">
 				<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 dark:bg-neutral-700">
-					<Wrench size={32} className="text-neutral-400" />
+					<Wrench size={32} className="text-[var(--color-text-muted)]" />
 				</div>
 				<h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
 					{t('maintenance.notFound')}
 				</h2>
-				<p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+				<p className="mt-2 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
 					{t('maintenance.notFoundDesc')}
 				</p>
 				<Link
@@ -99,7 +99,7 @@ export default function MaintenanceDetailPage() {
 			{/* Back link */}
 			<Link
 				to="/maintenance"
-				className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+				className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200"
 			>
 				<ArrowLeft size={16} />
 				{t('maintenance.back')}
@@ -115,7 +115,7 @@ export default function MaintenanceDetailPage() {
 								{t(cfg.label)}
 							</span>
 							{isUpcoming && (
-								<span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+								<span className="rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-medium text-info-text dark:bg-info-soft/30 dark:text-info-text">
 									{t('maintenance.upcoming')}
 								</span>
 							)}
@@ -128,7 +128,7 @@ export default function MaintenanceDetailPage() {
 						<h1 className="mt-2 text-xl font-bold text-neutral-900 dark:text-neutral-100">
 							{maintenance.title}
 						</h1>
-						<p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+						<p className="mt-1 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
 							{maintenance.description}
 						</p>
 					</div>
@@ -136,25 +136,25 @@ export default function MaintenanceDetailPage() {
 
 				{/* Meta */}
 				<div className="mt-5 grid gap-3 sm:grid-cols-2">
-					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
 						<Calendar size={14} />
 						<span>
 							{t('maintenance.startTime')}
 							{formatDateTime(maintenance.scheduledStartAt)}
 						</span>
 					</div>
-					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
 						<Clock size={14} />
 						<span>
 							{t('maintenance.endTime')}
 							{formatDateTime(maintenance.scheduledEndAt)}
 						</span>
 					</div>
-					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
 						<Clock size={14} />
 						<span>{t('maintenance.duration', { hours: durationHours })}</span>
 					</div>
-					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+					<div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-[var(--color-text-muted)]">
 						<Calendar size={14} />
 						<span>
 							{t('maintenance.createdAt')}
@@ -211,7 +211,7 @@ export default function MaintenanceDetailPage() {
 								className={`flex h-8 w-8 items-center justify-center rounded-full border-2 ${
 									step.active
 										? 'border-primary-500 bg-primary-500 text-white'
-										: 'border-neutral-300 bg-white text-neutral-400 dark:border-neutral-600 dark:bg-neutral-800'
+										: 'border-neutral-300 bg-white text-[var(--color-text-muted)] dark:border-neutral-600 dark:bg-neutral-800'
 								}`}
 							>
 								{step.key === 'scheduled' && <Calendar size={14} />}
@@ -219,7 +219,7 @@ export default function MaintenanceDetailPage() {
 								{step.key === 'completed' && <CheckCircle2 size={14} />}
 							</div>
 							<span
-								className={`text-xs font-medium ${step.active ? 'text-primary-600 dark:text-primary-400' : 'text-neutral-400 dark:text-neutral-500'}`}
+								className={`text-xs font-medium ${step.active ? 'text-primary-600 dark:text-primary-400' : 'text-[var(--color-text-muted)] dark:text-neutral-500'}`}
 							>
 								{step.label}
 							</span>

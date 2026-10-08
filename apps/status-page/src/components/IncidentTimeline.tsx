@@ -14,10 +14,10 @@ interface IncidentTimelineProps {
 }
 
 const severityIcons: Record<string, React.ReactNode> = {
-	critical: <AlertTriangle size={16} className="text-rose-600" />,
-	major: <AlertTriangle size={16} className="text-orange-500" />,
-	minor: <AlertTriangle size={16} className="text-amber-400" />,
-	maintenance: <Wrench size={16} className="text-slate-400" />,
+	critical: <AlertTriangle size={16} className="text-danger-text" />,
+	major: <AlertTriangle size={16} className="text-warning-text" />,
+	minor: <AlertTriangle size={16} className="text-warning-text" />,
+	maintenance: <Wrench size={16} className="text-[var(--color-text-muted)]" />,
 };
 
 export default function IncidentTimeline({
@@ -33,13 +33,13 @@ export default function IncidentTimeline({
 	if (incidents.length === 0) {
 		return (
 			<div className="rounded-lg border border-neutral-200 bg-white p-8 text-center dark:border-neutral-700 dark:bg-neutral-800">
-				<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/30">
-					<Clock size={20} className="text-emerald-600 dark:text-emerald-400" />
+				<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft/30">
+					<Clock size={20} className="text-success-text" />
 				</div>
 				<h3 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 					{t('incidents.recentNone')}
 				</h3>
-				<p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+				<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 					{t('incidents.recentNoneHint')}
 				</p>
 			</div>
@@ -81,7 +81,7 @@ export default function IncidentTimeline({
 										<StatusBadge status={incident.status} />
 										<StatusBadge status={incident.severity} />
 									</div>
-									<p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+									<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 										{(incident.affectedServices || [])
 											.map((s) => t('service.shortName.' + s))
 											.join(t('common.listSeparator'))}{' '}
@@ -91,7 +91,7 @@ export default function IncidentTimeline({
 							</div>
 							<ChevronRight
 								size={16}
-								className={`mt-1 shrink-0 text-neutral-400 transition-transform dark:text-neutral-500 ${isExpanded ? 'rotate-90' : ''}`}
+								className={`mt-1 shrink-0 text-[var(--color-text-muted)] transition-transform dark:text-neutral-500 ${isExpanded ? 'rotate-90' : ''}`}
 							/>
 						</button>
 
@@ -114,7 +114,7 @@ export default function IncidentTimeline({
 
 								{incident.updates.length > 0 && (
 									<div className="mt-4 space-y-3">
-										<h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+										<h4 className="text-xs font-semibold uppercase tracking-wide text-neutral-500 dark:text-[var(--color-text-muted)]">
 											{t('incidents.progress')}
 										</h4>
 										<div className="relative space-y-3 pl-4">
@@ -125,7 +125,7 @@ export default function IncidentTimeline({
 													<div className="rounded-md bg-neutral-50 p-3 dark:bg-neutral-700/50">
 														<div className="flex items-center gap-2">
 															<StatusBadge status={update.status} />
-															<span className="text-xs text-neutral-400 dark:text-neutral-500">
+															<span className="text-xs text-[var(--color-text-muted)] dark:text-neutral-500">
 																{formatShortDateTime(update.createdAt)}
 															</span>
 														</div>
@@ -140,7 +140,7 @@ export default function IncidentTimeline({
 								)}
 
 								{incident.resolvedAt && (
-									<div className="mt-3 flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400">
+									<div className="mt-3 flex items-center gap-2 text-xs text-success-text">
 										<Clock size={12} />
 										{t('incidents.resolvedAt', { time: formatShortDateTime(incident.resolvedAt) })}
 									</div>

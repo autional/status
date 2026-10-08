@@ -62,7 +62,7 @@ export default function MaintenancePage() {
 			<div className="mb-8">
 				<Link
 					to="/"
-					className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+					className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-800 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200"
 				>
 					<ArrowLeft size={16} />
 					{t('service.back')}
@@ -70,7 +70,7 @@ export default function MaintenancePage() {
 				<h1 className="mt-4 text-2xl font-bold text-neutral-900 dark:text-neutral-100">
 					{t('maintenance.title')}
 				</h1>
-				<p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+				<p className="mt-1 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
 					{t('maintenance.subtitle')}
 				</p>
 			</div>
@@ -87,19 +87,19 @@ export default function MaintenancePage() {
 							<div className="flex items-center gap-1">
 								<button
 									onClick={prevMonth}
-									className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700"
+									className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 dark:text-[var(--color-text-muted)] dark:hover:bg-neutral-700"
 								>
 									<ChevronLeft size={18} />
 								</button>
 								<button
 									onClick={() => setCurrentDate(new Date())}
-									className="rounded-md px-3 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700"
+									className="rounded-md px-3 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100 dark:text-[var(--color-text-muted)] dark:hover:bg-neutral-700"
 								>
 									{t('maintenance.today')}
 								</button>
 								<button
 									onClick={nextMonth}
-									className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700"
+									className="rounded-md p-1.5 text-neutral-500 hover:bg-neutral-100 dark:text-[var(--color-text-muted)] dark:hover:bg-neutral-700"
 								>
 									<ChevronRight size={18} />
 								</button>
@@ -111,7 +111,7 @@ export default function MaintenancePage() {
 							{weekDays.map((day) => (
 								<div
 									key={day}
-									className="py-2 text-center text-xs font-medium text-neutral-500 dark:text-neutral-400"
+									className="py-2 text-center text-xs font-medium text-neutral-500 dark:text-[var(--color-text-muted)]"
 								>
 									{day}
 								</div>
@@ -153,20 +153,20 @@ export default function MaintenancePage() {
 											>
 												{day}
 											</span>
-											{hasMaintenance && <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />}
+											{hasMaintenance && <div className="h-1.5 w-1.5 rounded-full bg-info" />}
 										</div>
 										{dayMaintenances.slice(0, 2).map((m) => (
 											<Link
 												key={m.id}
 												to={`/maintenance/${m.id}`}
-												className="mt-1 block truncate rounded px-1 py-0.5 text-[10px] font-medium leading-tight bg-blue-100 text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300"
+												className="mt-1 block truncate rounded px-1 py-0.5 text-[10px] font-medium leading-tight bg-info-soft text-info-text transition-colors hover:bg-info-soft dark:bg-info-soft/30 dark:text-info-text"
 												title={m.title}
 											>
 												{m.title}
 											</Link>
 										))}
 										{dayMaintenances.length > 2 && (
-											<div className="mt-0.5 text-[10px] text-neutral-400 dark:text-neutral-500">
+											<div className="mt-0.5 text-[10px] text-[var(--color-text-muted)] dark:text-neutral-500">
 												{t('maintenance.more', { n: dayMaintenances.length - 2 })}
 											</div>
 										)}
@@ -182,7 +182,7 @@ export default function MaintenancePage() {
 					<div className="rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
 						<div className="border-b border-neutral-100 px-5 py-4 dark:border-neutral-700">
 							<h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-								<Wrench size={16} className="text-blue-500" />
+								<Wrench size={16} className="text-info-text" />
 								{t('maintenance.records')}
 							</h3>
 						</div>
@@ -198,11 +198,11 @@ export default function MaintenancePage() {
 							</div>
 						) : maintenances?.length === 0 ? (
 							<div className="flex flex-col items-center justify-center p-8 text-center">
-								<CheckCircle2 size={32} className="text-emerald-500" />
+								<CheckCircle2 size={32} className="text-success-text" />
 								<p className="mt-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
 									{t('maintenance.noRecords')}
 								</p>
-								<p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+								<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 									{t('maintenance.noRecordsHint')}
 								</p>
 							</div>
@@ -219,10 +219,10 @@ export default function MaintenancePage() {
 												<h4 className="text-sm font-medium text-neutral-900 dark:text-neutral-100 truncate">
 													{m.title}
 												</h4>
-												<p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400 line-clamp-2">
+												<p className="mt-0.5 text-xs text-neutral-500 dark:text-[var(--color-text-muted)] line-clamp-2">
 													{m.description}
 												</p>
-												<div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-neutral-400 dark:text-neutral-500">
+												<div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--color-text-muted)] dark:text-neutral-500">
 													<span className="flex items-center gap-1">
 														<Calendar size={12} />
 														{formatDateOnly(m.scheduledStartAt)}
@@ -236,17 +236,17 @@ export default function MaintenancePage() {
 											</div>
 											<div className="shrink-0">
 												{m.status === 'completed' ? (
-													<span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+													<span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-medium text-success-text dark:bg-success-soft/30 dark:text-success-text">
 														<CheckCircle2 size={10} />
 														{t('maintenance.completed')}
 													</span>
 												) : m.status === 'cancelled' ? (
-													<span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400">
+													<span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-600 dark:bg-neutral-700 dark:text-[var(--color-text-muted)]">
 														<AlertCircle size={10} />
 														{t('maintenance.cancelled')}
 													</span>
 												) : (
-													<span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+													<span className="inline-flex items-center gap-1 rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-medium text-info-text dark:bg-info-soft/30 dark:text-info-text">
 														<AlertCircle size={10} />
 														{m.status === 'in_progress'
 															? t('maintenance.inProgress')
@@ -259,7 +259,7 @@ export default function MaintenancePage() {
 											{(m.affectedServices || []).map((sid) => (
 												<span
 													key={sid}
-													className="rounded bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-600 dark:bg-neutral-700 dark:text-neutral-400"
+													className="rounded bg-neutral-100 px-1.5 py-0.5 text-[10px] text-neutral-600 dark:bg-neutral-700 dark:text-[var(--color-text-muted)]"
 												>
 													{t('service.shortName.' + sid)}
 												</span>
@@ -276,13 +276,13 @@ export default function MaintenancePage() {
 						<h4 className="mb-2 text-xs font-medium text-neutral-700 dark:text-neutral-300">
 							{t('maintenance.legend')}
 						</h4>
-						<div className="space-y-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+						<div className="space-y-1.5 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 							<div className="flex items-center gap-2">
-								<div className="h-2 w-2 rounded-full bg-blue-500" />
+								<div className="h-2 w-2 rounded-full bg-info" />
 								<span>{t('maintenance.legend.planned')}</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<div className="h-2 w-2 rounded-full bg-emerald-500" />
+								<div className="h-2 w-2 rounded-full bg-success" />
 								<span>{t('maintenance.legend.completed')}</span>
 							</div>
 							<div className="flex items-center gap-2">

@@ -53,7 +53,7 @@ export default function IncidentsPage() {
 
 			{/* Filters */}
 			<div className="mb-6 flex flex-wrap items-center gap-3">
-				<div className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400">
+				<div className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-[var(--color-text-muted)]">
 					<Filter size={14} />
 					<span>{t('filter.severity')}</span>
 				</div>
@@ -113,13 +113,13 @@ export default function IncidentsPage() {
 				</div>
 			) : filteredIncidents.length === 0 ? (
 				<div className="rounded-lg border border-neutral-200 bg-white p-12 text-center dark:border-neutral-700 dark:bg-neutral-800">
-					<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/30">
-						<AlertTriangle size={20} className="text-emerald-600 dark:text-emerald-400" />
+					<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft/30">
+						<AlertTriangle size={20} className="text-success-text" />
 					</div>
 					<h3 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
 						{t('incidents.empty')}
 					</h3>
-					<p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+					<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 						{t('incidents.emptyHint')}
 					</p>
 				</div>

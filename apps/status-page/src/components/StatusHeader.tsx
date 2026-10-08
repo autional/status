@@ -23,15 +23,15 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 
 	const bannerConfig = {
 		healthy: {
-			bg: 'bg-emerald-600',
+			bg: 'bg-success',
 			icon: <Activity size={20} className="animate-pulse-soft" />,
 		},
 		degraded: {
-			bg: 'bg-amber-500',
+			bg: 'bg-warning',
 			icon: <Activity size={20} className="animate-pulse-soft" />,
 		},
 		unhealthy: {
-			bg: 'bg-rose-600',
+			bg: 'bg-danger',
 			icon: <Activity size={20} className="animate-pulse-soft" />,
 		},
 	};
@@ -80,7 +80,7 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 							<Link
 								key={item.to}
 								to={item.to}
-								className="text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+								className="text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-100"
 							>
 								{t(item.key)}
 							</Link>
@@ -93,7 +93,7 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 							{t('subscribe')}
 						</Link>
 						<ThemeToggle
-							className="text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+							className="text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 dark:text-[var(--color-text-muted)] dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
 							iconSize={16}
 							labelLight={t('theme.switchToLight')}
 							labelDark={t('theme.switchToDark')}
@@ -103,7 +103,7 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 
 					{/* Mobile menu button */}
 					<button
-						className="md:hidden text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200"
+						className="md:hidden text-neutral-600 hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200"
 						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
 					>
 						{mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -119,7 +119,7 @@ export default function StatusHeader({ overallStatus = 'healthy' }: StatusHeader
 									key={item.to}
 									to={item.to}
 									onClick={() => setMobileMenuOpen(false)}
-									className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+									className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-100"
 								>
 									{t(item.key)}
 								</Link>

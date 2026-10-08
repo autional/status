@@ -238,7 +238,7 @@ export default function SubscribePage() {
 						className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
 							mode === 'subscribe'
 								? 'bg-primary-600 text-white'
-								: 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200'
+								: 'text-neutral-600 hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200'
 						}`}
 					>
 						{t('subscribe.subscribeTab')}
@@ -251,7 +251,7 @@ export default function SubscribePage() {
 						className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
 							mode === 'unsubscribe'
 								? 'bg-primary-600 text-white'
-								: 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200'
+								: 'text-neutral-600 hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200'
 						}`}
 					>
 						{t('subscribe.unsubscribeTab')}
@@ -264,7 +264,7 @@ export default function SubscribePage() {
 						className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
 							mode === 'preferences'
 								? 'bg-primary-600 text-white'
-								: 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200'
+								: 'text-neutral-600 hover:text-neutral-900 dark:text-[var(--color-text-muted)] dark:hover:text-neutral-200'
 						}`}
 					>
 						{t('subscribe.preferencesTab')}
@@ -285,18 +285,18 @@ export default function SubscribePage() {
 							<div className="relative">
 								<Mail
 									size={16}
-									className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
+									className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] dark:text-neutral-500"
 								/>
 								<input
 									id="email"
 									type="email"
 									{...emailForm.register('email')}
 									placeholder="your@email.com"
-									className="w-full rounded-md border border-neutral-300 bg-white py-2.5 pl-9 pr-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+									className="w-full rounded-md border border-neutral-300 bg-white py-2.5 pl-9 pr-4 text-sm text-neutral-900 placeholder:text-[var(--color-text-muted)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500"
 								/>
 							</div>
 							{emailForm.formState.errors.email && (
-								<p className="mt-1 text-xs text-rose-500">{t('subscribe.invalidEmail')}</p>
+								<p className="mt-1 text-xs text-danger-text">{t('subscribe.invalidEmail')}</p>
 							)}
 						</div>
 
@@ -330,20 +330,20 @@ export default function SubscribePage() {
 							<div className="relative">
 								<XCircle
 									size={16}
-									className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
+									className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] dark:text-neutral-500"
 								/>
 								<input
 									id="token"
 									type="text"
 									{...tokenForm.register('token')}
 									placeholder={t('subscribe.tokenPlaceholder')}
-									className="w-full rounded-md border border-neutral-300 bg-white py-2.5 pl-9 pr-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+									className="w-full rounded-md border border-neutral-300 bg-white py-2.5 pl-9 pr-4 text-sm text-neutral-900 placeholder:text-[var(--color-text-muted)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500"
 								/>
 							</div>
 							{tokenForm.formState.errors.token && (
-								<p className="mt-1 text-xs text-rose-500">{t('subscribe.tokenRequired')}</p>
+								<p className="mt-1 text-xs text-danger-text">{t('subscribe.tokenRequired')}</p>
 							)}
-							<p className="mt-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+							<p className="mt-1.5 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 								{t('subscribe.tokenHint')}
 							</p>
 						</div>
@@ -372,7 +372,7 @@ export default function SubscribePage() {
 						<h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
 							{t('subscribe.preferences.title')}
 						</h3>
-						<p className="text-xs text-neutral-500 dark:text-neutral-400">
+						<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 							{t('subscribe.preferences.desc')}
 						</p>
 
@@ -388,7 +388,7 @@ export default function SubscribePage() {
 								<div className="relative flex-1">
 									<KeyRound
 										size={16}
-										className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 dark:text-neutral-500"
+										className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] dark:text-neutral-500"
 									/>
 									<input
 										id="pref-token"
@@ -399,7 +399,7 @@ export default function SubscribePage() {
 											setPrefsLoaded(false);
 										}}
 										placeholder={t('subscribe.preferences.tokenPlaceholder')}
-										className="w-full rounded-md border border-neutral-300 bg-white py-2.5 pl-9 pr-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+										className="w-full rounded-md border border-neutral-300 bg-white py-2.5 pl-9 pr-4 text-sm text-neutral-900 placeholder:text-[var(--color-text-muted)] focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-500"
 									/>
 								</div>
 								<button
@@ -417,11 +417,11 @@ export default function SubscribePage() {
 								</button>
 							</div>
 							{prefForm.formState.errors.prefToken && (
-								<p className="mt-1 text-xs text-rose-500">
+								<p className="mt-1 text-xs text-danger-text">
 									{t('subscribe.preferences.tokenRequired')}
 								</p>
 							)}
-							<p className="mt-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+							<p className="mt-1.5 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 								{t('subscribe.preferences.tokenHint')}
 							</p>
 						</div>
@@ -443,7 +443,7 @@ export default function SubscribePage() {
 										<span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
 											{t('subscribe.preferences.notifyIncidents')}
 										</span>
-										<p className="text-xs text-neutral-500 dark:text-neutral-400">
+										<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 											{t('subscribe.preferences.notifyIncidentsDesc')}
 										</p>
 									</div>
@@ -460,7 +460,7 @@ export default function SubscribePage() {
 										<span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
 											{t('subscribe.preferences.notifyMaintenance')}
 										</span>
-										<p className="text-xs text-neutral-500 dark:text-neutral-400">
+										<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 											{t('subscribe.preferences.notifyMaintenanceDesc')}
 										</p>
 									</div>
@@ -477,7 +477,7 @@ export default function SubscribePage() {
 										<span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
 											{t('subscribe.preferences.notifyRecovery')}
 										</span>
-										<p className="text-xs text-neutral-500 dark:text-neutral-400">
+										<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 											{t('subscribe.preferences.notifyRecoveryDesc')}
 										</p>
 									</div>
@@ -536,7 +536,7 @@ export default function SubscribePage() {
 								type="button"
 								onClick={handleUnsubscribeFromPrefs}
 								disabled={loading}
-								className="flex w-full items-center justify-center gap-2 rounded-md border border-rose-300 px-4 py-2.5 text-sm font-medium text-rose-600 transition-colors hover:bg-rose-50 disabled:opacity-60 disabled:cursor-not-allowed dark:border-rose-800 dark:text-rose-400 dark:hover:bg-rose-900/20"
+								className="flex w-full items-center justify-center gap-2 rounded-md border border-danger-soft px-4 py-2.5 text-sm font-medium text-danger-text transition-colors hover:bg-danger-soft disabled:opacity-60 disabled:cursor-not-allowed dark:border-danger-soft dark:text-danger-text dark:hover:bg-danger-soft/20"
 							>
 								{loading ? (
 									<>
@@ -558,8 +558,8 @@ export default function SubscribePage() {
 					<div
 						className={`mt-4 flex items-center gap-2 rounded-md p-3 text-sm ${
 							result.success
-								? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-								: 'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+								? 'bg-success-soft text-success-text dark:bg-success-soft/30 dark:text-success-text'
+								: 'bg-danger-soft text-danger-text dark:bg-danger-soft/30 dark:text-danger-text'
 						}`}
 					>
 						{result.success ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
@@ -571,24 +571,24 @@ export default function SubscribePage() {
 			{/* Subscription Benefits */}
 			<div className="mt-8 grid gap-4 sm:grid-cols-3">
 				<div className="rounded-lg border border-neutral-200 bg-white p-4 text-center dark:border-neutral-700 dark:bg-neutral-800">
-					<div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+					<div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-success-soft text-success-text dark:bg-success-soft/30 dark:text-success-text">
 						<Rss size={18} />
 					</div>
 					<h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
 						{t('subscribe.benefit.realtime')}
 					</h3>
-					<p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+					<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 						{t('subscribe.benefit.realtimeDesc')}
 					</p>
 				</div>
 				<div className="rounded-lg border border-neutral-200 bg-white p-4 text-center dark:border-neutral-700 dark:bg-neutral-800">
-					<div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+					<div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-info-soft text-info-text dark:bg-info-soft/30 dark:text-info-text">
 						<CheckCircle size={18} />
 					</div>
 					<h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
 						{t('subscribe.benefit.resolve')}
 					</h3>
-					<p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+					<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 						{t('subscribe.benefit.resolveDesc')}
 					</p>
 				</div>
@@ -599,7 +599,7 @@ export default function SubscribePage() {
 					<h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">
 						{t('subscribe.benefit.advance')}
 					</h3>
-					<p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+					<p className="mt-1 text-xs text-neutral-500 dark:text-[var(--color-text-muted)]">
 						{t('subscribe.benefit.advanceDesc')}
 					</p>
 				</div>

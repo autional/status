@@ -23,11 +23,11 @@ export default function ServiceCard({ service }: ServiceCardProps) {
 	}, []);
 	const statusBorderColors = {
 		healthy:
-			'border-emerald-200 hover:border-emerald-300 dark:border-emerald-800 dark:hover:border-emerald-700',
+			'border-success-soft hover:border-success-soft dark:border-success-soft dark:hover:border-success-soft',
 		degraded:
-			'border-amber-200 hover:border-amber-300 dark:border-amber-800 dark:hover:border-amber-700',
+			'border-warning-soft hover:border-warning dark:border-warning-soft dark:hover:border-warning',
 		unhealthy:
-			'border-rose-200 hover:border-rose-300 dark:border-rose-800 dark:hover:border-rose-700',
+			'border-danger-soft hover:border-danger-soft dark:border-danger-soft dark:hover:border-danger-soft',
 	};
 
 	return (
@@ -38,14 +38,14 @@ export default function ServiceCard({ service }: ServiceCardProps) {
 			} hover:shadow-md`}
 		>
 			<div className="flex items-center gap-3 min-w-0">
-				<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-neutral-100 text-neutral-500 dark:bg-neutral-700 dark:text-neutral-400">
+				<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-neutral-100 text-neutral-500 dark:bg-neutral-700 dark:text-[var(--color-text-muted)]">
 					<Server size={18} />
 				</div>
 				<div className="min-w-0">
 					<h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 truncate">
 						{t('service.name.' + service.id)}
 					</h3>
-					<p className="text-xs text-neutral-500 dark:text-neutral-400 truncate">
+					<p className="text-xs text-neutral-500 dark:text-[var(--color-text-muted)] truncate">
 						{t('service.desc.' + service.id)}
 					</p>
 				</div>
@@ -55,8 +55,8 @@ export default function ServiceCard({ service }: ServiceCardProps) {
 				{isDesktop && (
 					<div className="w-20 h-8 shrink-0 flex items-center justify-center">
 						{service.status === 'healthy' && (
-							<div className="h-1 w-full rounded bg-emerald-200 dark:bg-emerald-800">
-								<div className="h-full w-full rounded bg-emerald-500" />
+							<div className="h-1 w-full rounded bg-success-soft">
+								<div className="h-full w-full rounded bg-success" />
 							</div>
 						)}
 						{service.status === 'degraded' && (
@@ -65,8 +65,8 @@ export default function ServiceCard({ service }: ServiceCardProps) {
 							</div>
 						)}
 						{service.status === 'unhealthy' && (
-							<div className="h-1 w-full rounded bg-rose-200 dark:bg-rose-800">
-								<div className="h-full w-1/4 rounded bg-rose-500" />
+							<div className="h-1 w-full rounded bg-danger-soft">
+								<div className="h-full w-1/4 rounded bg-danger" />
 							</div>
 						)}
 					</div>
@@ -74,7 +74,7 @@ export default function ServiceCard({ service }: ServiceCardProps) {
 				<div className="flex flex-col items-end gap-1">
 					<StatusIndicator status={service.status} showLabel />
 					{service.latency && (
-						<div className="flex items-center gap-1 text-xs text-neutral-400 dark:text-neutral-500">
+						<div className="flex items-center gap-1 text-xs text-[var(--color-text-muted)] dark:text-neutral-500">
 							<Clock size={10} />
 							{service.latency}
 						</div>
