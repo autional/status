@@ -200,7 +200,7 @@
   "maintenance.prevMonth": "上个月",
   "maintenance.nextMonth": "下个月",
   "uptime.title": "致力于高可用性",
-  "uptime.desc": "Autional 所有核心服务承诺 99.9% 以上的月度可用性（自然月口径，与详情页的 24 小时滚动窗口不同）。我们会在此页面实时公开所有服务的运行状态和事件进展，确保透明可信。",
+  "uptime.desc": "Autional 所有核心服务以 99.9% 以上的月度可用性为目标（自然月口径，与详情页的 24 小时滚动窗口不同）。我们会在此页面实时公开所有服务的运行状态和事件进展，确保透明可信。",
   "rss.title": "Autional Status — 系统事件通知",
   "rss.desc": "Autional 所有系统服务的状态事件与维护公告 RSS Feed",
   "rss.generating": "正在生成 RSS Feed...",

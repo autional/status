@@ -200,7 +200,7 @@
   "maintenance.prevMonth": "Previous month",
   "maintenance.nextMonth": "Next month",
   "uptime.title": "Committed to High Availability",
-  "uptime.desc": "Autional guarantees 99.9%+ monthly uptime (calendar-month basis, distinct from the 24-hour rolling window shown on service detail pages) for all core services. We publicly display the operational status and incident progress of all services here in real time, ensuring transparency and trust.",
+  "uptime.desc": "Autional targets 99.9%+ monthly uptime (calendar-month basis, distinct from the 24-hour rolling window shown on service detail pages) for all core services. We publicly display the operational status and incident progress of all services here in real time, ensuring transparency and trust.",
   "rss.title": "Autional Status — System Event Notifications",
   "rss.desc": "RSS feed for Autional system service status events and maintenance announcements",
   "rss.generating": "Generating RSS Feed...",
