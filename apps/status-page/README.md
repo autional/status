@@ -76,6 +76,4 @@ GET /ready → 网关聚合所有上游服务状态（checks / checks_latency）
 
 ## 服务列表
 
-展示 15 个核心微服务：
-
-identity-service, profile-service, tenant-service, session-service, mfa-service, oauth-service, wallet-service, point-service, audit-service, notification-service, communication-service, storage-service, billing-service, compliance-service, gateway-service
+服务清单在运行时取自网关 catalog（当前 27 个微服务），页面不硬编码服务列表。
