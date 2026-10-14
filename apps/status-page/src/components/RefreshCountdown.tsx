@@ -65,7 +65,14 @@ export default function RefreshCountdown({ intervalMs = 30000, onRefresh }: Refr
 	const seconds = Math.ceil(remaining / 1000);
 	const fraction = Math.max(0, Math.min(1, remaining / effectiveInterval));
 	// 圆环随剩余时间收缩：满圈 = 刚刷新过，走空 = 即将刷新。
-	const dashOffset = RING_CIRCUMFERENCE * (1 - fraction);
+	//
+	// ⚠️ 符号为负是刻意的（2026-10-14 用户报"方向反了"）：
+	//   strokeDashoffset 为正 ⇒ 可见弧 = 路径 [0, C·fraction] ⇒ 弧钉在 12 点、**远端逆时针回缩**
+	//     ⇒ 缺口从 12 点往左扩，读起来像钟表倒着走；
+	//   取负 ⇒ 可见弧 = 路径 [(1−fraction)·C, C] ⇒ 弧尾扫过、**起端顺时针推进**收向 12 点
+	//     ⇒ 缺口从 12 点往右扩，与秒针同向。
+	// 证据：用同一套 stroke 数学渲染的对照图（.temp/ring-big.png，红线标 12 点方向）。
+	const dashOffset = -RING_CIRCUMFERENCE * (1 - fraction);
 
 	return (
 		<div
