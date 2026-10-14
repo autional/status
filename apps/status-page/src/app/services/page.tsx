@@ -6,6 +6,8 @@ import {
 	useUptimeMetrics,
 } from '@/hooks/use-system-status';
 import StatusIndicator from '@/components/StatusIndicator';
+import { serviceIcon } from '@/lib/service-icon';
+import { formatLatency } from '@/lib/format';
 import { UptimeChart } from '@/components/UptimeChart';
 import LatencyChart from '@/components/LatencyChart';
 import IncidentTimeline from '@/components/IncidentTimeline';
@@ -41,6 +43,11 @@ export default function ServiceDetailPage() {
 		range,
 	);
 	const { data: uptimeResult, isLoading: uptimeLoading } = useUptimeMetrics(serviceId || '', range);
+
+	// 空图表有两种完全不同的原因，必须分开说 —— 否则用户会把"数据源挂了"读成"服务没问题"：
+	//   available === false → Prometheus 不可用（监控链路问题，与服务健康无关）
+	//   available 为真但无数据点 → 该服务确实没有这类指标（如 gRPC-only 服务没有 HTTP 直方图）
+	const metricsSourceDown = (res?: { available?: boolean } | null) => res?.available === false;
 
 	const service = useMemo(() => {
 		return services?.find((s) => s.id === serviceId);
@@ -135,9 +142,10 @@ export default function ServiceDetailPage() {
 	}
 
 	const statusConfig = {
+		// 安静模式：正常态不用绿色铺满一整块面板 —— 颜色留给"出事了"。
 		healthy: {
-			bg: 'bg-success-soft text-success-text dark:bg-success-soft/30 dark:text-success-text',
-			border: 'border-success-soft',
+			bg: 'bg-neutral-50/80 text-neutral-800 dark:bg-surface/30 dark:text-neutral-200',
+			border: 'border-neutral-200 dark:border-neutral-700',
 		},
 		degraded: {
 			bg: 'bg-warning-soft text-warning-text dark:bg-warning/30 dark:text-warning-text',
@@ -153,6 +161,8 @@ export default function ServiceDetailPage() {
 		},
 	};
 	const cfg = statusConfig[service.status];
+	// 与总览页状态墙同源：详情页头部也用该服务的专属图标（此前写死 <Server>，每个服务都一样）
+	const ServiceIcon = serviceIcon(service.id);
 
 	const TrendIcon =
 		latencyTrend === 'up' ? TrendingUp : latencyTrend === 'down' ? TrendingDown : Minus;
@@ -179,14 +189,14 @@ export default function ServiceDetailPage() {
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-4">
 						<div className="flex h-14 w-14 items-center justify-center rounded-lg bg-neutral-0/80">
-							<Server size={28} className="text-muted" />
+							<ServiceIcon size={28} className="text-muted" />
 						</div>
 						<div>
 							<h1 className="text-2xl font-bold">{t('service.name.' + service.id)}</h1>
 							<p className="mt-1 text-sm opacity-80">{t('service.desc.' + service.id)}</p>
 						</div>
 					</div>
-					<StatusIndicator status={service.status} size="lg" showLabel />
+					<StatusIndicator status={service.status} size="lg" showLabel quietHealthy />
 				</div>
 
 				<div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -195,7 +205,9 @@ export default function ServiceDetailPage() {
 							<Clock size={14} />
 							{t('service.latency')}
 						</div>
-						<p className="mt-1 text-xl font-semibold">{service.latency || '—'}</p>
+						<p className="mt-1 text-xl font-semibold">
+							{formatLatency(service.latency) ?? '—'}
+						</p>
 					</div>
 					<div className="rounded-lg bg-neutral-0/60 p-4">
 						<div className="flex items-center gap-2 text-sm opacity-70">
@@ -214,6 +226,12 @@ export default function ServiceDetailPage() {
 						<p className="mt-1 text-xl font-semibold">{incidents.length}</p>
 					</div>
 				</div>
+
+				{/* unknown 的真实原因：探针清单没覆盖它（不是服务坏了）。不写清楚，用户会把
+				    "未知徽章 + 满页绿色图表"读成互相矛盾的两句话。 */}
+				{service.status === 'unknown' && (
+					<p className="mt-4 text-xs opacity-70">{t('service.noProbeHint')}</p>
+				)}
 			</div>
 
 			{/* Range Selector */}
@@ -244,7 +262,7 @@ export default function ServiceDetailPage() {
 					</h2>
 					{avgUptime !== null && (
 						<span
-							className={`flex items-center gap-1 text-sm font-medium ${avgUptime >= 99.9 ? 'text-success-text' : avgUptime >= 95 ? 'text-warning-text' : 'text-danger-text'}`}
+							className={`flex items-center gap-1 text-sm font-medium ${avgUptime >= 99.9 ? 'text-neutral-600 dark:text-neutral-300' : avgUptime >= 95 ? 'text-warning-text' : 'text-danger-text'}`}
 						>
 							{t('service.uptimeAvg')} {avgUptime}%
 						</span>
@@ -260,8 +278,14 @@ export default function ServiceDetailPage() {
 					) : (
 						<div className="flex h-full flex-col items-center justify-center text-muted">
 							<Activity size={32} />
-							<p className="mt-2 text-sm">{t('service.noUptime')}</p>
-							<p className="text-xs">{t('service.prometheusHint')}</p>
+							<p className="mt-2 text-sm">
+								{metricsSourceDown(uptimeResult) ? t('service.metricsSourceDown') : t('service.noUptime')}
+							</p>
+							<p className="text-xs">
+								{metricsSourceDown(uptimeResult)
+									? t('service.metricsSourceDownHint')
+									: t('service.prometheusHint')}
+							</p>
 						</div>
 					)}
 				</div>
@@ -292,8 +316,14 @@ export default function ServiceDetailPage() {
 					) : (
 						<div className="flex h-full flex-col items-center justify-center text-muted">
 							<Clock size={32} />
-							<p className="mt-2 text-sm">{t('service.noLatency')}</p>
-							<p className="text-xs">{t('service.prometheusHint')}</p>
+							<p className="mt-2 text-sm">
+								{metricsSourceDown(latencyResult) ? t('service.metricsSourceDown') : t('service.noLatency')}
+							</p>
+							<p className="text-xs">
+								{metricsSourceDown(latencyResult)
+									? t('service.metricsSourceDownHint')
+									: t('service.prometheusHint')}
+							</p>
 						</div>
 					)}
 				</div>

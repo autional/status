@@ -7,6 +7,7 @@ import {
 	useMaintenances,
 } from '@/hooks/use-system-status';
 import ServiceGroup from '@/components/ServiceGroup';
+import FleetStrip from '@/components/FleetStrip';
 import IncidentTimeline from '@/components/IncidentTimeline';
 import StatusIndicator from '@/components/StatusIndicator';
 import RefreshCountdown from '@/components/RefreshCountdown';
@@ -115,7 +116,14 @@ export default function DashboardPage() {
 										{servicesHealthy}/{servicesTotal}
 									</p>
 								</div>
-								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-success-soft text-success-text dark:bg-success-soft/30 dark:text-success-text">
+								{/* 颜色=问题：服务全好时中性，真出现降级/故障才变红（统计卡也不再常亮绿色） */}
+								<div
+									className={`flex h-10 w-10 items-center justify-center rounded-md ${
+										servicesDegraded > 0
+											? 'bg-danger-soft text-danger-text dark:bg-danger-soft/30 dark:text-danger-text'
+											: 'bg-neutral-100 text-muted dark:bg-surface/40 dark:text-neutral-300'
+									}`}
+								>
 									<Shield size={20} />
 								</div>
 							</div>
@@ -199,7 +207,7 @@ export default function DashboardPage() {
 			{/* Legend */}
 			<div className="mb-6 flex flex-wrap items-center gap-4 text-xs text-muted">
 				<span className="flex items-center gap-1.5">
-					<StatusIndicator status="healthy" size="sm" /> {t('status.operational')}
+					<StatusIndicator status="healthy" size="sm" quietHealthy /> {t('status.operational')}
 				</span>
 				<span className="flex items-center gap-1.5">
 					<StatusIndicator status="degraded" size="sm" /> {t('status.degraded')}
@@ -208,9 +216,24 @@ export default function DashboardPage() {
 					<StatusIndicator status="unhealthy" size="sm" /> {t('status.down')}
 				</span>
 				<span className="flex items-center gap-1.5">
-					<StatusIndicator status="unknown" size="sm" /> {t('status.unknown')}
+					<span className="inline-block h-2.5 w-2.5 rounded-xs border border-dashed border-neutral-400" /> {t('status.unknown')}
 				</span>
 			</div>
+
+			{/* Fleet Overview Strip —— 27 个服务图标一览，一眼看全 */}
+			{services && services.length > 0 && (
+				<div className="mb-6 rounded-lg border border-neutral-200 bg-neutral-0 p-4 shadow-card">
+					<div className="mb-3 flex items-center justify-between gap-3">
+						<p className="text-xs font-medium text-muted uppercase tracking-wide">
+							{t('fleet.title', { n: services.length })}
+						</p>
+						<span className="text-xs text-muted">
+							{t('fleet.hint')}
+						</span>
+					</div>
+					<FleetStrip services={services} />
+				</div>
+			)}
 
 			{/* Service Groups */}
 			<div className="mb-8 space-y-4">
@@ -243,7 +266,6 @@ export default function DashboardPage() {
 								name={groupName}
 								description={groupDesc}
 								services={groupServices}
-								defaultExpanded={true}
 							/>
 						);
 					})

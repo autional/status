@@ -21,7 +21,9 @@ interface UptimeChartProps {
 }
 
 const statusColors: Record<string, string> = {
-	healthy: 'var(--color-success)',
+	// 安静模式：正常 = 中性灰（"没出事就别用颜色占满屏幕"），只有掉下来才上色。
+	// 一根 100% 的绿色柱墙什么信息都没有，还会把真正的异常淹掉。
+	healthy: 'var(--color-neutral-400)',
 	degraded: 'var(--color-warning)',
 	unhealthy: 'var(--color-danger)',
 };

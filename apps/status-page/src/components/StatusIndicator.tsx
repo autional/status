@@ -1,27 +1,19 @@
 import type { HealthStatus, IncidentSeverity, IncidentStatus } from '@/types';
 import { useTranslation } from 'react-i18next';
+import { statusLabelKey } from '@/lib/status-label';
 
 interface StatusIndicatorProps {
 	status: HealthStatus | IncidentSeverity | IncidentStatus;
 	size?: 'sm' | 'md' | 'lg';
 	showLabel?: boolean;
+	/**
+	 * 「安静模式」：健康态不显示绿色，改为中性灰。
+	 *
+	 * 用途 = 总览页状态墙：默认满屏中性，只有异常才有颜色，找问题一眼可见。
+	 * 默认 false —— 服务详情 / 事件线等其它页面维持原有语义色，不受影响。
+	 */
+	quietHealthy?: boolean;
 }
-
-const statusI18nKeys: Record<string, string> = {
-	healthy: 'status.operational',
-	degraded: 'status.degraded',
-	unhealthy: 'status.down',
-	unknown: 'status.unknown',
-	critical: 'severity.critical',
-	major: 'severity.major',
-	minor: 'severity.minor',
-	maintenance: 'severity.maintenance',
-	investigating: 'status.investigating',
-	identified: 'status.identified',
-	monitoring: 'status.monitoring',
-	resolved: 'status.resolved',
-	draft: 'status.draft',
-};
 
 const statusColor: Record<string, string> = {
 	healthy: 'bg-success',
@@ -78,11 +70,15 @@ export default function StatusIndicator({
 	status,
 	size = 'md',
 	showLabel = false,
+	quietHealthy = false,
 }: StatusIndicatorProps) {
 	const { t } = useTranslation();
-	const key = statusI18nKeys[status];
+	const key = statusLabelKey(status);
 	const label = key ? t(key) : status;
-	const color = statusColor[status] || 'bg-[var(--color-text-muted)]';
+	const color =
+		quietHealthy && status === 'healthy'
+			? 'bg-neutral-300 dark:bg-neutral-600'
+			: statusColor[status] || 'bg-[var(--color-text-muted)]';
 	const animate = statusAnimate[status] || false;
 
 	const sizeClasses = {
@@ -111,7 +107,7 @@ export function StatusBadge({
 	status: HealthStatus | IncidentSeverity | IncidentStatus;
 }) {
 	const { t } = useTranslation();
-	const key = statusI18nKeys[status];
+	const key = statusLabelKey(status);
 	const label = key ? t(key) : status;
 
 	return (

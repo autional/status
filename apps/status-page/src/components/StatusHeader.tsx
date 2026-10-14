@@ -53,13 +53,22 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 
 	return (
 		<header className="w-full">
-			{/* Status Banner */}
-			<div className={`${config.bg} text-white`}>
-				<div className="mx-auto flex max-w-6xl items-center justify-center gap-3 px-4 py-4">
-					{config.icon}
-					<span className="text-lg font-semibold">{bannerText[status]}</span>
+			{/* Status Banner —— 安静模式：
+			    "所有系统运行正常" 在一切正常时是一条不提供信息的大色带（统计卡已说明 23/27）。
+			    因此健康态不再占据整条横幅，只保留对读屏软件可见的状态播报（role=status）；
+			    只有异常（降级/故障/未知）才升起可见横幅 —— 那时它才真的有用。 */}
+			{status === 'healthy' ? (
+				<p className="sr-only" role="status">
+					{bannerText.healthy}
+				</p>
+			) : (
+				<div className={`${config.bg} text-white`}>
+					<div className="mx-auto flex max-w-6xl items-center justify-center gap-3 px-4 py-4">
+						{config.icon}
+						<span className="text-lg font-semibold">{bannerText[status]}</span>
+					</div>
 				</div>
-			</div>
+			)}
 
 			{/* Navigation */}
 			<nav className="sticky top-0 z-10 h-[var(--layout-header-height)] border-b border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)]">
