@@ -24,21 +24,21 @@ export function generateRSS(incidents: Incident[], maintenances: Maintenance[]):
 	const lang = i18n.language;
 	const isZh = lang === 'zh-CN';
 	const channelTitle = isZh
-		? 'Autional Status — 系统事件通知'
+		? 'Autional Status — 系统事件通知' // i18n-exempt: RSS 区域条件文案（isZh 三元分支）
 		: 'Autional Status — System Event Notifications';
 	const channelDesc = isZh
-		? 'Autional 所有系统服务的状态事件与维护公告 RSS Feed'
+		? 'Autional 所有系统服务的状态事件与维护公告 RSS Feed' // i18n-exempt: RSS 区域条件文案（isZh 三元分支）
 		: 'RSS feed for Autional system service status events and maintenance announcements';
 	const xmlLang = isZh ? 'zh-CN' : 'en-US';
 
 	const labels = isZh
 		? {
-				affectedServices: '影响服务',
-				status: '状态',
-				scheduledTime: '计划时间',
-				to: '至',
-				incidentPrefix: '[事件]',
-				maintenancePrefix: '[维护]',
+				affectedServices: '影响服务', // i18n-exempt: RSS 区域条件文案（isZh 三元分支）
+				status: '状态', // i18n-exempt: RSS 区域条件文案（isZh 三元分支）
+				scheduledTime: '计划时间', // i18n-exempt: RSS 区域条件文案（isZh 三元分支）
+				to: '至', // i18n-exempt: RSS 区域条件文案（isZh 三元分支）
+				incidentPrefix: '[事件]', // i18n-exempt: RSS 区域条件文案（isZh 三元分支）
+				maintenancePrefix: '[维护]', // i18n-exempt: RSS 区域条件文案（isZh 三元分支）
 			}
 		: {
 				affectedServices: 'Affected Services',
