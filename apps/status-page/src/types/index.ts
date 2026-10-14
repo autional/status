@@ -28,6 +28,12 @@ export interface ServiceStatus {
 	/** /ready 的时间戳；不可达时缺省（调用方显示 '--:--:--'，不得用本地时钟伪造新鲜度） */
 	lastChecked?: string;
 	description?: string;
+	/**
+	 * 「未接入监控」标记：健康源可达（/ready 正常）但该服务**没有探针条目**
+	 * （如 gRPC-only / 无网关路由的服务），与"有探针但健康源整体不可达"是两回事。
+	 * 该状态既不是 healthy 也不是故障 —— UI 必须单独表达，不得折叠进"异常"或"正常"。
+	 */
+	noProbe?: boolean;
 }
 
 /**

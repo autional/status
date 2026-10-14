@@ -76,8 +76,14 @@ export default function DashboardPage() {
 	const servicesDegraded = hasLiveServices
 		? services.filter((s) => s.status === 'degraded' || s.status === 'unhealthy').length
 		: 0;
+	// unknown 再拆两类（口径不同，必须分开说）：
+	//   未接入监控 = 健康源可达、但这个服务没有探针条目（长期态，属"监控覆盖缺口"）
+	//   状态未知   = 有探针/或健康源整体不可达，无法判定（瞬时态，属"数据源问题"）
+	const servicesUnmonitored = hasLiveServices
+		? services.filter((s) => s.status === 'unknown' && s.noProbe).length
+		: 0;
 	const servicesUnknown = hasLiveServices
-		? services.filter((s) => s.status === 'unknown').length
+		? services.filter((s) => s.status === 'unknown' && !s.noProbe).length
 		: 0;
 	const activeIncidents = useMemo(() => {
 		if (overview?.activeIncidents != null) return overview.activeIncidents;
@@ -141,7 +147,9 @@ export default function DashboardPage() {
 										? t('stat.services.degraded', { n: servicesDegraded })
 										: servicesUnknown > 0
 											? t('stat.services.unknown', { n: servicesUnknown })
-											: t('stat.services.allOk')}
+											: servicesUnmonitored > 0
+												? t('stat.services.unmonitored', { n: servicesUnmonitored })
+												: t('stat.services.allOk')}
 							</p>
 						</div>
 
@@ -217,6 +225,10 @@ export default function DashboardPage() {
 				</span>
 				<span className="flex items-center gap-1.5">
 					<span className="inline-block h-2.5 w-2.5 rounded-xs border border-dashed border-neutral-400" /> {t('status.unknown')}
+				</span>
+				{/* 「未接入监控」是独立状态：既不是正常也不是故障，只是没有探针证据 */}
+				<span className="flex items-center gap-1.5">
+					<span className="inline-block h-2.5 w-2.5 rounded-full border-2 border-info" /> {t('status.unmonitored')}
 				</span>
 			</div>
 

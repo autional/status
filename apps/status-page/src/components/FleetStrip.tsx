@@ -28,6 +28,10 @@ const STRIP_TONE: Record<HealthStatus, string> = {
 		'border-dashed border-neutral-300 bg-neutral-0 text-neutral-400 hover:border-neutral-400 dark:border-neutral-600 dark:bg-surface/40 dark:text-neutral-400',
 };
 
+/** 「未接入监控」：虚线 + 信息色（蓝）—— 独立于"未知"，且不冒充故障。 */
+const UNMONITORED_STRIP_TONE =
+	'border-dashed border-info-soft bg-neutral-0 text-info hover:border-info dark:border-info-soft/60 dark:bg-surface/40 dark:text-info';
+
 export default function FleetStrip({ services }: FleetStripProps) {
 	const { t } = useTranslation();
 
@@ -38,15 +42,22 @@ export default function FleetStrip({ services }: FleetStripProps) {
 			{services.map((service) => {
 				const Icon = serviceIcon(service.id);
 				const name = t('service.name.' + service.id);
+				const unmonitored = !!service.noProbe && service.status === 'unknown';
 				const labelKey = statusLabelKey(service.status);
-				const statusLabel = labelKey ? t(labelKey) : service.status;
+				const statusLabel = unmonitored
+					? t('status.unmonitored')
+					: labelKey
+						? t(labelKey)
+						: service.status;
 				return (
 					<Link
 						key={service.id}
 						to={`/services/${service.id}`}
 						title={`${name} — ${statusLabel}`}
 						aria-label={`${name} — ${statusLabel}`}
-						className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${STRIP_TONE[service.status]}`}
+						className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${
+							unmonitored ? UNMONITORED_STRIP_TONE : STRIP_TONE[service.status]
+						}`}
 					>
 						<Icon size={16} />
 					</Link>

@@ -96,6 +96,10 @@ export function buildServiceStatuses(
 		return {
 			id: item.id,
 			status,
+			// 「未接入监控」：健康源可达、但这个服务没有探针条目 —— 与"健康源整体不可达"
+			// （health 为 null，全部 unknown）必须分开表达，否则会把"探针清单缺项"说成
+			// "状态未知"，也会把"网关抓不到"说成"这服务没监控"。
+			noProbe: !!health && !checkKey && item.id !== 'gateway-service',
 			latency: checkKey ? latencies[checkKey] : undefined,
 			// 不伪造时间戳：/ready 不可达时没有可信的"最后检测时间"，
 			// 此前用 `new Date()` 兜底 ⇒ 状态是 unknown 却显示"刚刚更新"（假新鲜度）。

@@ -23,6 +23,9 @@ export default function ServiceGroup({ id, name = '', description = '', services
 	const status = aggregateStatus(services);
 	const GroupIcon = groupIcon(id);
 	const healthyCount = services.filter((s) => s.status === 'healthy').length;
+	// 组内所有"未知"都源于「未接入监控」时，组头也用未接入标记（与磁贴口径一致）
+	const allUnknownUnmonitored =
+		status === 'unknown' && services.filter((s) => s.status === 'unknown').every((s) => s.noProbe);
 
 	// 安静模式：健康 = 中性（不抢眼）；只有异常才给整条上色
 	const statusBgColors = {
@@ -50,7 +53,13 @@ export default function ServiceGroup({ id, name = '', description = '', services
 					<div className="min-w-0">
 						<div className="flex items-center gap-2">
 							<h3 className="truncate text-base font-semibold text-neutral-900">{name}</h3>
-							<StatusIndicator status={status} size="sm" quietHealthy />
+							{allUnknownUnmonitored ? (
+								<span title={t('status.unmonitored')}>
+									<span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full border-2 border-info bg-transparent" />
+								</span>
+							) : (
+								<StatusIndicator status={status} size="sm" quietHealthy />
+							)}
 						</div>
 						<p className="truncate text-xs text-muted">{description}</p>
 					</div>

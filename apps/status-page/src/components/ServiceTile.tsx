@@ -36,6 +36,15 @@ const ICON_TONE: Record<HealthStatus, string> = {
 	unknown: 'bg-neutral-100 text-muted',
 };
 
+/** 「未接入监控」用信息色（蓝）：它既不是正常也不是故障，只是"没有证据"。 */
+const UNMONITORED_ICON_TONE = 'bg-info-soft text-info-text';
+
+/** 「未接入监控」的状态点：空心环（形状本身表示"没有数据"），信息色描边。 */
+function UnmonitoredDot() {
+	return (
+		<span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full border-2 border-info bg-transparent" />
+	);
+}
 
 const POPOVER_WIDTH = 288;
 const POPOVER_MARGIN = 12;
@@ -55,13 +64,26 @@ export default function ServiceTile({ service }: ServiceTileProps) {
 	const Icon = serviceIcon(service.id);
 	const name = t('service.name.' + service.id);
 	const description = t('service.desc.' + service.id);
+	// 「未接入监控」：健康源可达但该服务没有探针条目 —— 独立状态，不并入"未知"也不并入"正常"
+	const unmonitored = !!service.noProbe && service.status === 'unknown';
 	const latency = formatLatency(service.latency);
-	// 无探针时：unknown 明确说"无监控探针"（不冒充健康）；其余状态（如 gateway 自报健康但无探针）用 "—"，
-	// 免得把"健康"和"无监控"两句话叠在同一条上自相矛盾。
-	const latencyText =
-		latency ?? (service.status === 'unknown' ? t('service.noMonitor') : '—');
+	// 三种"没有延迟数字"的情况要分开说：
+	//   未接入监控 → "无监控探针"
+	//   健康源不可达 → "状态未知"
+	//   其余（如 gateway 无探针但已判健康）→ "—"（免得"健康"和"无监控"叠在一行自相矛盾）
+	const latencyText = latency
+		? latency
+		: unmonitored
+			? t('service.noMonitor')
+			: service.status === 'unknown'
+				? t('service.statusUnknown')
+				: '—';
 	const labelKey = statusLabelKey(service.status);
-	const statusLabel = labelKey ? t(labelKey) : service.status;
+	const statusLabel = unmonitored
+		? t('status.unmonitored')
+		: labelKey
+			? t(labelKey)
+			: service.status;
 
 	// 浮层用 fixed 定位并夹在视口内：磁贴格子窄、分组容器带 overflow-hidden，
 	// 若用 absolute 会被裁切，故按锚点矩形自行算坐标。
@@ -94,7 +116,9 @@ export default function ServiceTile({ service }: ServiceTileProps) {
 				onBlur={closePopover}
 			>
 				<span
-					className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${ICON_TONE[service.status]}`}
+					className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+						unmonitored ? UNMONITORED_ICON_TONE : ICON_TONE[service.status]
+					}`}
 				>
 					<Icon size={16} />
 				</span>
@@ -106,7 +130,13 @@ export default function ServiceTile({ service }: ServiceTileProps) {
 						{latencyText}
 					</span>
 				</span>
-				<StatusIndicator status={service.status} size="sm" quietHealthy />
+				{unmonitored ? (
+					<span title={t('status.unmonitored')}>
+						<UnmonitoredDot />
+					</span>
+				) : (
+					<StatusIndicator status={service.status} size="sm" quietHealthy />
+				)}
 			</Link>
 
 			{popover && (
@@ -125,7 +155,16 @@ export default function ServiceTile({ service }: ServiceTileProps) {
 					<p className="text-[13px] font-semibold text-neutral-900">{name}</p>
 					<p className="mt-1 text-xs leading-snug text-muted">{description}</p>
 					<div className="mt-2 flex items-center justify-between gap-3 border-t border-neutral-100 pt-2 dark:border-neutral-800">
-						<StatusIndicator status={service.status} size="sm" showLabel quietHealthy />
+						{unmonitored ? (
+							<span className="flex items-center gap-2">
+								<UnmonitoredDot />
+								<span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+									{t('status.unmonitored')}
+								</span>
+							</span>
+						) : (
+							<StatusIndicator status={service.status} size="sm" showLabel quietHealthy />
+						)}
 						<span className="flex items-center gap-1 text-xs text-muted tabular-nums">
 							<Clock size={11} />
 							{latencyText}
