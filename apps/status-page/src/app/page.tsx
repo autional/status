@@ -13,7 +13,7 @@ import StatusIndicator from '@/components/StatusIndicator';
 import RefreshCountdown from '@/components/RefreshCountdown';
 import { buildGroupStructure } from '@/lib/api';
 import { formatTimeWithSeconds } from '@/lib/format';
-import { RefreshCw, Shield, AlertTriangle, Clock, ArrowRight, Wrench } from 'lucide-react';
+import { Shield, AlertTriangle, Clock, ArrowRight, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
 import type { ServiceGroup as ServiceGroupType, ServiceStatus } from '@/types';
@@ -34,7 +34,6 @@ export default function DashboardPage() {
 		data: services,
 		isLoading: statusLoading,
 		refetch: refetchStatus,
-		isFetching,
 	} = useServiceStatuses();
 	const { data: incidents } = useIncidents();
 	const { data: overview } = useOverview();
@@ -187,7 +186,7 @@ export default function DashboardPage() {
 						</div>
 
 						<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-5 shadow-card">
-							<div className="flex items-center justify-between">
+							<div className="flex items-center justify-between gap-3">
 								<div>
 									<p className="text-xs font-medium text-muted uppercase tracking-wide">
 										{t('lastUpdated')}
@@ -196,19 +195,10 @@ export default function DashboardPage() {
 										{lastUpdated ? formatTimeWithSeconds(lastUpdated) : '--:--:--'}
 									</p>
 								</div>
-								<button
-									onClick={() => refetchStatus()}
-									disabled={isFetching}
-									className="flex h-10 w-10 items-center justify-center rounded-md bg-neutral-50 text-muted hover:bg-neutral-100 transition-colors"
-									title={t('refresh')}
-								>
-									<RefreshCw size={18} className={isFetching ? 'animate-spin' : ''} />
-								</button>
-							</div>
-							<div className="mt-2 flex items-center justify-between">
-								<p className="text-xs text-muted">{t('autoRefresh')}</p>
+								{/* 倒计时圆环（剩余秒数居中）；手动刷新与暂停入口已去掉 */}
 								<RefreshCountdown intervalMs={30000} onRefresh={() => refetchStatus()} />
 							</div>
+							<p className="mt-3 text-xs text-muted">{t('autoRefresh')}</p>
 						</div>
 					</>
 				)}
