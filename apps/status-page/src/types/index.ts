@@ -25,7 +25,8 @@ export interface ServiceStatus {
 	name?: string;
 	status: HealthStatus;
 	latency?: string;
-	lastChecked: string;
+	/** /ready 的时间戳；不可达时缺省（调用方显示 '--:--:--'，不得用本地时钟伪造新鲜度） */
+	lastChecked?: string;
 	description?: string;
 }
 

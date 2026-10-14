@@ -97,7 +97,9 @@ export function buildServiceStatuses(
 			id: item.id,
 			status,
 			latency: checkKey ? latencies[checkKey] : undefined,
-			lastChecked: health?.timestamp ?? new Date().toISOString(),
+			// 不伪造时间戳：/ready 不可达时没有可信的"最后检测时间"，
+			// 此前用 `new Date()` 兜底 ⇒ 状态是 unknown 却显示"刚刚更新"（假新鲜度）。
+			lastChecked: health?.timestamp,
 		};
 	});
 }

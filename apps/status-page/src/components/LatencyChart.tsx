@@ -6,7 +6,6 @@ import {
 	CartesianGrid,
 	Tooltip,
 	ResponsiveContainer,
-	ReferenceLine,
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
 
@@ -19,6 +18,10 @@ interface LatencyData {
 interface LatencyChartProps {
 	data: LatencyData[];
 }
+
+// ⚠️ 这里曾画一条标着「阈值」的 ReferenceLine，值为 `maxLatency > 500 ? 500 : 200` ——
+// 拍脑袋的魔数，背后没有任何 SLO/承诺。一条橙色的"阈值线"会让用户以为存在约定的延迟上限。
+// 已删除；若日后要画，请接真实 SLO 值来源，不要再用魔数。
 
 // 图表网格与坐标轴此前用**两套写死的灰**：浅色 #e5e5e5 / #737373，深色 #404040 / #a3a3a3。
 // 它们既不在设计系统里（所以颜色闸门抓不到——那些是非设计系统色值，不在它的比对表里），
@@ -34,8 +37,6 @@ const chartColors = {
 export default function LatencyChart({ data }: LatencyChartProps) {
 	const { t } = useTranslation();
 	const c = chartColors;
-	const maxLatency = Math.max(...data.map((d) => d.latency), 100);
-	const threshold = maxLatency > 500 ? 500 : 200;
 
 	return (
 		<ResponsiveContainer width="100%" height="100%" minWidth={1}>
@@ -61,17 +62,6 @@ export default function LatencyChart({ data }: LatencyChartProps) {
 						borderRadius: '8px',
 						border: '1px solid ' + c.tooltipBorder,
 						fontSize: '12px',
-					}}
-				/>
-				<ReferenceLine
-					y={threshold}
-					stroke="var(--color-warning)"
-					strokeDasharray="4 4"
-					label={{
-						value: t('service.latencyThreshold'),
-						position: 'right',
-						fontSize: 10,
-						fill: 'var(--color-warning)',
 					}}
 				/>
 				<Line

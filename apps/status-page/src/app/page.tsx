@@ -62,18 +62,24 @@ export default function DashboardPage() {
 		[catalog],
 	);
 
-	// 统计：catalog 派生服务（25）优先；catalog 不可用时回退 overview 汇总（后端 registry 派生，同样 25）。
-	// 历史上用 status.services.length（受 SERVICE_CONFIG 15 限制）导致 15/15 假象。
-	const servicesTotal = services?.length ?? overview?.servicesTotal ?? 0;
-	const servicesHealthy =
-		services?.filter((s) => s.status === 'healthy').length ?? overview?.servicesHealthy ?? 0;
-	// degraded/unhealthy 合称"异常"；unknown（无监控数据）单独报——绝不并入 healthy 凑数（V-01）
-	const servicesDegraded = services
+	// 统计口径（V-01 假绿教训的第二形态）：
+	// 服务清单由 catalog × /ready 派生，**空数组 = 拿不到实时数据，不等于"0 个服务"**。
+	// 历史实现用 `services?.length ?? overview?.servicesTotal ?? 0`：空数组的 length 是 0
+	// （非 nullish）⇒ `??` 兜底永不触发 ⇒ 接口全挂时页面显示「0/0 · 所有服务运行正常」，
+	// 一个假绿。故这里显式以「是否真的有逐服务数据」为界。
+	const hasLiveServices = (services?.length ?? 0) > 0;
+	const servicesTotal = hasLiveServices ? services.length : (overview?.servicesTotal ?? 0);
+	const servicesHealthy = hasLiveServices
+		? services.filter((s) => s.status === 'healthy').length
+		: (overview?.servicesHealthy ?? 0);
+	// degraded/unhealthy 合称"异常"；unknown（无监控数据）单独报——绝不并入 healthy 凑数（V-01）。
+	// 回退到 overview 时无法区分 unknown，故一律记 0：宁可说"暂无数据"，也不报一个假"异常"。
+	const servicesDegraded = hasLiveServices
 		? services.filter((s) => s.status === 'degraded' || s.status === 'unhealthy').length
-		: overview
-			? Math.max((overview.servicesTotal ?? 0) - (overview.servicesHealthy ?? 0), 0)
-			: 0;
-	const servicesUnknown = services?.filter((s) => s.status === 'unknown').length ?? 0;
+		: 0;
+	const servicesUnknown = hasLiveServices
+		? services.filter((s) => s.status === 'unknown').length
+		: 0;
 	const activeIncidents = useMemo(() => {
 		if (overview?.activeIncidents != null) return overview.activeIncidents;
 		return (
@@ -91,7 +97,9 @@ export default function DashboardPage() {
 		[maintenances],
 	);
 
-	const healthUnavailable = !services && !statusLoading;
+	// 拿不到逐服务数据（catalog 挂了）才算"不可用"：空数组是真值，`!services` 永远为 false
+	// ⇒ 原来的写法让下方的"无法获取实时服务状态"警示成了死代码。
+	const healthUnavailable = !hasLiveServices && !statusLoading;
 
 	return (
 		<div className="mx-auto max-w-6xl px-4 py-8">
@@ -113,7 +121,7 @@ export default function DashboardPage() {
 										{t('stat.services')}
 									</p>
 									<p className="mt-1 text-2xl font-bold text-neutral-900">
-										{servicesHealthy}/{servicesTotal}
+										{servicesTotal > 0 ? `${servicesHealthy}/${servicesTotal}` : '—'}
 									</p>
 								</div>
 								{/* 颜色=问题：服务全好时中性，真出现降级/故障才变红（统计卡也不再常亮绿色） */}
@@ -128,11 +136,13 @@ export default function DashboardPage() {
 								</div>
 							</div>
 							<p className="mt-2 text-xs text-muted">
-								{servicesDegraded > 0
-									? t('stat.services.degraded', { n: servicesDegraded })
-									: servicesUnknown > 0
-										? t('stat.services.unknown', { n: servicesUnknown })
-										: t('stat.services.allOk')}
+								{!hasLiveServices
+									? t('stat.services.unavailable')
+									: servicesDegraded > 0
+										? t('stat.services.degraded', { n: servicesDegraded })
+										: servicesUnknown > 0
+											? t('stat.services.unknown', { n: servicesUnknown })
+											: t('stat.services.allOk')}
 							</p>
 						</div>
 
