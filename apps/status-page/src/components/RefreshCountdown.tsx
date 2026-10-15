@@ -80,6 +80,12 @@ export default function RefreshCountdown({ intervalMs = 30000, onRefresh }: Refr
 			style={{ width: RING_SIZE, height: RING_SIZE }}
 			aria-hidden="true"
 		>
+			{/* 配色极性（2026-10-15 深色对比度修复）：深色主题把 neutral 色阶**整体反转**
+			    —— neutral-200 在 dark 下是 #1a2a42(暗)、neutral-700 是 #8fb0cc(亮)。
+			    所以"淡轨道"两种主题下都用 stroke-neutral-200（token 会自动反转），
+			    不可再叠一个中性色的 dark 变体把轨道写成亮色（那会反过来盖过进度弧）。
+			    品牌 primary 色**不参与反转**：深色卡面上 primary-500(#235f84) 仅 2.77:1，
+			    故进度弧必须显式给 dark 变体（primary-400 → 5.49:1）。 */}
 			<svg width={RING_SIZE} height={RING_SIZE} className="-rotate-90">
 				<circle
 					cx={RING_SIZE / 2}
@@ -87,7 +93,7 @@ export default function RefreshCountdown({ intervalMs = 30000, onRefresh }: Refr
 					r={RING_RADIUS}
 					fill="none"
 					strokeWidth={RING_STROKE}
-					className="stroke-neutral-200 dark:stroke-neutral-700"
+					className="stroke-neutral-200"
 				/>
 				<circle
 					cx={RING_SIZE / 2}
@@ -98,10 +104,10 @@ export default function RefreshCountdown({ intervalMs = 30000, onRefresh }: Refr
 					strokeLinecap="round"
 					strokeDasharray={RING_CIRCUMFERENCE}
 					strokeDashoffset={dashOffset}
-					className="stroke-primary-500 transition-[stroke-dashoffset] duration-1000 ease-linear"
+					className="stroke-primary-500 dark:stroke-primary-400 transition-[stroke-dashoffset] duration-1000 ease-linear"
 				/>
 			</svg>
-			<span className="absolute text-[11px] font-semibold tabular-nums text-neutral-600 dark:text-neutral-300">
+			<span className="absolute text-[11px] font-semibold tabular-nums text-neutral-600">
 				{seconds}s
 			</span>
 		</div>

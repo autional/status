@@ -91,7 +91,7 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 							<Link
 								key={item.to}
 								to={item.to}
-								className="text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900"
+								className="text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-700"
 							>
 								{t(item.key)}
 							</Link>
