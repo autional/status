@@ -205,9 +205,12 @@ export default function ServiceTile({ service }: ServiceTileProps) {
 						) : (
 							<StatusIndicator status={service.status} size="sm" showLabel quietHealthy />
 						)}
+						{/* 磁贴正面只有数字、没有标签；在其浮层给同一条目冠名，使"这个数是什么"不再靠猜 ——
+						    与详情页头部同一口径（网关探针往返）。
+						    标签与数值必须同处一行：JSX 会折叠跨行空白，分行会粘成"网关探测延迟13.1ms"。 */}
 						<span className="flex items-center gap-1 text-xs text-muted tabular-nums">
 							<Clock size={11} />
-							{latencyText}
+							{t('service.latency')} {latencyText}
 						</span>
 					</div>
 				</div>

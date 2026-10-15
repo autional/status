@@ -208,6 +208,10 @@ export default function ServiceDetailPage() {
 						<p className="mt-1 text-xl font-semibold">
 							{formatLatency(service.latency) ?? '—'}
 						</p>
+						{/* 口径小字：这个数是"网关 → 上游健康检查往返"的单次读数，
+						    与下方图表的服务端 P95 聚合不是同一口径 —— 不写清楚两者看着像互相矛盾。
+						    用 text-muted text-xs（复用既有行样式），不动本卡片的 opacity-70 标签。 */}
+						<p className="mt-0.5 text-xs text-muted">{t('service.latencyProbeHint')}</p>
 					</div>
 					<div className="rounded-lg bg-neutral-0/60 p-4">
 						<div className="flex items-center gap-2 text-sm opacity-70">
@@ -307,6 +311,9 @@ export default function ServiceDetailPage() {
 						<TrendIcon size={16} className={trendColor} />
 					</div>
 				</div>
+				{/* 口径小字：这里画的是 Prometheus 直方图的 P95 聚合（与头部"网关探测延迟"不同口径），
+				    标出来源与统计量，读者才不会把两处数字读成互相矛盾。 */}
+				<p className="mt-1 text-xs text-muted">{t('service.latencySourceHint', { range })}</p>
 				<div className="mt-4 h-64">
 					{latencyLoading ? (
 						<div className="flex h-full items-center justify-center">
