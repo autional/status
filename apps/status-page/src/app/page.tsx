@@ -149,7 +149,10 @@ export default function DashboardPage() {
 											? t('stat.services.unknown', { n: servicesUnknown })
 											: servicesUnmonitored > 0
 												? t('stat.services.unmonitored', { n: servicesUnmonitored })
-												: t('stat.services.allOk')}
+												: null /* 口径（用户 2026-10-16 裁决）：全健康时**不**显示任何宣告——
+												     只要真实展示 status。旧实现此处显示「所有服务运行正常」，
+												     与顶部横幅的安静模式口径不一致，且接口全挂时也会命中（历史 0/0 假绿）。
+												     异常/未知/未接入仍如实说明（上面的分支）。 */}
 							</p>
 						</div>
 

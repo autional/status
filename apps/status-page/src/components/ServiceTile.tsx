@@ -28,6 +28,14 @@ const TILE_TONE: Record<HealthStatus, string> = {
 		'border-dashed border-neutral-300 bg-neutral-0 hover:border-neutral-400 dark:border-neutral-600 dark:bg-surface/40 dark:hover:border-neutral-500',
 };
 
+/**
+ * 「未接入监控」的磁贴边框：**独立信息蓝虚线**，与舰队条的同类项同色系。
+ * 此前它与「状态未知」共用中性虚线灰（TILE_TONE[unknown]），只能靠图标底盘区分，
+ * 与「未接入监控是独立状态」的口径不一致（T38）。
+ */
+const UNMONITORED_TILE_TONE =
+	'border-dashed border-info-soft bg-neutral-0 hover:border-info dark:border-info-soft/60 dark:bg-surface/40 dark:hover:border-info';
+
 /** 图标底盘：中性底 + 中性图标；异常态才用状态色，让图标本身也成为"出事了"的信号。 */
 const ICON_TONE: Record<HealthStatus, string> = {
 	healthy: 'bg-neutral-100 text-muted',
@@ -147,7 +155,7 @@ export default function ServiceTile({ service }: ServiceTileProps) {
 				aria-label={`${name} — ${statusLabel}`}
 				// 描述也进无障碍树：读屏（含移动端读屏）不必先跳转就能听到"这个服务是干嘛的"
 				aria-description={description}
-				className={`flex min-w-0 items-center gap-2.5 rounded-lg border px-2.5 py-2 transition-colors ${TILE_TONE[service.status]}`}
+				className={`flex min-w-0 items-center gap-2.5 rounded-lg border px-2.5 py-2 transition-colors ${unmonitored ? UNMONITORED_TILE_TONE : TILE_TONE[service.status]}`}
 				onMouseEnter={openPopover}
 				onMouseLeave={closePopover}
 				onFocus={openPopover}

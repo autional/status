@@ -46,7 +46,6 @@
   "stat.services": "Services",
   "stat.incidents": "Active Incidents",
   "stat.maintenance": "Scheduled Maintenance",
-  "stat.services.allOk": "All services operational",
   "stat.services.degraded": "{{n}} services degraded",
   "stat.services.unknown": "{{n}} services status unknown",
   "stat.services.unavailable": "Live service status unavailable",

@@ -219,7 +219,7 @@ export default function ServiceDetailPage() {
 
 				<div className="mt-6 grid gap-4 sm:grid-cols-3">
 					<div className="rounded-lg bg-neutral-0/60 p-4">
-						<div className="flex items-center gap-2 text-sm opacity-70">
+						<div className="flex items-center gap-2 text-sm text-muted">
 							<Clock size={14} />
 							{t('service.latency')}
 						</div>
@@ -228,11 +228,12 @@ export default function ServiceDetailPage() {
 						</p>
 						{/* 口径小字：这个数是"网关 → 上游健康检查往返"的单次读数，
 						    与下方图表的服务端 P95 聚合不是同一口径 —— 不写清楚两者看着像互相矛盾。
-						    用 text-muted text-xs（复用既有行样式），不动本卡片的 opacity-70 标签。 */}
+						    用 text-muted text-xs（复用既有行样式）；卡内三个标签也由 opacity-70 改为
+						    text-muted（T39：浅色下 opacity-70 实测 4.32:1 < AA 4.5:1，与本节同一 token）。 */}
 						<p className="mt-0.5 text-xs text-muted">{t('service.latencyProbeHint')}</p>
 					</div>
 					<div className="rounded-lg bg-neutral-0/60 p-4">
-						<div className="flex items-center gap-2 text-sm opacity-70">
+						<div className="flex items-center gap-2 text-sm text-muted">
 							<Activity size={14} />
 							{/* 本处传的是 range 的**本地化展示取值**（zh「24 小时」/ en「24-hour」），
 							    不是原始取值 `24h` —— 只改这一处；同页 `service.uptimeTitle` /
@@ -246,11 +247,12 @@ export default function ServiceDetailPage() {
 						{/* 口径小字：这个数是 **Prometheus 抓取成功率**（每 5 分钟一个采样点、滚动窗口）的均值，
 						    与徽章（网关瞬时探针）不是同一套测量系统 —— 不写清楚，读者会把"此刻正常"
 						    与"24h 95.82%"读成互相矛盾。只标**口径**、不下结论词（§2.4 Q1 拍板：否）。
-						    用 text-muted text-xs（复用既有行样式），不动本卡片的 opacity-70 标签。 */}
+						    用 text-muted text-xs（复用既有行样式）；卡内三个标签也由 opacity-70 改为
+						    text-muted（T39：浅色下 opacity-70 实测 4.32:1 < AA 4.5:1，与本节同一 token）。 */}
 						<p className="mt-0.5 text-xs text-muted">{t('service.uptimeSourceHint')}</p>
 					</div>
 					<div className="rounded-lg bg-neutral-0/60 p-4">
-						<div className="flex items-center gap-2 text-sm opacity-70">
+						<div className="flex items-center gap-2 text-sm text-muted">
 							<AlertTriangle size={14} />
 							{t('service.incidentCount')}
 						</div>
@@ -269,7 +271,7 @@ export default function ServiceDetailPage() {
 				{/* unknown 的真实原因：探针清单没覆盖它（不是服务坏了）。不写清楚，用户会把
 				    "未知徽章 + 满页绿色图表"读成互相矛盾的两句话。 */}
 				{service.status === 'unknown' && (
-					<p className="mt-4 text-xs opacity-70">{t('service.noProbeHint')}</p>
+					<p className="mt-4 text-xs text-muted">{t('service.noProbeHint')}</p>
 				)}
 			</div>
 

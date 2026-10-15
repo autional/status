@@ -46,7 +46,6 @@
   "stat.services": "服务状态",
   "stat.incidents": "活跃事件",
   "stat.maintenance": "计划维护",
-  "stat.services.allOk": "所有服务运行正常",
   "stat.services.degraded": "{{n}} 个服务异常",
   "stat.services.unknown": "{{n}} 个服务状态未知",
   "stat.services.unavailable": "无法获取实时服务状态",
