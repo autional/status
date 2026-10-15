@@ -245,7 +245,7 @@ export default function SubscribePage() {
 							setMode('subscribe');
 							setResult(null);
 						}}
-						className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+						className={`inline-flex min-h-[var(--a11y-touch-target)] items-center rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
 							mode === 'subscribe'
 								? 'bg-primary-600 text-white'
 								: 'text-neutral-600 hover:text-neutral-900'
@@ -262,7 +262,7 @@ export default function SubscribePage() {
 							setMode('unsubscribe');
 							setResult(null);
 						}}
-						className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+						className={`inline-flex min-h-[var(--a11y-touch-target)] items-center rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
 							mode === 'unsubscribe'
 								? 'bg-primary-600 text-white'
 								: 'text-neutral-600 hover:text-neutral-900'
@@ -279,7 +279,7 @@ export default function SubscribePage() {
 							setMode('preferences');
 							setResult(null);
 						}}
-						className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+						className={`inline-flex min-h-[var(--a11y-touch-target)] items-center rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
 							mode === 'preferences'
 								? 'bg-primary-600 text-white'
 								: 'text-neutral-600 hover:text-neutral-900'
@@ -313,9 +313,13 @@ export default function SubscribePage() {
 								{...emailForm.register('email')}
 								placeholder="your@email.com"
 								prefix={<Mail size={16} />}
+								aria-invalid={!!emailForm.formState.errors.email}
+								aria-describedby={emailForm.formState.errors.email ? 'email-error' : undefined}
 							/>
 							{emailForm.formState.errors.email && (
-								<p className="mt-1 text-xs text-danger-text">{t('subscribe.invalidEmail')}</p>
+								<p id="email-error" role="alert" className="mt-1 text-xs text-danger-text">
+									{t('subscribe.invalidEmail')}
+								</p>
 							)}
 						</div>
 
@@ -352,9 +356,13 @@ export default function SubscribePage() {
 								{...tokenForm.register('token')}
 								placeholder={t('subscribe.tokenPlaceholder')}
 								prefix={<XCircle size={16} />}
+								aria-invalid={!!tokenForm.formState.errors.token}
+								aria-describedby={tokenForm.formState.errors.token ? 'token-error' : undefined}
 							/>
 							{tokenForm.formState.errors.token && (
-								<p className="mt-1 text-xs text-danger-text">{t('subscribe.tokenRequired')}</p>
+								<p id="token-error" role="alert" className="mt-1 text-xs text-danger-text">
+									{t('subscribe.tokenRequired')}
+								</p>
 							)}
 							<p className="mt-1.5 text-xs text-muted">
 								{t('subscribe.tokenHint')}
@@ -408,13 +416,17 @@ export default function SubscribePage() {
 											setPrefsLoaded(false);
 										}}
 										placeholder={t('subscribe.preferences.tokenPlaceholder')}
+										aria-invalid={!!prefForm.formState.errors.prefToken}
+										aria-describedby={
+											prefForm.formState.errors.prefToken ? 'pref-token-error' : undefined
+										}
 									/>
 								</div>
 								<button
 									type="button"
 									onClick={prefForm.handleSubmit(() => handleLoadPreferences())}
 									disabled={prefsLoading || !(watchedPrefToken ?? '').trim()}
-									className="flex items-center gap-1.5 rounded-md bg-neutral-100 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-200 transition-colors disabled:opacity-50"
+									className="flex min-h-[var(--a11y-touch-target)] items-center gap-1.5 rounded-md bg-neutral-100 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-200 transition-colors disabled:opacity-50"
 								>
 									{prefsLoading ? (
 										<Loader2 size={14} className="animate-spin" />
@@ -425,7 +437,7 @@ export default function SubscribePage() {
 								</button>
 							</div>
 							{prefForm.formState.errors.prefToken && (
-								<p className="mt-1 text-xs text-danger-text">
+								<p id="pref-token-error" role="alert" className="mt-1 text-xs text-danger-text">
 									{t('subscribe.preferences.tokenRequired')}
 								</p>
 							)}
@@ -498,10 +510,14 @@ export default function SubscribePage() {
 
 								{/* Digest Frequency */}
 								<div className="pt-2 border-t border-neutral-200">
-									<label className="mb-2 block text-sm font-medium text-neutral-800">
+									<label
+										htmlFor="digest-frequency"
+										className="mb-2 block text-sm font-medium text-neutral-800"
+									>
 										{t('subscribe.preferences.digestFrequency')}
 									</label>
 									<select
+										id="digest-frequency"
 										value={prefs.digestFrequency}
 										onChange={(e) => handleDigestChange(e.target.value)}
 										className="w-full rounded-md border border-neutral-300 bg-neutral-0 py-2 px-3 text-sm text-neutral-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
