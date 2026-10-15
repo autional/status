@@ -109,4 +109,55 @@ describe('ServiceTile', () => {
 		fireEvent.blur(screen.getByRole('link'));
 		expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
 	});
+
+	// ── 触屏可达（评审 #9：描述只在 hover/focus 浮层里，触屏点按直接跳转 ⇒ 永远读不到） ──
+	it('描述进无障碍树（aria-description）——读屏不必先跳转就能听到服务说明', () => {
+		renderTile();
+		expect(screen.getByRole('link')).toHaveAttribute(
+			'aria-description',
+			'用户注册、登录、密码管理',
+		);
+	});
+
+	it('触屏首次点按展开描述且不跳转，再次点按才进详情', () => {
+		renderTile();
+		const link = screen.getByRole('link');
+
+		fireEvent.pointerDown(link, { pointerType: 'touch' });
+		// click 返回 false = preventDefault 已生效（本次未跳转）
+		expect(fireEvent.click(link)).toBe(false);
+		expect(screen.getByRole('tooltip')).toHaveTextContent('用户注册、登录、密码管理');
+
+		// 触屏点按后浏览器会补发兼容鼠标事件；钉住的浮层不得被 mouseleave/blur 抢关
+		fireEvent.mouseLeave(link);
+		fireEvent.blur(link);
+		expect(screen.getByRole('tooltip')).toBeInTheDocument();
+
+		// 再点一次 → 不再拦截，正常进详情
+		// （去掉 href 只为免掉 jsdom 对未拦截点击的 "Not implemented: navigation" 噪声，
+		//   不影响 preventDefault 判定的语义）
+		link.removeAttribute('href');
+		fireEvent.pointerDown(link, { pointerType: 'touch' });
+		expect(fireEvent.click(link)).toBe(true);
+	});
+
+	it('触屏点按磁贴以外的位置收起浮层', () => {
+		renderTile();
+		const link = screen.getByRole('link');
+		fireEvent.pointerDown(link, { pointerType: 'touch' });
+		fireEvent.click(link);
+		expect(screen.getByRole('tooltip')).toBeInTheDocument();
+
+		fireEvent.pointerDown(document.body, { pointerType: 'touch' });
+		expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+	});
+
+	it('鼠标点按不受触屏逻辑影响（仍直接跳转，不拦截）', () => {
+		renderTile();
+		const link = screen.getByRole('link');
+		link.removeAttribute('href'); // 同上：免 jsdom 导航噪声
+		fireEvent.pointerDown(link, { pointerType: 'mouse' });
+		expect(fireEvent.click(link)).toBe(true);
+		expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+	});
 });

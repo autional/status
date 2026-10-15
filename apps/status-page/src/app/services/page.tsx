@@ -240,10 +240,11 @@ export default function ServiceDetailPage() {
 					{t('service.rangeLabel')}
 				</span>
 				{RANGE_OPTIONS.map((opt) => (
+					// 触区基线：时间范围按钮原为 24–26px 高（同上）。
 					<button
 						key={opt.value}
 						onClick={() => setRange(opt.value)}
-						className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+						className={`inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center rounded-md px-3 text-xs font-medium transition-colors ${
 							range === opt.value
 								? 'bg-primary-600 text-white'
 								: 'bg-neutral-0 text-neutral-600 border border-neutral-200 hover:bg-neutral-50'

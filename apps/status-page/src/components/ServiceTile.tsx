@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { Link } from 'react-router';
 import { Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -60,6 +60,12 @@ export default function ServiceTile({ service }: ServiceTileProps) {
 	const { t } = useTranslation();
 	const anchorRef = useRef<HTMLAnchorElement>(null);
 	const [popover, setPopover] = useState<PopoverPosition | null>(null);
+	// 触屏（无 hover）拿不到 hover/focus 才出现的描述浮层 —— 移动端用户永远读不到
+	// "这个服务是干嘛的"。修法不新增按钮（<a> 内不允许嵌 <button>）、不改文案：
+	// 记录最近一次指针类型，触屏上**首次点按展开描述、再次点按才进详情**（评审建议的「点按展开」）。
+	// 鼠标/键盘行为逐字不变（mouse 指针 + focus 仍与原来一致）。
+	const pointerKind = useRef<'mouse' | 'touch'>('mouse');
+	const pinned = useRef(false);
 
 	const Icon = serviceIcon(service.id);
 	const name = t('service.name.' + service.id);
@@ -101,7 +107,37 @@ export default function ServiceTile({ service }: ServiceTileProps) {
 		});
 	};
 
-	const closePopover = () => setPopover(null);
+	const closePopover = () => {
+		// 触屏钉住的浮层不因 mouseleave/blur 关闭：触屏点按后会补发一套兼容鼠标事件
+		// （mouseenter→mouseleave），否则刚展开就被抢关。由「再次点按本磁贴」或
+		// 「点按页面其它位置」（下方 document 捕获监听）关闭。
+		if (pinned.current) return;
+		setPopover(null);
+	};
+
+	const handlePointerDown = (e: ReactPointerEvent<HTMLAnchorElement>) => {
+		pointerKind.current = e.pointerType === 'mouse' ? 'mouse' : 'touch';
+	};
+
+	const handleClick = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+		if (pointerKind.current === 'touch' && !pinned.current) {
+			e.preventDefault();
+			openPopover();
+			pinned.current = true;
+		}
+	};
+
+	// 触屏浮层的解除：点按磁贴以外的任何位置即收起（捕获阶段，先于目标自身处理）
+	useEffect(() => {
+		const onDocPointerDown = (e: PointerEvent) => {
+			if (!pinned.current) return;
+			if (anchorRef.current?.contains(e.target as Node)) return;
+			pinned.current = false;
+			setPopover(null);
+		};
+		document.addEventListener('pointerdown', onDocPointerDown, true);
+		return () => document.removeEventListener('pointerdown', onDocPointerDown, true);
+	}, []);
 
 	return (
 		<>
@@ -109,11 +145,15 @@ export default function ServiceTile({ service }: ServiceTileProps) {
 				ref={anchorRef}
 				to={`/services/${service.id}`}
 				aria-label={`${name} — ${statusLabel}`}
+				// 描述也进无障碍树：读屏（含移动端读屏）不必先跳转就能听到"这个服务是干嘛的"
+				aria-description={description}
 				className={`flex min-w-0 items-center gap-2.5 rounded-lg border px-2.5 py-2 transition-colors ${TILE_TONE[service.status]}`}
 				onMouseEnter={openPopover}
 				onMouseLeave={closePopover}
 				onFocus={openPopover}
 				onBlur={closePopover}
+				onPointerDown={handlePointerDown}
+				onClick={handleClick}
 			>
 				<span
 					className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${

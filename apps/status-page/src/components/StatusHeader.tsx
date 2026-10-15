@@ -112,9 +112,12 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 						<LanguageSwitcher labelEn={t('lang.en')} labelZh={t('lang.zh')} />
 					</div>
 
-					{/* Mobile menu button */}
+					{/* Mobile menu button —— 移动端**唯一**导航入口，命中区必须够大。
+					    图标视觉尺寸保持 22（不改设计），只把可点盒撑到设计系统的 a11y 触区令牌
+					    （--a11y-touch-target: 44px，来自 tokens.css :root）。导航行高由
+					    --layout-header-height(64px) 固定，故 44px 不会撑高 sticky 导航。 */}
 					<button
-						className="md:hidden text-neutral-600 hover:text-neutral-900"
+						className="md:hidden inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center rounded-md text-neutral-600 hover:text-neutral-900"
 						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
 						aria-label={mobileMenuOpen ? t('nav.closeMenu') : t('nav.openMenu')}
 						aria-expanded={mobileMenuOpen}

@@ -70,10 +70,12 @@ export default function IncidentsPage() {
 					<>
 						<div className="flex flex-wrap gap-2">
 							{severityFilters.map((f) => (
+								// 触区基线：筛选片原为 24–26px 高，手指（≈44px 触区）难以命中；
+								// 用 min-h/min-w 引用设计系统 a11y 触区令牌，宽度不足 44 的短标签也补齐。
 								<button
 									key={f.value}
 									onClick={() => setSeverityFilter(f.value)}
-									className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+									className={`inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center rounded-full px-3 text-xs font-medium transition-colors ${
 										severityFilter === f.value
 											? 'bg-primary-600 text-white'
 											: 'bg-neutral-0 text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
@@ -88,7 +90,7 @@ export default function IncidentsPage() {
 								<button
 									key={f.value}
 									onClick={() => setStatusFilter(f.value)}
-									className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+									className={`inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center rounded-full px-3 text-xs font-medium transition-colors ${
 										statusFilter === f.value
 											? 'bg-primary-600 text-white'
 											: 'bg-neutral-0 text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
