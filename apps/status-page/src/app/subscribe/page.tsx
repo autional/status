@@ -422,10 +422,13 @@ export default function SubscribePage() {
 										}
 									/>
 								</div>
+								{/* 触发性（T46 补修）：此前 `disabled = !token.trim()`，而"空值"正是 zod.min(1) 报错的
+								    唯一条件 ⇒ 错误分支**永远走不到**、"为什么必填"对读屏用户是死路（线上复测实证）。
+								    改为只在加载中禁用；点击空值由 handleSubmit 触发校验并显示 role="alert" 错误。 */}
 								<button
 									type="button"
 									onClick={prefForm.handleSubmit(() => handleLoadPreferences())}
-									disabled={prefsLoading || !(watchedPrefToken ?? '').trim()}
+									disabled={prefsLoading}
 									className="flex min-h-[var(--a11y-touch-target)] items-center gap-1.5 rounded-md bg-neutral-100 px-4 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-200 transition-colors disabled:opacity-50"
 								>
 									{prefsLoading ? (
