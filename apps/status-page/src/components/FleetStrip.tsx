@@ -55,7 +55,7 @@ export default function FleetStrip({ services }: FleetStripProps) {
 						to={`/services/${service.id}`}
 						title={`${name} — ${statusLabel}`}
 						aria-label={`${name} — ${statusLabel}`}
-						className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-colors ${
+						className={`flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center rounded-lg border transition-colors ${
 							unmonitored ? UNMONITORED_STRIP_TONE : STRIP_TONE[service.status]
 						}`}
 					>

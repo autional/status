@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link, NavLink } from 'react-router';
 import { Activity, Bell, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { LanguageSwitcher, ThemeToggle } from '@autional/ui';
@@ -88,13 +88,20 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 					{/* Desktop Nav */}
 					<div className="hidden items-center gap-6 md:flex">
 						{navItems.map((item) => (
-							<Link
+							<NavLink
 								key={item.to}
 								to={item.to}
-								className="text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-700"
+								end={item.to === '/'}
+								className={({ isActive }) =>
+									`text-sm font-medium transition-colors ${
+										isActive
+											? 'text-primary-700 dark:text-primary-400'
+											: 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-700'
+									}`
+								}
 							>
 								{t(item.key)}
-							</Link>
+							</NavLink>
 						))}
 						<Link
 							to="/subscribe"
@@ -131,19 +138,26 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 					<div className="border-t border-neutral-100 bg-neutral-0 px-4 py-3 md:hidden">
 						<div className="flex flex-col gap-3">
 							{navItems.map((item) => (
-								<Link
+								<NavLink
 									key={item.to}
 									to={item.to}
+									end={item.to === '/'}
 									onClick={() => setMobileMenuOpen(false)}
-									className="text-sm font-medium text-neutral-600 hover:text-neutral-900"
+									className={({ isActive }) =>
+										`flex min-h-[var(--a11y-touch-target)] items-center text-sm font-medium ${
+											isActive
+												? 'text-primary-700 dark:text-primary-400'
+												: 'text-neutral-600 hover:text-neutral-900'
+										}`
+									}
 								>
 									{t(item.key)}
-								</Link>
+								</NavLink>
 							))}
 							<Link
 								to="/subscribe"
 								onClick={() => setMobileMenuOpen(false)}
-								className="flex w-fit items-center gap-1.5 rounded-md bg-primary-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-700"
+								className="flex min-h-[var(--a11y-touch-target)] w-fit items-center gap-1.5 rounded-md bg-primary-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-700"
 							>
 								<Bell size={14} />
 								{t('subscribe')}

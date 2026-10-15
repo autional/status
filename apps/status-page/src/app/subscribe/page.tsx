@@ -322,7 +322,7 @@ export default function SubscribePage() {
 						<button
 							type="submit"
 							disabled={loading}
-							className="flex w-full items-center justify-center gap-2 rounded-md bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed"
+							className="flex min-h-[var(--a11y-touch-target)] w-full items-center justify-center gap-2 rounded-md bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed"
 						>
 							{loading ? (
 								<>
@@ -364,7 +364,7 @@ export default function SubscribePage() {
 						<button
 							type="submit"
 							disabled={loading}
-							className="flex w-full items-center justify-center gap-2 rounded-md bg-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-0 transition-colors hover:bg-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed"
+							className="flex min-h-[var(--a11y-touch-target)] w-full items-center justify-center gap-2 rounded-md bg-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-0 transition-colors hover:bg-neutral-800 disabled:opacity-60 disabled:cursor-not-allowed"
 						>
 							{loading ? (
 								<>
@@ -522,7 +522,7 @@ export default function SubscribePage() {
 								type="button"
 								onClick={handleSavePreferences}
 								disabled={prefsLoading}
-								className="flex w-full items-center justify-center gap-2 rounded-md bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed"
+								className="flex min-h-[var(--a11y-touch-target)] w-full items-center justify-center gap-2 rounded-md bg-primary-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed"
 							>
 								{prefsLoading && prefsLoaded ? (
 									<>
