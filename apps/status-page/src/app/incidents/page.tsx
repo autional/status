@@ -1,6 +1,7 @@
 import { useIncidentList } from '@/hooks/use-system-status';
 import IncidentTimeline from '@/components/IncidentTimeline';
-import { AlertTriangle, Filter } from 'lucide-react';
+import { IncidentEmptyCard, IncidentErrorCard } from '@/components/IncidentStateCard';
+import { Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState, useMemo } from 'react';
 import type { IncidentSeverity, IncidentStatus } from '@/types';
@@ -59,30 +60,7 @@ export default function IncidentsPage() {
 
 	// 接口故障 ≠ 没有事件：取不到数据必须显式说「取不到」，绝不能渲染成绿色的
 	// 「没有符合条件的事件」——那会把「数据源挂了」读成「一切正常」（假绿）。
-	const errorCard = (
-		<div
-			role="status"
-			className="rounded-lg border border-warning-soft bg-neutral-0 p-12 text-center"
-		>
-			<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft">
-				<AlertTriangle size={20} className="text-warning-text" />
-			</div>
-			<h3 className="text-sm font-medium text-neutral-900">{t('incidents.error')}</h3>
-			<p className="mt-1 text-xs text-muted">{t('incidents.errorHint')}</p>
-		</div>
-	);
-
-	// 两种「空」共用同一张卡片骨架，只是标题/副文案/动作不同（绿=真的没事，故两态都保留既有视觉）。
-	const emptyCard = (title: React.ReactNode, hint: React.ReactNode, action?: React.ReactNode) => (
-		<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-12 text-center">
-			<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft/30">
-				<AlertTriangle size={20} className="text-success-text" />
-			</div>
-			<h3 className="text-sm font-medium text-neutral-900">{title}</h3>
-			<p className="mt-1 text-xs text-muted">{hint}</p>
-			{action}
-		</div>
-	);
+	// 错误态/空态卡片已抽到 `components/IncidentStateCard.tsx`（与详情页「关联事件」共用同一份）。
 
 	return (
 		<div className="mx-auto max-w-4xl px-4 py-8">
@@ -158,29 +136,31 @@ export default function IncidentsPage() {
 					))}
 				</div>
 			) : isError ? (
-				errorCard
+				<IncidentErrorCard />
 			) : incidents.length > 0 ? (
 				<IncidentTimeline incidents={incidents} linkToDetail />
 			) : datasetTotal > 0 ? (
 				// 「筛掉了」：数据集里确实有 {datasetTotal} 条事件记录，只是当前筛选没有命中。
 				// 旧实现只在前端过滤首页 20 条，匹配项落在第 21 条之后时会错报"没有符合条件的事件"。
-				emptyCard(
-					t('incidents.empty'),
-					t('incidents.filteredEmptyHint', { total: datasetTotal }),
-					<button
-						onClick={clearFilters}
-						className="mt-4 inline-flex min-h-[var(--a11y-touch-target)] items-center justify-center rounded-full border border-neutral-200 bg-neutral-0 px-4 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-50"
-					>
-						{t('filter.clear')}
-					</button>,
-				)
+				<IncidentEmptyCard
+					title={t('incidents.empty')}
+					hint={t('incidents.filteredEmptyHint', { total: datasetTotal })}
+					action={
+						<button
+							onClick={clearFilters}
+							className="mt-4 inline-flex min-h-[var(--a11y-touch-target)] items-center justify-center rounded-full border border-neutral-200 bg-neutral-0 px-4 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-50"
+						>
+							{t('filter.clear')}
+						</button>
+					}
+				/>
 			) : datasetError ? (
 				// 列表拿到了空数组，但"数据集总数"这条查询失败 ⇒ 无法确认是"真的没有"还是"被筛掉"。
 				// 宁可说「取不到」，也不要说「尚无事件记录」（假绿教训，§4.1(c)）。
-				errorCard
+				<IncidentErrorCard />
 			) : (
 				// 「真的没有事件」：接口可用 + 无筛选 + total = 0。
-				emptyCard(t('incidents.noneYet'), t('incidents.noneYetHint'))
+				<IncidentEmptyCard title={t('incidents.noneYet')} hint={t('incidents.noneYetHint')} />
 			)}
 		</div>
 	);

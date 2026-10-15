@@ -32,7 +32,7 @@ const VERDICT_MARKS = ['\u8fbe\u6807', '\u672a\u8fbe\u6807', '\u4e0d\u8fbe\u6807
 const TOUCHED: Array<{ key: string; zh: string; en: string; old?: string }> = [
 	{
 		key: 'service.uptime',
-		zh: '{{range}} 探针可用率（滚动）',
+		zh: '{{range}}探针可用率（滚动）',
 		en: '{{range}} Probe Uptime (rolling)',
 		old: '{{range}} 平均可用率',
 	},
@@ -90,7 +90,12 @@ describe('可用率口径文案（zh / en 双 bundle）', () => {
 describe('渲染与"降级为图表分段色"', () => {
 	it('F. 两个键都确实被详情页渲染出来（不是死文案）', () => {
 		const detail = readSource('app/services/page.tsx');
-		expect(detail).toContain("t('service.uptime', { range })");
+		// 标题这一处的 {{range}} 传的是 **range 的本地化展示取值**（zh「24 小时」/ en「24-hour」），
+		// 不是原始取值 `24h`；键值本身仍保留 {{range}} 占位（见 E），且其它 {{range}} 调用点
+		// 仍传原始 `range`（T33 ① 只改这一处）。
+		expect(detail).toContain(
+			"t('service.uptime', { range: t('service.uptimeRange.' + range) })",
+		);
 		expect(detail).toContain("t('service.uptimeSourceHint')");
 	});
 

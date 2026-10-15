@@ -19,7 +19,7 @@ import ServiceDetailPage from '../services/page';
 
 vi.mock('@/hooks/use-system-status', () => ({
 	useServiceStatuses: vi.fn(),
-	useIncidents: vi.fn(),
+	useIncidentList: vi.fn(),
 	useLatencyMetrics: vi.fn(),
 	useUptimeMetrics: vi.fn(),
 }));
@@ -38,7 +38,7 @@ vi.mock('@/components/IncidentTimeline', () => ({
 
 import {
 	useServiceStatuses,
-	useIncidents,
+	useIncidentList,
 	useLatencyMetrics,
 	useUptimeMetrics,
 } from '@/hooks/use-system-status';
@@ -57,7 +57,11 @@ const POINTS = [
 
 function mockLoaded() {
 	vi.mocked(useServiceStatuses).mockReturnValue({ data: [SERVICE], isLoading: false } as any);
-	vi.mocked(useIncidents).mockReturnValue({ data: [], isLoading: false } as any);
+	vi.mocked(useIncidentList).mockReturnValue({
+		data: { items: [], total: 0 },
+		isLoading: false,
+		isError: false,
+	} as any);
 	vi.mocked(useLatencyMetrics).mockReturnValue({
 		data: { available: true, points: POINTS },
 		isLoading: false,

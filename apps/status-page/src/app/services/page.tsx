@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router';
 import {
 	useServiceStatuses,
-	useIncidents,
+	useIncidentList,
 	useLatencyMetrics,
 	useUptimeMetrics,
 } from '@/hooks/use-system-status';
@@ -11,6 +11,7 @@ import { formatLatency } from '@/lib/format';
 import { UptimeChart } from '@/components/UptimeChart';
 import LatencyChart from '@/components/LatencyChart';
 import IncidentTimeline from '@/components/IncidentTimeline';
+import { IncidentEmptyCard, IncidentErrorCard } from '@/components/IncidentStateCard';
 import {
 	ArrowLeft,
 	Server,
@@ -35,8 +36,23 @@ export default function ServiceDetailPage() {
 	const { t } = useTranslation();
 	const { serviceId } = useParams<{ serviceId: string }>();
 	const { data: services } = useServiceStatuses();
-	const { data: allIncidents } = useIncidents();
 	const [range, setRange] = useState('24h');
+
+	// 「关联事件」数据源与 `/incidents` 列表页同口径（§4.1(b)/(c) 同型缺陷修复）：
+	//   ① 列表 = 服务端按 `service` 过滤（不再对首页 20 条做 affectedServices 前端过滤 ——
+	//      匹配项落在第 21 条之后会被漏掉）；`service` 参数生成 SDK 已支持，**零契约变更**。
+	//   ② 另一条无筛选同源查询 = 数据集真实总数，用来把「本服务没有关联事件」与
+	//      「数据集本身就没有事件」分开（三分诊）；无筛选时与 ①同 key ⇒ 只发一次请求。
+	const {
+		data: incidentList,
+		isLoading: incidentsLoading,
+		isError: incidentsError,
+	} = useIncidentList({ service: serviceId });
+	const { data: incidentDataset, isError: incidentDatasetError, isLoading: incidentDatasetLoading } =
+		useIncidentList();
+
+	const incidentItems = incidentList?.items;
+	const datasetTotal = incidentDataset?.total ?? 0;
 
 	const { data: latencyResult, isLoading: latencyLoading } = useLatencyMetrics(
 		serviceId || '',
@@ -53,10 +69,9 @@ export default function ServiceDetailPage() {
 		return services?.find((s) => s.id === serviceId);
 	}, [services, serviceId]);
 
-	const incidents = useMemo(() => {
-		if (!allIncidents || !serviceId) return [];
-		return allIncidents.filter((inc) => (inc.affectedServices || []).includes(serviceId));
-	}, [allIncidents, serviceId]);
+	// 服务端已按 `service` 过滤（见上方 ①），此处不再做前端过滤 —— 也就不会再漏掉
+	// 落在第 21 条之后的关联事件。
+	const incidents = incidentItems ?? [];
 
 	// Transform Prometheus uptime data for chart
 	const uptimeChartData = useMemo(() => {
@@ -219,7 +234,11 @@ export default function ServiceDetailPage() {
 					<div className="rounded-lg bg-neutral-0/60 p-4">
 						<div className="flex items-center gap-2 text-sm opacity-70">
 							<Activity size={14} />
-							{t('service.uptime', { range })}
+							{/* 本处传的是 range 的**本地化展示取值**（zh「24 小时」/ en「24-hour」），
+							    不是原始取值 `24h` —— 只改这一处；同页 `service.uptimeTitle` /
+							    `service.latencyTitle` / `service.latencySourceHint` 仍传原始 `range`
+							    （全仓 `{{range}}` 约定不变）。en 的 `-hour/-day` 连字符写法待产品确认。 */}
+							{t('service.uptime', { range: t('service.uptimeRange.' + range) })}
 						</div>
 						<p className="mt-1 text-xl font-semibold">
 							{avgUptime !== null ? `${avgUptime}%` : uptimeLoading ? t('service.loading') : '—'}
@@ -235,7 +254,15 @@ export default function ServiceDetailPage() {
 							<AlertTriangle size={14} />
 							{t('service.incidentCount')}
 						</div>
-						<p className="mt-1 text-xl font-semibold">{incidents.length}</p>
+						<p className="mt-1 text-xl font-semibold">
+							{/* 与下方区块同口径：取不到数据时不得显示 0（把"取不到"读成"没有事件"，
+							    且会与区块的「事件数据暂时不可用」自相矛盾）。 */}
+							{incidentsError
+								? '—'
+								: incidentsLoading
+									? t('service.loading')
+									: incidents.length}
+						</p>
 					</div>
 				</div>
 
@@ -347,15 +374,38 @@ export default function ServiceDetailPage() {
 				</div>
 			</div>
 
-			{/* Related Incidents */}
-			{incidents.length > 0 && (
-				<div className="mt-8">
-					<h2 className="mb-4 text-lg font-bold text-neutral-900">
-						{t('service.relatedIncidents')}
-					</h2>
+			{/* Related Incidents —— 三分诊（数据集空 / 筛选后空 / 取数失败），与 `/incidents` 列表页同口径。
+			    此前是 `incidents.length > 0 &&` 才渲染 ⇒ 接口挂掉时整块静默消失，
+			    读者会把「取不到」读成「没事」（§4.1(c) 假绿同型缺陷）。 */}
+			<div className="mt-8">
+				<h2 className="mb-4 text-lg font-bold text-neutral-900">
+					{t('service.relatedIncidents')}
+				</h2>
+				{incidentsLoading ? (
+					<div className="h-24 animate-pulse rounded-lg bg-neutral-100" />
+				) : incidentsError ? (
+					// (c) 取数失败：显式说「取不到」，绝不静默隐藏（复用列表页同一张错误卡）。
+					<IncidentErrorCard />
+				) : incidents.length > 0 ? (
 					<IncidentTimeline incidents={incidents} linkToDetail />
-				</div>
-			)}
+				) : incidentDatasetLoading ? (
+					// 本服务 0 条、但「数据集总数」仍在途 ⇒ 此刻还分不清 (a) 与 (b)，
+					// 先给骨架；否则会把"还不知道"瞬态渲染成「尚无事件记录」（假空）。
+					<div className="h-24 animate-pulse rounded-lg bg-neutral-100" />
+				) : datasetTotal > 0 ? (
+					// (b) 筛选后为空：数据集确有 {datasetTotal} 条事件，只是没有一条影响到本服务。
+					<IncidentEmptyCard
+						title={t('incidents.empty')}
+						hint={t('incidents.filteredEmptyHint', { total: datasetTotal })}
+					/>
+				) : incidentDatasetError ? (
+					// 本服务 0 条、而「数据集总数」查询失败 ⇒ 不敢断言"压根没有事件"（保守分支，同列表页）。
+					<IncidentErrorCard />
+				) : (
+					// (a) 数据集为空：接口可用 + 无筛选 + total = 0 ⇒ 真的没有事件。
+					<IncidentEmptyCard title={t('incidents.noneYet')} hint={t('incidents.noneYetHint')} />
+				)}
+			</div>
 		</div>
 	);
 }

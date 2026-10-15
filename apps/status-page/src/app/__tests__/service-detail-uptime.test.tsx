@@ -21,7 +21,7 @@ const VERDICT_MARKS = ['\u8fbe\u6807', '\u672a\u8fbe\u6807', '\u4e0d\u8fbe\u6807
 
 vi.mock('@/hooks/use-system-status', () => ({
 	useServiceStatuses: vi.fn(),
-	useIncidents: vi.fn(),
+	useIncidentList: vi.fn(),
 	useLatencyMetrics: vi.fn(),
 	useUptimeMetrics: vi.fn(),
 }));
@@ -40,7 +40,7 @@ vi.mock('@/components/IncidentTimeline', () => ({
 
 import {
 	useServiceStatuses,
-	useIncidents,
+	useIncidentList,
 	useLatencyMetrics,
 	useUptimeMetrics,
 } from '@/hooks/use-system-status';
@@ -60,7 +60,11 @@ const POINTS = [
 
 function mockLoaded() {
 	vi.mocked(useServiceStatuses).mockReturnValue({ data: [SERVICE], isLoading: false } as any);
-	vi.mocked(useIncidents).mockReturnValue({ data: [], isLoading: false } as any);
+	vi.mocked(useIncidentList).mockReturnValue({
+		data: { items: [], total: 0 },
+		isLoading: false,
+		isError: false,
+	} as any);
 	vi.mocked(useLatencyMetrics).mockReturnValue({
 		data: { available: true, points: [{ timestamp: '2026-10-15T00:00:00Z', value: 0.0131 }] },
 		isLoading: false,
@@ -88,10 +92,12 @@ beforeEach(async () => {
 });
 
 describe('服务详情页 · 可用率口径渲染', () => {
-	it('KPI 标题为「24h 探针可用率（滚动）」，旧标题「24h 平均可用率」不再出现', () => {
+	it('KPI 标题为「24 小时探针可用率（滚动）」（本地化取值，不是原始 24h），旧标题不再出现', () => {
 		renderDetail();
-		// {{range}} 的插值值是 range 的**原始取值**（24h/7d…，与 service.latencySourceHint 同一约定）。
-		expect(screen.getByText('24h 探针可用率（滚动）')).toBeInTheDocument();
+		// {{range}} 的插值值**只在这一处**是 range 的本地化展示取值（24h → 「24 小时」）；
+		// 其它 {{range}} 用法仍传原始取值（见 lib/__tests__/uptime-range-copy.test.ts）。
+		expect(screen.getByText('24 小时探针可用率（滚动）')).toBeInTheDocument();
+		expect(screen.queryByText('24h 探针可用率（滚动）')).toBeNull();
 		expect(screen.queryByText('24h 平均可用率')).toBeNull();
 	});
 
@@ -104,8 +110,8 @@ describe('服务详情页 · 可用率口径渲染', () => {
 		renderDetail();
 		expect(screen.queryByText(/\{\{range\}\}/)).not.toBeInTheDocument();
 		fireEvent.click(screen.getByText('7天'));
-		expect(screen.getByText('7d 探针可用率（滚动）')).toBeInTheDocument();
-		expect(screen.queryByText('24h 探针可用率（滚动）')).toBeNull();
+		expect(screen.getByText('7 天探针可用率（滚动）')).toBeInTheDocument();
+		expect(screen.queryByText('24 小时探针可用率（滚动）')).toBeNull();
 	});
 
 	it('页面上不出现结论词（Q1 = 否）', () => {
@@ -114,5 +120,24 @@ describe('服务详情页 · 可用率口径渲染', () => {
 		for (const word of VERDICT_MARKS) {
 			expect(body).not.toContain(word);
 		}
+	});
+});
+
+describe('服务详情页 · 可用率口径渲染（en）', () => {
+	beforeEach(async () => {
+		await i18n.changeLanguage('en-US');
+	});
+
+	it('en 渲染为「24-hour Probe Uptime (rolling)」（该 en 用词待产品确认）', () => {
+		renderDetail();
+		expect(screen.getByText('24-hour Probe Uptime (rolling)')).toBeInTheDocument();
+		expect(screen.queryByText('24h Probe Uptime (rolling)')).toBeNull();
+	});
+
+	it('en 下随选择器变化（7d → 7-day）', () => {
+		renderDetail();
+		fireEvent.click(screen.getByText('7 Days'));
+		expect(screen.getByText('7-day Probe Uptime (rolling)')).toBeInTheDocument();
+		expect(screen.queryByText('24-hour Probe Uptime (rolling)')).toBeNull();
 	});
 });
