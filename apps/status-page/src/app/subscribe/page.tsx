@@ -449,9 +449,11 @@ export default function SubscribePage() {
 							</p>
 						</div>
 
-						{/* Not verified warning */}
+						{/* Not verified warning —— 用**语义令牌**（warning-soft/warning-text）而非裸 amber 调色板：
+						    T41 实测该横幅对比度 3.20:1（< 4.5:1）；令牌组为设计系统给的成对色，
+						    light #fef4e1/#966003 ≈ 5.5:1、dark #503302/#faad14 ≈ 7.0:1（深浅同 class）。 */}
 						{prefsLoaded && prefs && !prefs.verified && (
-							<div className="flex items-center gap-2 rounded-md bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+							<div className="flex items-center gap-2 rounded-md border border-warning-soft bg-warning-soft p-3 text-sm text-warning-text">
 								<AlertCircle size={16} />
 								{t('subscribe.preferences.notVerified')}
 							</div>
