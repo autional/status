@@ -35,7 +35,7 @@ export default function DashboardPage() {
 		isLoading: statusLoading,
 		refetch: refetchStatus,
 	} = useServiceStatuses();
-	const { data: incidents } = useIncidents();
+	const { data: incidents, isError: incidentsError } = useIncidents();
 	const { data: overview } = useOverview();
 	const { data: maintenances } = useMaintenances();
 	const { data: catalog, isLoading: catalogLoading } = useServiceCatalog();
@@ -134,7 +134,7 @@ export default function DashboardPage() {
 									className={`flex h-10 w-10 items-center justify-center rounded-md ${
 										servicesDegraded > 0
 											? 'bg-danger-soft text-danger-text dark:bg-danger-soft/30 dark:text-danger-text'
-											: 'bg-neutral-100 text-muted dark:bg-surface/40 dark:text-neutral-300'
+											: 'bg-neutral-100 text-muted dark:bg-surface/40'
 									}`}
 								>
 									<Shield size={20} />
@@ -298,7 +298,23 @@ export default function DashboardPage() {
 						<ArrowRight size={14} />
 					</Link>
 				</div>
-				<IncidentTimeline incidents={incidents || []} limit={3} showViewAll linkToDetail />
+				{incidentsError ? (
+					// 事件接口挂了 ≠ 没有事件：不能把"最近事件"空列表渲染成绿色好消息（假绿）。
+					<div
+						role="status"
+						className="rounded-lg border border-warning-soft bg-neutral-0 p-8 text-center"
+					>
+						<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft">
+							<AlertTriangle size={20} className="text-warning-text" />
+						</div>
+						<h3 className="text-sm font-medium text-neutral-900">
+							{t('incidents.error')}
+						</h3>
+						<p className="mt-1 text-xs text-muted">{t('incidents.errorHint')}</p>
+					</div>
+				) : (
+					<IncidentTimeline incidents={incidents || []} limit={3} showViewAll linkToDetail />
+				)}
 			</div>
 
 			{/* Uptime Promise */}

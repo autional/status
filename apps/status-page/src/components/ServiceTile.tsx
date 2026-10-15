@@ -198,7 +198,7 @@ export default function ServiceTile({ service }: ServiceTileProps) {
 						{unmonitored ? (
 							<span className="flex items-center gap-2">
 								<UnmonitoredDot />
-								<span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+								<span className="text-sm font-medium text-neutral-700">
 									{t('status.unmonitored')}
 								</span>
 							</span>

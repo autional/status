@@ -19,7 +19,7 @@ interface FleetStripProps {
  */
 const STRIP_TONE: Record<HealthStatus, string> = {
 	healthy:
-		'border-neutral-200 bg-neutral-0 text-muted hover:border-neutral-400 hover:text-neutral-700 dark:border-neutral-700 dark:bg-surface/40 dark:text-neutral-400 dark:hover:border-neutral-500',
+		'border-neutral-200 bg-neutral-0 text-muted hover:border-neutral-400 hover:text-neutral-700 dark:border-neutral-700 dark:bg-surface/40 dark:hover:border-neutral-500',
 	degraded:
 		'border-warning bg-warning-soft text-warning-text ring-1 ring-warning/40 hover:ring-warning',
 	unhealthy:

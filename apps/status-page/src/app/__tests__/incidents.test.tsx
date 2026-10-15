@@ -129,6 +129,31 @@ describe('IncidentsPage', () => {
 		expect(screen.getByText('incidents.empty')).toBeInTheDocument();
 	});
 
+	it('shows an error state (not the empty state) when the incidents request fails', () => {
+		// 接口报错 ⇒ 必须是"取不到"的错误态，绝不能渲染成绿色的"没有符合条件的事件"（假绿）。
+		vi.mocked(useIncidents).mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+		} as any);
+
+		renderIncidents();
+		expect(screen.getByText('incidents.error')).toBeInTheDocument();
+		expect(screen.queryByText('incidents.empty')).toBeNull();
+	});
+
+	it('still shows the empty state (no error) when the request succeeds with zero items', () => {
+		vi.mocked(useIncidents).mockReturnValue({
+			data: [],
+			isLoading: false,
+			isError: false,
+		} as any);
+
+		renderIncidents();
+		expect(screen.getByText('incidents.empty')).toBeInTheDocument();
+		expect(screen.queryByText('incidents.error')).toBeNull();
+	});
+
 	it('shows loading skeleton when data is loading', () => {
 		vi.mocked(useIncidents).mockReturnValue({
 			data: undefined,

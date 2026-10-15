@@ -144,7 +144,7 @@ export default function ServiceDetailPage() {
 	const statusConfig = {
 		// 安静模式：正常态不用绿色铺满一整块面板 —— 颜色留给"出事了"。
 		healthy: {
-			bg: 'bg-neutral-50/80 text-neutral-800 dark:bg-surface/30 dark:text-neutral-200',
+			bg: 'bg-neutral-50/80 text-neutral-800 dark:bg-surface/30',
 			border: 'border-neutral-200 dark:border-neutral-700',
 		},
 		degraded: {
@@ -263,7 +263,7 @@ export default function ServiceDetailPage() {
 					</h2>
 					{avgUptime !== null && (
 						<span
-							className={`flex items-center gap-1 text-sm font-medium ${avgUptime >= 99.9 ? 'text-neutral-600 dark:text-neutral-300' : avgUptime >= 95 ? 'text-warning-text' : 'text-danger-text'}`}
+							className={`flex items-center gap-1 text-sm font-medium ${avgUptime >= 99.9 ? 'text-neutral-600' : avgUptime >= 95 ? 'text-warning-text' : 'text-danger-text'}`}
 						>
 							{t('service.uptimeAvg')} {avgUptime}%
 						</span>

@@ -189,4 +189,17 @@ describe('DashboardPage', () => {
 		expect(screen.getByText('stat.maintenance')).toBeInTheDocument();
 		expect(screen.getByText('lastUpdated')).toBeInTheDocument();
 	});
+
+	it('shows an incident error state instead of the green empty timeline when incidents fail', () => {
+		// 失败不得渲染成绿色的"暂无事件记录"（假绿）——见 docs/STATUS-UI-SEMANTICS-OPTIONS.md §4.1(c)。
+		vi.mocked(useIncidents).mockReturnValue({
+			data: undefined,
+			isLoading: false,
+			isError: true,
+		} as any);
+
+		renderDashboard();
+		expect(screen.getByText('incidents.error')).toBeInTheDocument();
+		expect(screen.queryByTestId('incident-timeline')).toBeNull();
+	});
 });

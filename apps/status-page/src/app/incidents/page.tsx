@@ -27,7 +27,7 @@ function FilterSkeleton() {
 
 export default function IncidentsPage() {
 	const { t } = useTranslation();
-	const { data: incidents, isLoading } = useIncidents();
+	const { data: incidents, isLoading, isError } = useIncidents();
 	const [severityFilter, setSeverityFilter] = useState<IncidentSeverity | 'all'>('all');
 	const [statusFilter, setStatusFilter] = useState<IncidentStatus | 'all'>('all');
 
@@ -112,6 +112,23 @@ export default function IncidentsPage() {
 							className="h-24 animate-pulse rounded-lg bg-neutral-100"
 						/>
 					))}
+				</div>
+			) : isError ? (
+				// 接口故障 ≠ 没有事件：取不到数据必须显式说"取不到"，绝不能渲染成绿色的
+				// 「没有符合条件的事件」——那会把"数据源挂了"读成"一切正常"（假绿）。
+				<div
+					role="status"
+					className="rounded-lg border border-warning-soft bg-neutral-0 p-12 text-center"
+				>
+					<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft">
+						<AlertTriangle size={20} className="text-warning-text" />
+					</div>
+					<h3 className="text-sm font-medium text-neutral-900">
+						{t('incidents.error')}
+					</h3>
+					<p className="mt-1 text-xs text-muted">
+						{t('incidents.errorHint')}
+					</p>
 				</div>
 			) : filteredIncidents.length === 0 ? (
 				<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-12 text-center">
