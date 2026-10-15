@@ -232,12 +232,26 @@ export async function fetchIncidents(): Promise<Incident[]> {
 	return (await fetchIncidentList()).items;
 }
 
+/**
+ * 详情类 fetch 的错误语义（T43）：**只有真 404** 映射为 null（="不存在"），其余错误一律**抛出**
+ * ⇒ 交给 react-query 的 `isError`（="取不到"）。
+ *
+ * 反面教材（本文件历史）：try/catch 吞错 + `return null` ⇒ react-query 视为成功 ⇒ `isError`
+ * 恒为 false ⇒ 页面的失败态成**死代码**（2026-10-16 线上复测实证：注入 500 时详情页仍显示
+ * "未找到"，与新加的警示卡分支不符）。
+ */
+function isNotFound(err: unknown): boolean {
+	return (err as { response?: { status?: number } })?.response?.status === 404;
+}
+
 export async function fetchIncident(id: string): Promise<Incident | null> {
 	try {
 		return (await Generated.statusIncidentsByIncidents(id)) as Incident;
 	} catch (err) {
-		devWarn('[StatusPage] status-service incident fetch failed:', err);
-		return null;
+		if (isNotFound(err)) return null;
+		// 非 404 ⇒ 抛出（让 react-query 的 isError 生效："取不到 ≠ 不存在"）
+		devWarn('[StatusPage] status-service incident fetch failed (non-404; rethrow to set isError):', err);
+		throw err;
 	}
 }
 
@@ -250,10 +264,17 @@ export async function fetchMaintenance(id: string): Promise<Maintenance | null> 
 	try {
 		return (await Generated.statusMaintenancesByMaintenances(id)) as Maintenance;
 	} catch (err) {
-		devWarn('[StatusPage] status-service maintenance fetch failed:', err);
-		return null;
+		if (isNotFound(err)) return null;
+		// 非 404 ⇒ 抛出（让 react-query 的 isError 生效："取不到 ≠ 不存在"）
+		devWarn('[StatusPage] status-service maintenance fetch failed (non-404; rethrow to set isError):', err);
+		throw err;
 	}
 }
+
+// 说明（T43）：本文件另有若干 fetch（overview / catalog / metrics / rss / 订阅偏好）仍保留
+// "catch ⇒ return null" 的吞错写法 —— 其调用方（页面）目前都以 null 为正常缺省、**不**依赖
+// `isError`，故本次不动（改动它们会影响各页的 null 分支）。若将来要给这些入口加失败态，
+// **必须**先让错误抛出，否则同样会得到死代码。
 
 export interface LatencyMetricsResult {
 	service: string;
