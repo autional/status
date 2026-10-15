@@ -295,7 +295,7 @@ export default function DashboardPage() {
 					</h2>
 					<Link
 						to="/incidents"
-						className="flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
+						className="flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 					>
 						{t('incidents.viewAll')}
 						<ArrowRight size={14} />

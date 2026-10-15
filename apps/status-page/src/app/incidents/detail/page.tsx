@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router';
 import { useIncident } from '@/hooks/use-system-status';
+import { IncidentErrorCard } from '@/components/IncidentStateCard';
 import { StatusBadge } from '@/components/StatusIndicator';
 import {
 	ArrowLeft,
@@ -54,7 +55,7 @@ function buildSeverityConfig(
 export default function IncidentDetailPage() {
 	const { t } = useTranslation();
 	const { id } = useParams<{ id: string }>();
-	const { data: incident, isLoading } = useIncident(id || '');
+	const { data: incident, isLoading, isError } = useIncident(id || '');
 
 	function formatRelativeTime(isoString: string): string {
 		const date = new Date(isoString);
@@ -76,10 +77,25 @@ export default function IncidentDetailPage() {
 	if (isLoading) {
 		return (
 			<div className="mx-auto max-w-3xl px-4 py-12 text-center">
-				<Loader2 size={32} className="mx-auto animate-spin text-primary-600" />
+				<Loader2 size={32} className="mx-auto animate-spin text-primary-600 dark:text-primary-400" />
 				<p className="mt-4 text-sm text-muted">
 					{t('incidents.loading')}
 				</p>
+			</div>
+		);
+	}
+
+	if (isError) {
+		return (
+			<div className="mx-auto max-w-3xl px-4 py-12">
+				<IncidentErrorCard />
+				<Link
+					to="/incidents"
+					className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
+				>
+					<ArrowLeft size={14} />
+					{t('incidents.backToList')}
+				</Link>
 			</div>
 		);
 	}
@@ -98,7 +114,7 @@ export default function IncidentDetailPage() {
 				</p>
 				<Link
 					to="/incidents"
-					className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
+					className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 				>
 					<ArrowLeft size={14} />
 					{t('incidents.backToList')}

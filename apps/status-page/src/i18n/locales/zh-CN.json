@@ -203,6 +203,8 @@
   "maintenance.records": "维护记录",
   "maintenance.noRecords": "暂无维护记录",
   "maintenance.noRecordsHint": "当有计划维护时，将在此显示",
+  "maintenance.loadError": "维护数据暂时不可用",
+  "maintenance.loadErrorHint": "我们没有取到维护数据——这不代表「没有维护」。请稍后重试。",
   "maintenance.legend": "图例",
   "maintenance.legend.planned": "计划维护",
   "maintenance.legend.completed": "已完成",

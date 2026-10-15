@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router';
 import { useMaintenance } from '@/hooks/use-system-status';
+import { IncidentErrorCard } from '@/components/IncidentStateCard';
 import {
 	ArrowLeft,
 	Wrench,
@@ -50,15 +51,33 @@ const statusConfig: Record<
 export default function MaintenanceDetailPage() {
 	const { t } = useTranslation();
 	const { id } = useParams<{ id: string }>();
-	const { data: maintenance, isLoading } = useMaintenance(id || '');
+	const { data: maintenance, isLoading, isError } = useMaintenance(id || '');
 
 	if (isLoading) {
 		return (
 			<div className="mx-auto max-w-3xl px-4 py-12 text-center">
-				<Loader2 size={32} className="mx-auto animate-spin text-primary-600" />
+				<Loader2 size={32} className="mx-auto animate-spin text-primary-600 dark:text-primary-400" />
 				<p className="mt-4 text-sm text-muted">
 					{t('maintenance.loading')}
 				</p>
+			</div>
+		);
+	}
+
+	if (isError) {
+		return (
+			<div className="mx-auto max-w-3xl px-4 py-12">
+				<IncidentErrorCard
+					title={t('maintenance.loadError')}
+					hint={t('maintenance.loadErrorHint')}
+				/>
+				<Link
+					to="/maintenance"
+					className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
+				>
+					<ArrowLeft size={14} />
+					{t('maintenance.back')}
+				</Link>
 			</div>
 		);
 	}
@@ -77,7 +96,7 @@ export default function MaintenanceDetailPage() {
 				</p>
 				<Link
 					to="/maintenance"
-					className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
+					className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 				>
 					<ArrowLeft size={14} />
 					{t('maintenance.back')}

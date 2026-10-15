@@ -9,7 +9,7 @@ export default function Footer() {
 			<div className="mx-auto max-w-6xl px-4 py-8">
 				<div className="flex flex-col items-center justify-between gap-4 md:flex-row">
 					<div className="flex items-center gap-2 text-sm text-neutral-600">
-						<Activity size={16} className="text-primary-600" />
+						<Activity size={16} className="text-primary-600 dark:text-primary-400" />
 						<span className="font-medium">{t('footer.brand')}</span>
 						<span className="text-muted">·</span>
 						<span>{t('footer.tagline')}</span>

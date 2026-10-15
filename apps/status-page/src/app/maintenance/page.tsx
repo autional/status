@@ -14,6 +14,7 @@ import {
 import type { Maintenance } from '@/types';
 import { useTranslation } from 'react-i18next';
 import { formatDateOnly, formatTimeOnly } from '@/lib/format';
+import { IncidentErrorCard } from '@/components/IncidentStateCard';
 
 function getDaysInMonth(year: number, month: number): number {
 	return new Date(year, month + 1, 0).getDate();
@@ -25,7 +26,7 @@ function getFirstDayOfMonth(year: number, month: number): number {
 
 export default function MaintenancePage() {
 	const { t } = useTranslation();
-	const { data: maintenances, isLoading } = useMaintenances();
+	const { data: maintenances, isLoading, isError } = useMaintenances();
 	const [currentDate, setCurrentDate] = useState(new Date());
 
 	const year = currentDate.getFullYear();
@@ -189,7 +190,12 @@ export default function MaintenancePage() {
 							</h3>
 						</div>
 
-						{isLoading ? (
+						{isError ? (
+							<IncidentErrorCard
+								title={t('maintenance.loadError')}
+								hint={t('maintenance.loadErrorHint')}
+							/>
+						) : isLoading ? (
 							<div className="space-y-3 p-5">
 								{Array.from({ length: 3 }).map((_, i) => (
 									<div

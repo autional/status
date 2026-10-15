@@ -15,8 +15,20 @@ import { useTranslation } from 'react-i18next';
  * `incidents.noneYet` / `incidents.noneYetHint`（数据集为空）、`filter.clear`（动作按钮，由调用方给）。
  */
 
-/** 取数失败：琥珀警示卡 + role="status"。绝不渲染成绿色空态（假绿教训）。 */
-export function IncidentErrorCard() {
+/**
+ * 取数失败：琥珀警示卡 + role="status"。绝不渲染成绿色空态（假绿教训）。
+ *
+ * 默认文案复用 `incidents.error` / `incidents.errorHint`（事件面）；其它面（如维护）可传自己的
+ * 文案键，但**必须**保持同一语义：「取不到 ≠ 没有」。T43 起因：维护列表/详情在接口失败时整块
+ * 静默隐藏（读者把"取不到"读成"没事"），与首页/事件页的失败态口径不一致。
+ */
+export function IncidentErrorCard({
+	title,
+	hint,
+}: {
+	title?: ReactNode;
+	hint?: ReactNode;
+} = {}) {
 	const { t } = useTranslation();
 	return (
 		<div
@@ -26,8 +38,8 @@ export function IncidentErrorCard() {
 			<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft">
 				<AlertTriangle size={20} className="text-warning-text" />
 			</div>
-			<h3 className="text-sm font-medium text-neutral-900">{t('incidents.error')}</h3>
-			<p className="mt-1 text-xs text-muted">{t('incidents.errorHint')}</p>
+			<h3 className="text-sm font-medium text-neutral-900">{title ?? t('incidents.error')}</h3>
+			<p className="mt-1 text-xs text-muted">{hint ?? t('incidents.errorHint')}</p>
 		</div>
 	);
 }

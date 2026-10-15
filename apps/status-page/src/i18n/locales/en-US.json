@@ -203,6 +203,8 @@
   "maintenance.records": "Maintenance Records",
   "maintenance.noRecords": "No maintenance records",
   "maintenance.noRecordsHint": "Maintenance records will appear here when scheduled",
+  "maintenance.loadError": "Maintenance data temporarily unavailable",
+  "maintenance.loadErrorHint": "We could not load maintenance data — this does not mean there is none. Please try again later.",
   "maintenance.legend": "Legend",
   "maintenance.legend.planned": "Planned Maintenance",
   "maintenance.legend.completed": "Completed",

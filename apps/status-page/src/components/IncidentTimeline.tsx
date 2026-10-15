@@ -155,7 +155,7 @@ export default function IncidentTimeline({
 				<div className="text-center">
 					<Link
 						to="/incidents"
-						className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
+						className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 					>
 						{t('incidents.viewAllEvents')}
 						<ChevronRight size={14} />

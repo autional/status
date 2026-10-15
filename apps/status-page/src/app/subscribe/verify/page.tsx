@@ -90,7 +90,7 @@ function VerifyContent() {
 						</Link>
 						<Link
 							to="/"
-							className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
+							className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 						>
 							<ArrowLeft size={14} />
 							{t('verify.backHome')}
@@ -106,7 +106,7 @@ function VerifyContent() {
 			<div className="text-center">
 				{loading ? (
 					<>
-						<Loader2 size={40} className="mx-auto animate-spin text-primary-600" />
+						<Loader2 size={40} className="mx-auto animate-spin text-primary-600 dark:text-primary-400" />
 						<h1 className="mt-6 text-xl font-bold text-neutral-900">
 							{t('verify.title')}
 						</h1>
@@ -147,7 +147,7 @@ function VerifyContent() {
 			<div className="mt-8 flex flex-col items-center gap-3">
 				<Link
 					to="/"
-					className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
+					className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 				>
 					<ArrowLeft size={14} />
 					{t('verify.backHome')}

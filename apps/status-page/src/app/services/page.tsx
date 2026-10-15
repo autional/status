@@ -150,7 +150,7 @@ export default function ServiceDetailPage() {
 				</p>
 				<Link
 					to="/"
-					className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700"
+					className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 				>
 					<ArrowLeft size={14} />
 					{t('service.back')}
