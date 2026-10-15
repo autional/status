@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import {
 	fetchGatewayHealth,
 	fetchIncidents,
+	fetchIncidentList,
 	fetchIncident,
 	fetchMaintenances,
 	fetchMaintenance,
@@ -13,6 +14,7 @@ import {
 	fetchRssXml,
 	buildServiceStatuses,
 } from '@/lib/api';
+import type { IncidentListFilters } from '@/lib/api';
 
 /**
  * 原始 gateway /ready 健康检查（checks: {svc}:{port} / grpc:{svc}）。
@@ -58,6 +60,32 @@ export function useIncidents() {
 	return useQuery({
 		queryKey: ['incidents'],
 		queryFn: fetchIncidents,
+		staleTime: 60000,
+	});
+}
+
+/**
+ * 事件列表（服务端筛选 + 信封 total）。
+ *
+ * 与 `useIncidents` 的差别（两条都为本单需要）：
+ *   1. 透出响应里的 `total`（`useIncidents` 只给 items 数组，丢了 total ⇒ 空态无法三分诊）；
+ *   2. 支持把 severity/status/service 下传服务端（此前只在首页 20 条内前端过滤）。
+ *
+ * 不传 filters 时与 `useIncidents` 打的是同一个 url，queryKey 归一后（null 占位）二者并行挂载
+ * 也只发一次请求 —— `/incidents` 页正是靠"无筛选的同源查询"拿到数据集真实总数。
+ */
+export function useIncidentList(filters?: IncidentListFilters) {
+	const severity = filters?.severity ?? null;
+	const status = filters?.status ?? null;
+	const service = filters?.service ?? null;
+	return useQuery({
+		queryKey: ['incident-list', severity, status, service],
+		queryFn: () =>
+			fetchIncidentList({
+				severity: severity ?? undefined,
+				status: status ?? undefined,
+				service: service ?? undefined,
+			}),
 		staleTime: 60000,
 	});
 }

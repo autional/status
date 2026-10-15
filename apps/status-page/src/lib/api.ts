@@ -181,9 +181,55 @@ export async function fetchOverview(): Promise<OverviewData | null> {
 	}
 }
 
+/** 事件列表查询参数 —— 后端 ListIncidentsRequest 已支持（severity/status/service/page/page_size）。 */
+export interface IncidentListFilters {
+	/** 严重级别：critical / major / minor / maintenance */
+	severity?: string;
+	/** 事件状态：investigating / identified / monitoring / resolved */
+	status?: string;
+	/** 影响的服务 ID */
+	service?: string;
+	page?: number;
+	page_size?: number;
+}
+
+export interface IncidentListResult {
+	items: Incident[];
+	/**
+	 * 响应信封里的 total —— **当前筛选下**匹配的总条数（不是当前页条数，也不是数据集条数）。
+	 *
+	 * 后端列表接口本来就返回它（`dto_base.ListResponse.total`，与 `pagination.total` 同源），
+	 * 此前前端 `return res.items ?? []` 把它丢了 ⇒「筛掉的全空」与「压根没有事件」在页面上
+	 * 长得一模一样（`docs/STATUS-UI-SEMANTICS-OPTIONS.md` §4.1）。
+	 */
+	total: number;
+}
+
+/**
+ * 事件列表（带分页/筛选信封）。
+ *
+ * severity/status/service 直接**下传服务端**（`Generated.statusIncidents` 已支持这些 query 参数），
+ * 不再只对首页 20 条做前端过滤 —— 否则匹配项落在第 21 条之后时，页面会错报
+ * 「没有符合条件的事件」（同上 §4.1(b)）。
+ *
+ * 注意：**不加 try/catch**（与 `fetchIncidents` 一致）—— 抛给 react-query 才能让 `isError` 生效，
+ * 页面据此渲染"取不到"而非假绿空态（§4.1(c)）。
+ */
+export async function fetchIncidentList(
+	filters?: IncidentListFilters,
+): Promise<IncidentListResult> {
+	const res = await Generated.statusIncidents(filters);
+	const payload = res as
+		| { items?: Incident[]; total?: number; pagination?: { total?: number } }
+		| null
+		| undefined;
+	const items: Incident[] = payload?.items ?? [];
+	const total = Number(payload?.total ?? payload?.pagination?.total ?? items.length);
+	return { items, total };
+}
+
 export async function fetchIncidents(): Promise<Incident[]> {
-	const res = await Generated.statusIncidents();
-	return (res as any)?.items ?? [];
+	return (await fetchIncidentList()).items;
 }
 
 export async function fetchIncident(id: string): Promise<Incident | null> {

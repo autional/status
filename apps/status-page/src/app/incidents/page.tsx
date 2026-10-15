@@ -1,9 +1,10 @@
-import { useIncidents } from '@/hooks/use-system-status';
+import { useIncidentList } from '@/hooks/use-system-status';
 import IncidentTimeline from '@/components/IncidentTimeline';
 import { AlertTriangle, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState, useMemo } from 'react';
 import type { IncidentSeverity, IncidentStatus } from '@/types';
+import type { IncidentListFilters } from '@/lib/api';
 
 const severityFilters: { value: IncidentSeverity | 'all'; label: string }[] = [
 	{ value: 'all', label: 'filter.all' },
@@ -27,18 +28,61 @@ function FilterSkeleton() {
 
 export default function IncidentsPage() {
 	const { t } = useTranslation();
-	const { data: incidents, isLoading, isError } = useIncidents();
 	const [severityFilter, setSeverityFilter] = useState<IncidentSeverity | 'all'>('all');
 	const [statusFilter, setStatusFilter] = useState<IncidentStatus | 'all'>('all');
 
-	const filteredIncidents = useMemo(() => {
-		if (!incidents) return [];
-		return incidents.filter((incident) => {
-			const matchSeverity = severityFilter === 'all' || incident.severity === severityFilter;
-			const matchStatus = statusFilter === 'all' || incident.status === statusFilter;
-			return matchSeverity && matchStatus;
-		});
-	}, [incidents, severityFilter, statusFilter]);
+	// 服务端筛选（docs/STATUS-UI-SEMANTICS-OPTIONS.md §4.2 C1 可选增强）：
+	// severity/status 直接下传接口（Generated.statusIncidents 支持这些 query 参数），
+	// 不再只对返回的首页 20 条做前端过滤 —— 后者在匹配项落在第 21 条之后时会错报
+	// 「没有符合条件的事件」，而那句「尝试调整筛选条件」在这种情况下也是误导。
+	const filters = useMemo<IncidentListFilters>(
+		() => ({
+			severity: severityFilter === 'all' ? undefined : severityFilter,
+			status: statusFilter === 'all' ? undefined : statusFilter,
+		}),
+		[severityFilter, statusFilter],
+	);
+
+	const { data: list, isLoading, isError } = useIncidentList(filters);
+	// 无筛选的同源查询：拿「数据集真实总数」。服务端返回的 total 是**当前筛选下**的条数，
+	// 单看它无法判断数据集本身是否为空；两相对照才能把「筛掉了」与「真的没有事件」分开
+	// （§4.1(a)/(b)）。无筛选时两条查询同 key ⇒ 仍只发一次请求。
+	const { data: dataset, isError: datasetError } = useIncidentList();
+
+	const incidents = list?.items ?? [];
+	const datasetTotal = dataset?.total ?? 0;
+
+	const clearFilters = () => {
+		setSeverityFilter('all');
+		setStatusFilter('all');
+	};
+
+	// 接口故障 ≠ 没有事件：取不到数据必须显式说「取不到」，绝不能渲染成绿色的
+	// 「没有符合条件的事件」——那会把「数据源挂了」读成「一切正常」（假绿）。
+	const errorCard = (
+		<div
+			role="status"
+			className="rounded-lg border border-warning-soft bg-neutral-0 p-12 text-center"
+		>
+			<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft">
+				<AlertTriangle size={20} className="text-warning-text" />
+			</div>
+			<h3 className="text-sm font-medium text-neutral-900">{t('incidents.error')}</h3>
+			<p className="mt-1 text-xs text-muted">{t('incidents.errorHint')}</p>
+		</div>
+	);
+
+	// 两种「空」共用同一张卡片骨架，只是标题/副文案/动作不同（绿=真的没事，故两态都保留既有视觉）。
+	const emptyCard = (title: React.ReactNode, hint: React.ReactNode, action?: React.ReactNode) => (
+		<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-12 text-center">
+			<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft/30">
+				<AlertTriangle size={20} className="text-success-text" />
+			</div>
+			<h3 className="text-sm font-medium text-neutral-900">{title}</h3>
+			<p className="mt-1 text-xs text-muted">{hint}</p>
+			{action}
+		</div>
+	);
 
 	return (
 		<div className="mx-auto max-w-4xl px-4 py-8">
@@ -114,36 +158,29 @@ export default function IncidentsPage() {
 					))}
 				</div>
 			) : isError ? (
-				// 接口故障 ≠ 没有事件：取不到数据必须显式说"取不到"，绝不能渲染成绿色的
-				// 「没有符合条件的事件」——那会把"数据源挂了"读成"一切正常"（假绿）。
-				<div
-					role="status"
-					className="rounded-lg border border-warning-soft bg-neutral-0 p-12 text-center"
-				>
-					<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft">
-						<AlertTriangle size={20} className="text-warning-text" />
-					</div>
-					<h3 className="text-sm font-medium text-neutral-900">
-						{t('incidents.error')}
-					</h3>
-					<p className="mt-1 text-xs text-muted">
-						{t('incidents.errorHint')}
-					</p>
-				</div>
-			) : filteredIncidents.length === 0 ? (
-				<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-12 text-center">
-					<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft/30">
-						<AlertTriangle size={20} className="text-success-text" />
-					</div>
-					<h3 className="text-sm font-medium text-neutral-900">
-						{t('incidents.empty')}
-					</h3>
-					<p className="mt-1 text-xs text-muted">
-						{t('incidents.emptyHint')}
-					</p>
-				</div>
+				errorCard
+			) : incidents.length > 0 ? (
+				<IncidentTimeline incidents={incidents} linkToDetail />
+			) : datasetTotal > 0 ? (
+				// 「筛掉了」：数据集里确实有 {datasetTotal} 条事件记录，只是当前筛选没有命中。
+				// 旧实现只在前端过滤首页 20 条，匹配项落在第 21 条之后时会错报"没有符合条件的事件"。
+				emptyCard(
+					t('incidents.empty'),
+					t('incidents.filteredEmptyHint', { total: datasetTotal }),
+					<button
+						onClick={clearFilters}
+						className="mt-4 inline-flex min-h-[var(--a11y-touch-target)] items-center justify-center rounded-full border border-neutral-200 bg-neutral-0 px-4 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-50"
+					>
+						{t('filter.clear')}
+					</button>,
+				)
+			) : datasetError ? (
+				// 列表拿到了空数组，但"数据集总数"这条查询失败 ⇒ 无法确认是"真的没有"还是"被筛掉"。
+				// 宁可说「取不到」，也不要说「尚无事件记录」（假绿教训，§4.1(c)）。
+				errorCard
 			) : (
-				<IncidentTimeline incidents={filteredIncidents} linkToDetail />
+				// 「真的没有事件」：接口可用 + 无筛选 + total = 0。
+				emptyCard(t('incidents.noneYet'), t('incidents.noneYetHint'))
 			)}
 		</div>
 	);

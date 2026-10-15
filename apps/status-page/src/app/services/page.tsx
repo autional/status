@@ -65,6 +65,9 @@ export default function ServiceDetailPage() {
 			const date = new Date(p.timestamp);
 			const value = Math.min(100, Math.max(0, p.value));
 			let status: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
+			// 99.9 / 95 在这里的**唯一**用途是给图表柱子分段着色（视觉梯度，status → UptimeChart 的分段色），
+			// 不再用于给"平均值数字"下一个结论词（见下方 KPI span 的说明）。
+			// 这样 99.9（本是**自然月口径**的那个数）只留在图上，不再被套到 24h 滚动均值上做判定（§2.3 第 4 条）。
 			if (value < 95) status = 'unhealthy';
 			else if (value < 99.9) status = 'degraded';
 			// HH:mm（含分钟）——只给小时会在细粒度采样下把多个点压成重复刻度（Q-02）
@@ -221,6 +224,11 @@ export default function ServiceDetailPage() {
 						<p className="mt-1 text-xl font-semibold">
 							{avgUptime !== null ? `${avgUptime}%` : uptimeLoading ? t('service.loading') : '—'}
 						</p>
+						{/* 口径小字：这个数是 **Prometheus 抓取成功率**（每 5 分钟一个采样点、滚动窗口）的均值，
+						    与徽章（网关瞬时探针）不是同一套测量系统 —— 不写清楚，读者会把"此刻正常"
+						    与"24h 95.82%"读成互相矛盾。只标**口径**、不下结论词（§2.4 Q1 拍板：否）。
+						    用 text-muted text-xs（复用既有行样式），不动本卡片的 opacity-70 标签。 */}
+						<p className="mt-0.5 text-xs text-muted">{t('service.uptimeSourceHint')}</p>
 					</div>
 					<div className="rounded-lg bg-neutral-0/60 p-4">
 						<div className="flex items-center gap-2 text-sm opacity-70">
@@ -266,9 +274,11 @@ export default function ServiceDetailPage() {
 						{t('service.uptimeTitle', { range })}
 					</h2>
 					{avgUptime !== null && (
-						<span
-							className={`flex items-center gap-1 text-sm font-medium ${avgUptime >= 99.9 ? 'text-neutral-600' : avgUptime >= 95 ? 'text-warning-text' : 'text-danger-text'}`}
-						>
+						// 这里**不再**按阈值给数字着色：99.9 是「自然月口径」的那个数（见 i18n `uptime.desc`），
+						// 套在 24h 滚动均值上等于"用月窗口去判日窗口"，而且给数字上"琥珀/红"本身就等于
+						// 替读者下了结论。§2.3 第 4 条要求把 99.9 **降级为图表分段色**（见 uptimeChartData），
+						// 不在数字旁下结论 —— 故此处恒用中性色，数字只陈述事实。
+						<span className="flex items-center gap-1 text-sm font-medium text-neutral-600">
 							{t('service.uptimeAvg')} {avgUptime}%
 						</span>
 					)}
