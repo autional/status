@@ -206,8 +206,6 @@
   "maintenance.loadError": "维护数据暂时不可用",
   "maintenance.loadErrorHint": "我们没有取到维护数据——这不代表「没有维护」。请稍后重试。",
   "maintenance.legend": "图例",
-  "maintenance.legend.planned": "计划维护",
-  "maintenance.legend.completed": "已完成",
   "maintenance.legend.today": "今天",
   "maintenance.notFound": "维护记录未找到",
   "maintenance.notFoundDesc": "该维护记录不存在或已被移除。",

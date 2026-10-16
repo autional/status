@@ -206,8 +206,6 @@
   "maintenance.loadError": "Maintenance data temporarily unavailable",
   "maintenance.loadErrorHint": "We could not load maintenance data — this does not mean there is none. Please try again later.",
   "maintenance.legend": "Legend",
-  "maintenance.legend.planned": "Planned Maintenance",
-  "maintenance.legend.completed": "Completed",
   "maintenance.legend.today": "Today",
   "maintenance.notFound": "Maintenance Record Not Found",
   "maintenance.notFoundDesc": "This maintenance record does not exist or has been removed.",

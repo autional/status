@@ -15,6 +15,7 @@ import type { Maintenance } from '@/types';
 import { useTranslation } from 'react-i18next';
 import { formatDateOnly, formatTimeOnly } from '@/lib/format';
 import { IncidentErrorCard } from '@/components/IncidentStateCard';
+import { TONE_CLASS, dayDotTone, maintenanceTone } from '@/lib/maintenance-status';
 
 function getDaysInMonth(year: number, month: number): number {
 	return new Date(year, month + 1, 0).getDate();
@@ -156,7 +157,13 @@ export default function MaintenancePage() {
 											>
 												{day}
 											</span>
-											{hasMaintenance && <div className="h-1.5 w-1.5 rounded-full bg-info" />}
+											{hasMaintenance && (
+												<div
+													className={`h-1.5 w-1.5 rounded-full ${
+														TONE_CLASS[dayDotTone(dayMaintenances.map((x) => x.status))].dot
+													}`}
+												/>
+											)}
 										</div>
 										{dayMaintenances.slice(0, 2).map((m) => (
 											<Link
@@ -244,17 +251,23 @@ export default function MaintenancePage() {
 											</div>
 											<div className="shrink-0">
 												{m.status === 'completed' ? (
-													<span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-[10px] font-medium text-success-text dark:bg-success-soft/30 dark:text-success-text">
+													<span
+														className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TONE_CLASS.success.badge}`}
+													>
 														<CheckCircle2 size={10} />
 														{t('maintenance.completed')}
 													</span>
 												) : m.status === 'cancelled' ? (
-													<span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-600">
+													<span
+														className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TONE_CLASS.neutral.badge}`}
+													>
 														<AlertCircle size={10} />
 														{t('maintenance.cancelled')}
 													</span>
 												) : (
-													<span className="inline-flex items-center gap-1 rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-medium text-info-text dark:bg-info-soft/30 dark:text-info-text">
+													<span
+														className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TONE_CLASS[maintenanceTone(m.status)].badge}`}
+													>
 														<AlertCircle size={10} />
 														{m.status === 'in_progress'
 															? t('maintenance.inProgress')
@@ -286,12 +299,20 @@ export default function MaintenancePage() {
 						</h4>
 						<div className="space-y-1.5 text-xs text-muted">
 							<div className="flex items-center gap-2">
-								<div className="h-2 w-2 rounded-full bg-info" />
-								<span>{t('maintenance.legend.planned')}</span>
+								<div className={`h-2 w-2 rounded-full ${TONE_CLASS.info.dot}`} />
+								<span>{t('maintenance.scheduled')}</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<div className="h-2 w-2 rounded-full bg-success" />
-								<span>{t('maintenance.legend.completed')}</span>
+								<div className={`h-2 w-2 rounded-full ${TONE_CLASS.warning.dot}`} />
+								<span>{t('maintenance.inProgress')}</span>
+							</div>
+							<div className="flex items-center gap-2">
+								<div className={`h-2 w-2 rounded-full ${TONE_CLASS.success.dot}`} />
+								<span>{t('maintenance.completed')}</span>
+							</div>
+							<div className="flex items-center gap-2">
+								<div className={`h-2 w-2 rounded-full ${TONE_CLASS.neutral.dot}`} />
+								<span>{t('maintenance.cancelled')}</span>
 							</div>
 							<div className="flex items-center gap-2">
 								<div className="h-2 w-2 rounded-full bg-primary-600" />
