@@ -95,7 +95,7 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 								className={({ isActive }) =>
 									`text-sm font-medium transition-colors ${
 										isActive
-											? 'text-primary-700 dark:text-primary-400'
+											? 'text-primary-700 dark:text-primary-300'
 											: 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-700'
 									}`
 								}
@@ -146,7 +146,7 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 									className={({ isActive }) =>
 										`flex min-h-[var(--a11y-touch-target)] items-center text-sm font-medium ${
 											isActive
-												? 'text-primary-700 dark:text-primary-400'
+												? 'text-primary-700 dark:text-primary-300'
 												: 'text-neutral-600 hover:text-neutral-900'
 										}`
 									}
