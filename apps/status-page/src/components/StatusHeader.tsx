@@ -111,12 +111,16 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 							{t('subscribe')}
 						</Link>
 						<ThemeToggle
-							className="text-muted hover:bg-neutral-100 hover:text-neutral-800"
+							className="inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center text-muted hover:bg-neutral-100 hover:text-neutral-800"
 							iconSize={16}
 							labelLight={t('theme.switchToLight')}
 							labelDark={t('theme.switchToDark')}
 						/>
-						<LanguageSwitcher labelEn={t('lang.en')} labelZh={t('lang.zh')} />
+						<LanguageSwitcher
+										className="inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center"
+										labelEn={t('lang.en')}
+										labelZh={t('lang.zh')}
+									 />
 					</div>
 
 					{/* Mobile menu button —— 移动端**唯一**导航入口，命中区必须够大。
@@ -165,11 +169,16 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 							<div className="flex items-center justify-between pt-3 border-t border-neutral-100">
 								<div className="flex items-center gap-3">
 									<ThemeToggle
+										className="inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center"
 										iconSize={14}
 										labelLight={t('theme.switchToLight')}
 										labelDark={t('theme.switchToDark')}
 									/>
-									<LanguageSwitcher labelEn={t('lang.en')} labelZh={t('lang.zh')} />
+									<LanguageSwitcher
+										className="inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center"
+										labelEn={t('lang.en')}
+										labelZh={t('lang.zh')}
+									 />
 								</div>
 							</div>
 						</div>
