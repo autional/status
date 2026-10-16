@@ -525,7 +525,7 @@ export default function SubscribePage() {
 										id="digest-frequency"
 										value={prefs.digestFrequency}
 										onChange={(e) => handleDigestChange(e.target.value)}
-										className="w-full rounded-md border border-neutral-300 bg-neutral-0 py-2 px-3 text-sm text-neutral-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+										className="w-full rounded-md border border-[var(--color-border-strong)] bg-neutral-0 py-2 px-3 text-sm text-neutral-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
 									>
 										{DIGEST_OPTIONS.map((opt) => (
 											<option key={opt.value} value={opt.value}>
