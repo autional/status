@@ -19,21 +19,25 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 		unknown: t('banner.unknown'),
 	};
 
+	// T56：横幅配色改为**语义令牌成对色**（soft 底 + text 前景；浅深共用同一 class）——
+	// 原来用 `bg-warning`/`bg-danger` 实色 + 硬编码 `text-white`：实测 degraded **1.90:1**、
+	// unhealthy **3.27:1**，均低于 AA 4.5（18px/600 不达大字号豁免）。令牌组在浅色是淡底+深字、
+	// 深色是深底+浅字 ⇒ 两主题都达标。加 border 保持"看得见的告警条"强度。
 	const bannerConfig = {
 		healthy: {
-			bg: 'bg-success',
+			bg: 'bg-success-soft text-success-text border border-success-soft dark:bg-success-soft/30 dark:text-success-text',
 			icon: <Activity size={20} className="animate-pulse-soft" />,
 		},
 		degraded: {
-			bg: 'bg-warning',
+			bg: 'bg-warning-soft text-warning-text border border-warning dark:bg-warning-soft/30 dark:text-warning-text',
 			icon: <Activity size={20} className="animate-pulse-soft" />,
 		},
 		unhealthy: {
-			bg: 'bg-danger',
+			bg: 'bg-danger-soft text-danger-text border border-danger dark:bg-danger-soft/30 dark:text-danger-text',
 			icon: <Activity size={20} className="animate-pulse-soft" />,
 		},
 		unknown: {
-			bg: 'bg-[var(--color-text-muted)]',
+			bg: 'bg-neutral-100 text-neutral-700 border border-neutral-300 dark:bg-neutral-100/60 dark:text-neutral-700',
 			icon: <Activity size={20} />,
 		},
 	};
@@ -62,7 +66,7 @@ export default function StatusHeader({ overallStatus = 'unknown' }: StatusHeader
 					{bannerText.healthy}
 				</p>
 			) : (
-				<div className={`${config.bg} text-white`}>
+				<div className={`${config.bg}`}>
 					<div className="mx-auto flex max-w-6xl items-center justify-center gap-3 px-4 py-4">
 						{config.icon}
 						<span className="text-lg font-semibold">{bannerText[status]}</span>
