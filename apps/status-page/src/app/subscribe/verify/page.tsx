@@ -70,7 +70,7 @@ function VerifyContent() {
 	if (timedOut) {
 		return (
 			<div className="mx-auto max-w-xl px-4 py-16">
-				<div className="text-center">
+				<div className="text-center" role="status" aria-live="polite" aria-atomic="true">
 					<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/30">
 						<AlertTriangle size={32} className="text-amber-600 dark:text-amber-400" />
 					</div>
@@ -83,14 +83,14 @@ function VerifyContent() {
 					<div className="mt-8 flex flex-col items-center gap-3">
 						<Link
 							to="/subscribe"
-							className="inline-flex items-center gap-2 rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+							className="inline-flex min-h-[var(--a11y-touch-target)] items-center gap-2 rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
 						>
 							<Mail size={14} />
 							{t('verify.resubscribe')}
 						</Link>
 						<Link
 							to="/"
-							className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
+							className="inline-flex min-h-[var(--a11y-touch-target)] items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 						>
 							<ArrowLeft size={14} />
 							{t('verify.backHome')}
@@ -103,7 +103,10 @@ function VerifyContent() {
 
 	return (
 		<div className="mx-auto max-w-xl px-4 py-16">
-			<div className="text-center">
+			{/* T60：异步结果对读屏可达 —— 容器在挂载时就存在（初始 loading 态），
+			    role=status + aria-live=polite 会在 loading→结果 变化时播报；
+			    aria-atomic 保证整块一起读，不读到半截。 */}
+			<div className="text-center" role="status" aria-live="polite" aria-atomic="true">
 				{loading ? (
 					<>
 						<Loader2 size={40} className="mx-auto animate-spin text-primary-600 dark:text-primary-400" />
@@ -122,7 +125,7 @@ function VerifyContent() {
 						<h1 className="text-xl font-bold text-neutral-900">
 							{t('verify.success')}
 						</h1>
-						<p className="mt-2 text-sm text-muted">{result.message}</p>
+						{/* T60：成功态不再重复展示 API 文案（与 h1 同义，P3 去重） */}
 						<p className="mt-4 text-sm text-neutral-600">
 							{t('verify.successDesc')}
 						</p>
@@ -147,7 +150,7 @@ function VerifyContent() {
 			<div className="mt-8 flex flex-col items-center gap-3">
 				<Link
 					to="/"
-					className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
+					className="inline-flex min-h-[var(--a11y-touch-target)] items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 				>
 					<ArrowLeft size={14} />
 					{t('verify.backHome')}
@@ -155,7 +158,7 @@ function VerifyContent() {
 				{!loading && !result?.success && (
 					<Link
 						to="/subscribe"
-						className="inline-flex items-center gap-2 rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+						className="inline-flex min-h-[var(--a11y-touch-target)] items-center gap-2 rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
 					>
 						<Mail size={14} />
 						{t('verify.resubscribe')}
