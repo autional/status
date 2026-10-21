@@ -38,6 +38,8 @@
   "maintenance.affectedServices": "受影响的服务",
   "maintenance.statusTitle": "维护状态",
   "autoRefresh": "每 30 秒自动刷新",
+  "stale.title": "无法获取最新状态",
+  "stale.desc": "当前显示的是 {{time}} 的数据；连接恢复后会自动刷新。",
   "lastUpdated": "最后更新",
   "theme.light": "切换亮色模式",
   "theme.dark": "切换暗色模式",

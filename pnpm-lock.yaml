@@ -127,6 +127,18 @@ importers:
       vite:
         specifier: 6.4.2
         version: 6.4.2(@types/node@26.1.2)(jiti@1.21.7)(terser@5.51.2)
+      workbox-core:
+        specifier: 7.4.1
+        version: 7.4.1
+      workbox-precaching:
+        specifier: 7.4.1
+        version: 7.4.1
+      workbox-routing:
+        specifier: 7.4.1
+        version: 7.4.1
+      workbox-strategies:
+        specifier: 7.4.1
+        version: 7.4.1
 
 packages:
 

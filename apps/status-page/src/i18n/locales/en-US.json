@@ -38,6 +38,8 @@
   "maintenance.affectedServices": "Affected Services",
   "maintenance.statusTitle": "Maintenance Status",
   "autoRefresh": "Auto-refreshes every 30s",
+  "stale.title": "Live status unavailable",
+  "stale.desc": "Showing data from {{time}}; it refreshes automatically when the connection returns.",
   "lastUpdated": "Last Updated",
   "theme.light": "Switch to light mode",
   "theme.dark": "Switch to dark mode",

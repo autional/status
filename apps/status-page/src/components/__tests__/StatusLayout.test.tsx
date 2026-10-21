@@ -88,6 +88,30 @@ describe('StatusLayout 横幅词表归一化', () => {
 	});
 });
 
+describe('StatusLayout 过期数据标注', () => {
+	// 回归锁：刷新失败但内存里仍有上一次 /ready 数据时，不得继续假装实时。
+	it('最新刷新失败且仍有旧数据 → 显示"无法获取最新状态"提示条', () => {
+		vi.mocked(useSystemStatus).mockReturnValue({
+			data: { status: 'healthy', timestamp: '2026-10-21T00:00:00Z' },
+			isError: true,
+		} as any);
+		vi.mocked(useOverview).mockReturnValue({ data: null } as any);
+		renderLayout();
+		expect(screen.getByText('stale.title')).toBeInTheDocument();
+		expect(screen.getByText('stale.desc')).toBeInTheDocument();
+	});
+
+	it('刷新正常 → 不显示过期提示条', () => {
+		vi.mocked(useSystemStatus).mockReturnValue({
+			data: { status: 'healthy', timestamp: '2026-10-21T00:00:00Z' },
+			isError: false,
+		} as any);
+		vi.mocked(useOverview).mockReturnValue({ data: null } as any);
+		renderLayout();
+		expect(screen.queryByText('stale.title')).not.toBeInTheDocument();
+	});
+});
+
 describe('normalizeOverallStatus', () => {
 	it('映射 gateway /ready 与 status-service 两套词表', () => {
 		expect(normalizeOverallStatus('healthy')).toBe('healthy');

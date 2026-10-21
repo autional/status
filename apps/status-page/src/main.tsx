@@ -8,6 +8,7 @@ import { ThemeProvider } from '@autional/ui';
 import App from './App';
 import './non-tenant-segments';
 import './index.css';
+import { setupPwaLifecycle } from './lib/pwa-lifecycle';
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -22,6 +23,8 @@ const queryClient = new QueryClient({
 		},
 	},
 });
+
+setupPwaLifecycle();
 
 const root = document.getElementById('root');
 if (root) {

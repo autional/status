@@ -9,7 +9,7 @@
     "build": "node ../../scripts/gen-env.mjs && tsc && vite build",
     "preview": "vite preview --port 13106",
     "lint": "eslint src/",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.sw.json",
     "test": "vitest run",
     "clean": "rimraf dist"
   },
@@ -41,6 +41,10 @@
     "postcss": "8.5.14",
     "tailwindcss": "3.4.19",
     "typescript": "5.8.3",
-    "vite": "6.4.2"
+    "vite": "6.4.2",
+    "workbox-core": "7.4.1",
+    "workbox-precaching": "7.4.1",
+    "workbox-routing": "7.4.1",
+    "workbox-strategies": "7.4.1"
   }
 }
