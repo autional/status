@@ -93,7 +93,7 @@ export function generateRSS(incidents: Incident[], maintenances: Maintenance[]):
     <description>${escapeXml(channelDesc)}</description>
     <language>${xmlLang}</language>
     <lastBuildDate>${now}</lastBuildDate>
-    <atom:link href="${baseUrl}/feed.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="${baseUrl}/feed.xml${isZh ? '' : '?lang=en'}" rel="self" type="application/rss+xml" />
 ${items}
   </channel>
 </rss>`;

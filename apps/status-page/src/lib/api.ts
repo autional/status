@@ -256,8 +256,8 @@ export async function fetchIncident(id: string): Promise<Incident | null> {
 }
 
 export async function fetchMaintenances(): Promise<Maintenance[]> {
-	const res = await Generated.statusMaintenances();
-	return (res as any)?.items ?? [];
+	const res = (await Generated.statusMaintenances()) as { items?: Maintenance[] } | null;
+	return res?.items ?? [];
 }
 
 export async function fetchMaintenance(id: string): Promise<Maintenance | null> {
@@ -332,14 +332,15 @@ export async function fetchServiceCatalog(): Promise<ServiceCatalogResponse> {
 	return (await Generated.statusServices()) as ServiceCatalogResponse;
 }
 
-export async function fetchRssXml(): Promise<string | null> {
+export async function fetchRssXml(lang: 'zh' | 'en' = 'zh'): Promise<string | null> {
 	try {
 		const { apiClient } = await import('@autional/shared');
 		// @generated-api-exempt: RSS endpoint needs Accept: application/rss+xml header
 		const res = await apiClient.get('/status/api/v1/status/rss', {
 			headers: { Accept: 'application/rss+xml' },
+			params: { lang },
 		});
-		return (res as any)?.data ?? null;
+		return (res as { data?: string | null } | null)?.data ?? null;
 	} catch (err) {
 		devWarn('[StatusPage] RSS feed fetch failed:', err);
 		return null;
@@ -354,7 +355,7 @@ export interface SubscribeResult {
 
 export async function subscribeEmail(email: string): Promise<SubscribeResult> {
 	try {
-		await Generated.statusSubscriptionsPost({ email } as any);
+		await Generated.statusSubscriptionsPost({ email });
 		return { success: true, code: 'subscribe.successCreated' };
 	} catch (err) {
 		devWarn('[StatusPage] status-service subscription failed:', err);
@@ -378,7 +379,7 @@ export async function verifySubscription(token: string): Promise<SubscribeResult
 
 export async function unsubscribeEmail(token: string): Promise<SubscribeResult> {
 	try {
-		await Generated.statusSubscriptionsDelete({ token } as any);
+		await Generated.statusSubscriptionsDelete({ token });
 		return { success: true, code: 'subscribe.unsubscribeSuccess' };
 	} catch (err) {
 		devWarn('[StatusPage] unsubscribe failed:', err);

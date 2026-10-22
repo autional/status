@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 import { Search, Home, ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { usePageMeta } from '@/lib/page-meta';
 
 const suggestionKeys = [
 	{ key: 'status', path: '/' },
@@ -11,6 +12,10 @@ const suggestionKeys = [
 
 export default function NotFoundPage() {
 	const { t } = useTranslation();
+	// 404 不索引；canonical 指向实际访问路径，避免把错误页并入首页。
+	usePageMeta(t('notFound.title'), t('notFound.description'), window.location.pathname, {
+		noindex: true,
+	});
 
 	return (
 		<div className="mx-auto max-w-2xl px-4 py-20 text-center">

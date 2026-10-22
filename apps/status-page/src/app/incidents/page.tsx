@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useState, useMemo } from 'react';
 import type { IncidentSeverity, IncidentStatus } from '@/types';
 import type { IncidentListFilters } from '@/lib/api';
+import { usePageMeta } from '@/lib/page-meta';
 
 const severityFilters: { value: IncidentSeverity | 'all'; label: string }[] = [
 	{ value: 'all', label: 'filter.all' },
@@ -29,6 +30,7 @@ function FilterSkeleton() {
 
 export default function IncidentsPage() {
 	const { t } = useTranslation();
+	usePageMeta(t('incidents.title'), t('incidents.subtitle'), '/incidents');
 	const [severityFilter, setSeverityFilter] = useState<IncidentSeverity | 'all'>('all');
 	const [statusFilter, setStatusFilter] = useState<IncidentStatus | 'all'>('all');
 

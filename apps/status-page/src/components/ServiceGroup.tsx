@@ -52,7 +52,7 @@ export default function ServiceGroup({ id, name = '', description = '', services
 					</div>
 					<div className="min-w-0">
 						<div className="flex items-center gap-2">
-							<h3 className="truncate text-base font-semibold text-neutral-900">{name}</h3>
+							<h2 className="truncate text-base font-semibold text-neutral-900">{name}</h2>
 							{allUnknownUnmonitored ? (
 								<span title={t('status.unmonitored')}>
 									<span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full border-2 border-info bg-transparent" />

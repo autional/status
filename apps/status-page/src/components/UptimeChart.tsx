@@ -9,11 +9,14 @@ import {
 	Cell,
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
+import { useEffect, useRef, useState } from 'react';
 
 interface UptimeData {
 	ts: number;
 	uptime: number;
 	status: 'healthy' | 'degraded' | 'unhealthy';
+	/** 聚合柱包含的原始采样点数（未聚合时为 1，缺省按 1 处理） */
+	count?: number;
 }
 
 interface UptimeChartProps {
@@ -41,8 +44,24 @@ const chartColors = {
 };
 
 export function UptimeChart({ data, tooltipLabel }: UptimeChartProps) {
-	const { i18n } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const c = chartColors;
+	const containerRef = useRef<HTMLDivElement>(null);
+	const [containerWidth, setContainerWidth] = useState(0);
+
+	// 柱宽必须按真实容器宽度收敛（ST2-06）：固定 480px 估算在 375px 视口会让
+	// 30 根柱挤成 1–2px。ResizeObserver 在首次渲染后立即给出真实宽度。
+	useEffect(() => {
+		const el = containerRef.current;
+		if (!el) return;
+		setContainerWidth(el.getBoundingClientRect().width);
+		if (typeof ResizeObserver === 'undefined') return;
+		const observer = new ResizeObserver((entries) => {
+			setContainerWidth(entries[0]?.contentRect.width ?? 0);
+		});
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, []);
 	// 数值时间轴：采样点按真实时间间隔摆放，稀疏数据不会被等距分类轴拉长成连续序列（ST2-04）。
 	const span = data.length > 1 ? data[data.length - 1].ts - data[0].ts : 0;
 	const tickFormatter = (value: number) =>
@@ -63,11 +82,17 @@ export function UptimeChart({ data, tooltipLabel }: UptimeChartProps) {
 			hour: '2-digit',
 			minute: '2-digit',
 		});
-	// 数值轴没有 bandSize，柱宽必须显式给；按样本数收敛，避免多柱重叠。
-	const barSize = Math.max(3, Math.min(24, Math.round(480 / Math.max(data.length, 1))));
+	// 数值轴没有 bandSize，柱宽必须显式给；按真实绘图宽度与柱数收敛（最小 2px，最大 24px）。
+	const plotWidth = Math.max(120, (containerWidth || 480) - 56);
+	const barSize = Math.max(2, Math.min(24, Math.floor(plotWidth / Math.max(data.length, 1))));
 	return (
-		<div style={{ width: '100%', height: 260 }}>
-			<ResponsiveContainer width="100%" height="100%" minWidth={1}>
+		<div ref={containerRef} style={{ width: '100%', height: 260 }}>
+			<ResponsiveContainer
+				width="100%"
+				height="100%"
+				minWidth={1}
+				initialDimension={{ width: 480, height: 260 }}
+			>
 				<BarChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
 					<CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
 					<XAxis
@@ -90,7 +115,16 @@ export function UptimeChart({ data, tooltipLabel }: UptimeChartProps) {
 					/>
 					<Tooltip
 						labelFormatter={labelFormatter}
-						formatter={(value) => [`${value}%`, tooltipLabel || 'Uptime']}
+						formatter={(value, _name, item) => {
+							const count = (item as { payload?: UptimeData } | undefined)?.payload?.count ?? 1;
+							const label = tooltipLabel || 'Uptime';
+							return [
+								`${value}%`,
+								count > 1
+									? `${label} · ${t('service.samplesUnit', { n: count })}`
+									: label,
+							];
+						}}
 						contentStyle={{
 							borderRadius: '8px',
 							border: '1px solid ' + c.tooltipBorder,

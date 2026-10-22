@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatDateTime } from '@/lib/format';
+import { usePageMeta } from '@/lib/page-meta';
 
 function buildSeverityConfig(
 	t: (key: string) => string,
@@ -56,6 +57,16 @@ export default function IncidentDetailPage() {
 	const { t } = useTranslation();
 	const { id } = useParams<{ id: string }>();
 	const { data: incident, isLoading, isError } = useIncident(id || '');
+	usePageMeta(
+		incident
+			? `${incident.title} — ${t('incidents.title')}`
+			: isLoading
+				? t('incidents.loading')
+				: t('incidents.notFound'),
+		incident?.description || t('incidents.subtitle'),
+		id ? `/incidents/${id}` : '/incidents',
+		{ noindex: !incident && !isLoading },
+	);
 
 	function formatRelativeTime(isoString: string): string {
 		const date = new Date(isoString);

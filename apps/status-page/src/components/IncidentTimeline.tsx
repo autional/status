@@ -36,9 +36,9 @@ export default function IncidentTimeline({
 				<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft/30">
 					<Clock size={20} className="text-success-text" />
 				</div>
-				<h3 className="text-sm font-medium text-neutral-900">
+				<h2 className="text-sm font-medium text-neutral-900">
 					{t('incidents.recentNone')}
-				</h3>
+				</h2>
 				<p className="mt-1 text-xs text-muted">
 					{t('incidents.recentNoneHint')}
 				</p>
@@ -74,9 +74,9 @@ export default function IncidentTimeline({
 												{incident.title}
 											</Link>
 										) : (
-											<h3 className="text-sm font-semibold text-neutral-900">
+											<span className="text-sm font-semibold text-neutral-900">
 												{incident.title}
-											</h3>
+											</span>
 										)}
 										<StatusBadge status={incident.status} />
 										<StatusBadge status={incident.severity} />
@@ -155,7 +155,7 @@ export default function IncidentTimeline({
 				<div className="text-center">
 					<Link
 						to="/incidents"
-						className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
+						className="-mx-2 inline-flex min-h-[var(--a11y-touch-target)] items-center gap-1 px-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 					>
 						{t('incidents.viewAllEvents')}
 						<ChevronRight size={14} />

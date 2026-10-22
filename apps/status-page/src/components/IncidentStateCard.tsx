@@ -38,7 +38,7 @@ export function IncidentErrorCard({
 			<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft">
 				<AlertTriangle size={20} className="text-warning-text" />
 			</div>
-			<h3 className="text-sm font-medium text-neutral-900">{title ?? t('incidents.error')}</h3>
+			<h2 className="text-sm font-medium text-neutral-900">{title ?? t('incidents.error')}</h2>
 			<p className="mt-1 text-xs text-muted">{hint ?? t('incidents.errorHint')}</p>
 		</div>
 	);
@@ -59,7 +59,7 @@ export function IncidentEmptyCard({
 			<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-success-soft/30">
 				<AlertTriangle size={20} className="text-success-text" />
 			</div>
-			<h3 className="text-sm font-medium text-neutral-900">{title}</h3>
+			<h2 className="text-sm font-medium text-neutral-900">{title}</h2>
 			<p className="mt-1 text-xs text-muted">{hint}</p>
 			{action}
 		</div>

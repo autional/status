@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { formatDateOnly, formatTimeOnly } from '@/lib/format';
 import { IncidentErrorCard } from '@/components/IncidentStateCard';
 import { TONE_CLASS, dayDotTone, maintenanceTone } from '@/lib/maintenance-status';
+import { usePageMeta } from '@/lib/page-meta';
 
 function getDaysInMonth(year: number, month: number): number {
 	return new Date(year, month + 1, 0).getDate();
@@ -26,7 +27,8 @@ function getFirstDayOfMonth(year: number, month: number): number {
 }
 
 export default function MaintenancePage() {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
+	usePageMeta(t('maintenance.title'), t('maintenance.subtitle'), '/maintenance');
 	const { data: maintenances, isLoading, isError } = useMaintenances();
 	const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -58,6 +60,31 @@ export default function MaintenancePage() {
 	const isToday = (day: number) =>
 		today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
 
+	// 完整日期 + 今天标记 + 维护数量：读屏用户听到的是「2026年10月21日，今天，无维护」，
+	// 而不是孤零零一个「21」（ST2-16）。
+	const dayLabel = (day: number): string => {
+		const dateLabel = new Date(year, month, day).toLocaleDateString(i18n.language, {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+		});
+		const parts = [dateLabel];
+		if (isToday(day)) parts.push(t('calendar.todaySuffix'));
+		const count = (maintenanceMap.get(day) ?? []).length;
+		parts.push(count > 0 ? t('calendar.maintenanceCount', { n: count }) : t('calendar.noMaintenance'));
+		return parts.join(t('calendar.labelSeparator'));
+	};
+
+	const calendarCells: (number | null)[] = [
+		...Array.from({ length: firstDay }, () => null),
+		...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+	];
+	while (calendarCells.length % 7 !== 0) calendarCells.push(null);
+	const calendarWeeks: (number | null)[][] = [];
+	for (let i = 0; i < calendarCells.length; i += 7) {
+		calendarWeeks.push(calendarCells.slice(i, i + 7));
+	}
+
 	return (
 		<div className="mx-auto max-w-6xl px-4 py-8">
 			{/* Header */}
@@ -83,107 +110,117 @@ export default function MaintenancePage() {
 					<div className="rounded-xl border border-neutral-200 bg-neutral-0 shadow-card">
 						{/* Calendar Header */}
 						<div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
-							<h2 className="text-lg font-semibold text-neutral-900">
+							<h2 id="calendar-month-label" className="text-lg font-semibold text-neutral-900">
 								{t('maintenance.year', { year })} {monthNames[month]}
 							</h2>
 							<div className="flex items-center gap-1">
 								<button
 									onClick={prevMonth}
 									aria-label={t('maintenance.prevMonth')}
-									className="rounded-md p-1.5 text-muted hover:bg-neutral-100"
+									className="inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center rounded-md text-muted hover:bg-neutral-100"
 								>
 									<ChevronLeft size={18} />
 								</button>
 								<button
 									onClick={() => setCurrentDate(new Date())}
-									className="rounded-md px-3 py-1.5 text-xs font-medium text-neutral-600 hover:bg-neutral-100"
+									className="inline-flex min-h-[var(--a11y-touch-target)] items-center justify-center rounded-md px-3 text-xs font-medium text-neutral-600 hover:bg-neutral-100"
 								>
 									{t('maintenance.today')}
 								</button>
 								<button
 									onClick={nextMonth}
 									aria-label={t('maintenance.nextMonth')}
-									className="rounded-md p-1.5 text-muted hover:bg-neutral-100"
+									className="inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center rounded-md text-muted hover:bg-neutral-100"
 								>
 									<ChevronRight size={18} />
 								</button>
 							</div>
 						</div>
 
-						{/* Weekday Headers */}
-						<div className="grid grid-cols-7 border-b border-neutral-100">
-							{weekDays.map((day) => (
-								<div
-									key={day}
-									className="py-2 text-center text-xs font-medium text-muted"
-								>
-									{day}
-								</div>
-							))}
-						</div>
-
-						{/* Days Grid */}
-						<div className="grid grid-cols-7">
-							{/* Empty cells before first day */}
-							{Array.from({ length: firstDay }).map((_, i) => (
-								<div
-									key={`empty-${i}`}
-									className="min-h-[80px] border-b border-r border-neutral-50"
-								/>
-							))}
-
-							{/* Days */}
-							{Array.from({ length: daysInMonth }).map((_, i) => {
-								const day = i + 1;
-								const dayMaintenances = maintenanceMap.get(day) || [];
-								const hasMaintenance = dayMaintenances.length > 0;
-
-								return (
-									<div
-										key={day}
-										className={`min-h-[80px] border-b border-r border-neutral-50 p-1.5 transition-colors ${
-											isToday(day)
-												? 'bg-primary-50/50 dark:bg-primary-900/10'
-												: 'hover:bg-neutral-50'
-										}`}
-									>
-										<div className="flex items-center justify-between">
-											<span
-												className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
-													isToday(day)
-														? 'bg-primary-600 text-white'
-														: 'text-neutral-700'
-												}`}
-											>
-												{day}
-											</span>
-											{hasMaintenance && (
-												<div
-													className={`h-1.5 w-1.5 rounded-full ${
-														TONE_CLASS[dayDotTone(dayMaintenances.map((x) => x.status))].dot
+						{/* 日历用真实表格语义（ST2-16）：caption 报出月份，列头报出星期，
+						    每个日期格用 aria-label 报出完整日期与维护情况。 */}
+						<table className="w-full table-fixed border-collapse" aria-labelledby="calendar-month-label">
+							<caption className="sr-only">
+								{t('calendar.caption', { year, month: monthNames[month] })}
+							</caption>
+							<thead>
+								<tr>
+									{weekDays.map((day) => (
+										<th
+											key={day}
+											scope="col"
+											className="py-2 text-center text-xs font-medium text-muted"
+										>
+											{day}
+										</th>
+									))}
+								</tr>
+							</thead>
+							<tbody>
+								{calendarWeeks.map((week, weekIndex) => (
+									<tr key={weekIndex}>
+										{week.map((day, dayIndex) => {
+											if (day === null) {
+												return (
+													<td
+														key={`empty-${dayIndex}`}
+														aria-hidden="true"
+														className="h-20 border-b border-r border-neutral-50"
+													/>
+												);
+											}
+											const dayMaintenances = maintenanceMap.get(day) || [];
+											const hasMaintenance = dayMaintenances.length > 0;
+											return (
+												<td
+													key={day}
+													aria-label={dayLabel(day)}
+													className={`h-20 border-b border-r border-neutral-50 p-1.5 align-top transition-colors ${
+														isToday(day)
+															? 'bg-primary-50/50 dark:bg-primary-900/10'
+															: 'hover:bg-neutral-50'
 													}`}
-												/>
-											)}
-										</div>
-										{dayMaintenances.slice(0, 2).map((m) => (
-											<Link
-												key={m.id}
-												to={`/maintenance/${m.id}`}
-												className="mt-1 hidden truncate rounded-xs px-1 py-0.5 text-[10px] font-medium leading-tight bg-info-soft text-info-text transition-colors hover:bg-info-soft sm:block dark:bg-info-soft/30 dark:text-info-text"
-												title={m.title}
-											>
-												{m.title}
-											</Link>
-										))}
-										{dayMaintenances.length > 2 && (
-											<div className="mt-0.5 text-[10px] text-muted">
-												{t('maintenance.more', { n: dayMaintenances.length - 2 })}
-											</div>
-										)}
-									</div>
-								);
-							})}
-						</div>
+												>
+													<div className="flex items-center justify-between">
+														<span
+															className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
+																isToday(day)
+																	? 'bg-primary-600 text-white'
+																	: 'text-neutral-700'
+															}`}
+														>
+															{day}
+														</span>
+														{hasMaintenance && (
+															<div
+																className={`h-1.5 w-1.5 rounded-full ${
+																	TONE_CLASS[dayDotTone(dayMaintenances.map((x) => x.status))].dot
+																}`}
+															/>
+														)}
+													</div>
+													{dayMaintenances.slice(0, 2).map((m) => (
+														<Link
+															key={m.id}
+															to={`/maintenance/${m.id}`}
+															className="mt-1 hidden truncate rounded-xs px-1 py-0.5 text-[10px] font-medium leading-tight bg-info-soft text-info-text transition-colors hover:bg-info-soft sm:block dark:bg-info-soft/30 dark:text-info-text"
+															title={m.title}
+														>
+															{m.title}
+														</Link>
+													))}
+													{dayMaintenances.length > 2 && (
+														<div className="mt-0.5 text-[10px] text-muted">
+															{t('maintenance.more', { n: dayMaintenances.length - 2 })}
+														</div>
+													)}
+												</td>
+											);
+										})}
+									</tr>
+								))}
+							</tbody>
+						</table>
 					</div>
 				</div>
 
@@ -191,10 +228,10 @@ export default function MaintenancePage() {
 				<div>
 					<div className="rounded-xl border border-neutral-200 bg-neutral-0 shadow-card">
 						<div className="border-b border-neutral-100 px-5 py-4">
-							<h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
+							<h2 className="flex items-center gap-2 text-sm font-semibold text-neutral-900">
 								<Wrench size={16} className="text-info-text" />
 								{t('maintenance.records')}
-							</h3>
+							</h2>
 						</div>
 
 						{isError ? (
@@ -231,9 +268,9 @@ export default function MaintenancePage() {
 									>
 										<div className="flex items-start justify-between gap-3">
 											<div className="min-w-0 flex-1">
-												<h4 className="text-sm font-medium text-neutral-900 truncate">
+												<h3 className="text-sm font-medium text-neutral-900 truncate">
 													{m.title}
-												</h4>
+												</h3>
 												<p className="mt-0.5 text-xs text-muted line-clamp-2">
 													{m.description}
 												</p>
@@ -294,9 +331,9 @@ export default function MaintenancePage() {
 
 					{/* Legend */}
 					<div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-0 p-4">
-						<h4 className="mb-2 text-xs font-medium text-neutral-700">
+						<h3 className="mb-2 text-xs font-medium text-neutral-700">
 							{t('maintenance.legend')}
-						</h4>
+						</h3>
 						<div className="space-y-1.5 text-xs text-muted">
 							<div className="flex items-center gap-2">
 								<div className={`h-2 w-2 rounded-full ${TONE_CLASS.info.dot}`} />

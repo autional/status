@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { formatDateTime } from '@/lib/format';
+import { usePageMeta } from '@/lib/page-meta';
 
 const statusConfig: Record<
 	string,
@@ -52,6 +53,16 @@ export default function MaintenanceDetailPage() {
 	const { t } = useTranslation();
 	const { id } = useParams<{ id: string }>();
 	const { data: maintenance, isLoading, isError } = useMaintenance(id || '');
+	usePageMeta(
+		maintenance
+			? `${maintenance.title} — ${t('maintenance.title')}`
+			: isLoading
+				? t('maintenance.loading')
+				: t('maintenance.notFound'),
+		maintenance?.description || t('maintenance.subtitle'),
+		id ? `/maintenance/${id}` : '/maintenance',
+		{ noindex: !maintenance && !isLoading },
+	);
 
 	if (isLoading) {
 		return (

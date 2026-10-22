@@ -25,6 +25,14 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { usePageMeta } from '@/lib/page-meta';
+
+type UptimePoint = {
+	ts: number;
+	uptime: number;
+	status: 'healthy' | 'degraded' | 'unhealthy';
+	count: number;
+};
 
 const RANGE_OPTIONS = [
 	{ value: '1h', label: 'service.range.1h' },
@@ -141,7 +149,7 @@ export default function ServiceDetailPage() {
 	const incidents = incidentItems ?? [];
 
 	// Transform Prometheus uptime data for chart
-	const uptimeChartData = useMemo(() => {
+	const uptimeRawData = useMemo<UptimePoint[]>(() => {
 		if (!uptimeResult?.points?.length) return [];
 		return uptimeResult.points.map((p) => {
 			const date = new Date(p.timestamp);
@@ -157,9 +165,46 @@ export default function ServiceDetailPage() {
 				ts: date.getTime(),
 				uptime: Math.round(value * 100) / 100,
 				status,
+				count: 1,
 			};
 		}).sort((a, b) => a.ts - b.ts);
 	}, [uptimeResult]);
+
+	// 柱子聚合（ST2-06）：24h 按小时、7d/30d 按天，避免移动端把 288/8640 个
+	// 采样点挤成 1–2px 的不可读柱墙。柱高取桶内均值；颜色取桶内**最差**状态，
+	// 异常时段不会被均值抹平。1h 保持原始 5 分钟粒度。
+	const uptimeChartData = useMemo<UptimePoint[]>(() => {
+		if (range === '1h' || !uptimeRawData.length) return uptimeRawData;
+		const hourly = range === '24h';
+		const bucketMs = hourly ? 3_600_000 : 86_400_000;
+		const buckets = new Map<number, UptimePoint[]>();
+		for (const point of uptimeRawData) {
+			const d = new Date(point.ts);
+			// 本地时区的整点/零点，避免 UTC 桶边界在非 UTC 区域错位。
+			const start = hourly
+				? new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours()).getTime()
+				: new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+			const list = buckets.get(start);
+			if (list) list.push(point);
+			else buckets.set(start, [point]);
+		}
+		return [...buckets.entries()]
+			.sort(([a], [b]) => a - b)
+			.map(([start, points]) => {
+				const mean = points.reduce((sum, p) => sum + p.uptime, 0) / points.length;
+				const worst: UptimePoint['status'] = points.some((p) => p.status === 'unhealthy')
+					? 'unhealthy'
+					: points.some((p) => p.status === 'degraded')
+						? 'degraded'
+						: 'healthy';
+				return {
+					ts: start + bucketMs / 2,
+					uptime: Math.round(mean * 100) / 100,
+					status: worst,
+					count: points.length,
+				};
+			});
+	}, [uptimeRawData, range]);
 
 	// Transform Prometheus latency data
 	const latencyChartData = useMemo(() => {
@@ -186,10 +231,10 @@ export default function ServiceDetailPage() {
 	}, [latencyChartData]);
 
 	const avgUptime = useMemo(() => {
-		if (!uptimeChartData.length) return null;
-		const sum = uptimeChartData.reduce((acc, d) => acc + d.uptime, 0);
-		return Math.round((sum / uptimeChartData.length) * 100) / 100;
-	}, [uptimeChartData]);
+		if (!uptimeRawData.length) return null;
+		const sum = uptimeRawData.reduce((acc, d) => acc + d.uptime, 0);
+		return Math.round((sum / uptimeRawData.length) * 100) / 100;
+	}, [uptimeRawData]);
 
 	const latencyTrend = useMemo(() => {
 		if (latencyChartData.length < 2) return 'stable' as const;
@@ -220,8 +265,26 @@ export default function ServiceDetailPage() {
 			n: points.length,
 		};
 	};
-	const uptimeCoverage = formatCoverage(uptimeChartData);
+	// 覆盖口径始终用原始采样点：聚合后的柱子只影响绘图，不改变数据覆盖与均值口径。
+	const uptimeCoverage = formatCoverage(uptimeRawData);
 	const latencyCoverage = formatCoverage(latencyChartData);
+	const uptimeAggregated =
+		range !== '1h' && uptimeChartData.length > 0 && uptimeChartData.length < uptimeRawData.length;
+
+	usePageMeta(
+		service
+			? `${t('service.name.' + service.id)} — ${t('app.title')}`
+			: servicesLoading
+				? t('service.loading')
+				: t('service.notFound'),
+		service
+			? t('service.desc.' + service.id)
+			: servicesLoading
+				? t('service.loading')
+				: t('service.notFoundDesc'),
+		serviceId ? `/services/${serviceId}` : '/services',
+		{ noindex: !service && !servicesLoading },
+	);
 
 	// 三态拆分（ST2-01）：加载中 → 骨架；取数失败 → 错误卡 + 重试；成功但未命中 → 未找到。
 	// 旧实现只有 `!service` 一个分支，把「请求失败」说成「服务已被移除」。
@@ -288,17 +351,24 @@ export default function ServiceDetailPage() {
 
 			{/* Service Header */}
 			<div className={`mt-6 rounded-xl border p-6 ${cfg.bg} ${cfg.border}`}>
-				<div className="flex items-start justify-between">
-					<div className="flex items-center gap-4">
-						<div className="flex h-14 w-14 items-center justify-center rounded-lg bg-neutral-0/80">
+				<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+					<div className="flex min-w-0 items-center gap-4">
+						<div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-neutral-0/80">
 							<ServiceIcon size={28} className="text-muted" />
 						</div>
-						<div>
+						<div className="min-w-0">
 							<h1 className="text-2xl font-bold">{t('service.name.' + service.id)}</h1>
 							<p className="mt-1 text-sm opacity-80">{t('service.desc.' + service.id)}</p>
 						</div>
 					</div>
-					<StatusIndicator status={service.status} size="lg" showLabel quietHealthy />
+					<div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
+						<StatusIndicator status={service.status} size="lg" showLabel quietHealthy />
+						{/* 徽章口径（ST2-17）：Operational 只表示网关探针最近一次通过，
+						    与下方 Prometheus 抓取成功率不是同一套测量系统。 */}
+						<p className="max-w-xs text-xs text-muted sm:text-right">
+							{t('service.badgeHint')}
+						</p>
+					</div>
 				</div>
 
 				<div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -383,8 +453,10 @@ export default function ServiceDetailPage() {
 
 			{/* Uptime Chart */}
 			<div className="mt-6 rounded-lg border border-neutral-200 bg-neutral-0 p-6 shadow-card">
-				<div className="flex items-center justify-between">
-					<h2 className="text-lg font-bold text-neutral-900">
+				{/* 标题与右侧均值块允许换行并各自收敛（ST2-07）：旧的单行 flex 会把
+				    长标题压到单词中间断行。 */}
+				<div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+					<h2 className="min-w-0 text-lg font-bold text-neutral-900">
 						{t('service.uptimeTitle', { range })}
 					</h2>
 					{avgUptime !== null && (
@@ -392,10 +464,10 @@ export default function ServiceDetailPage() {
 						// 套在 24h 滚动均值上等于"用月窗口去判日窗口"，而且给数字上"琥珀/红"本身就等于
 						// 替读者下了结论。§2.3 第 4 条要求把 99.9 **降级为图表分段色**（见 uptimeChartData），
 						// 不在数字旁下结论 —— 故此处恒用中性色，数字只陈述事实。
-						<span className="flex items-center gap-1 text-sm font-medium text-neutral-600">
+						<span className="flex shrink-0 flex-wrap items-center gap-1 text-sm font-medium text-neutral-600">
 							{t('service.uptimeAvg')} {avgUptime}%
 							<span className="text-xs font-normal text-muted">
-								{t('service.sampleCount', { n: uptimeChartData.length })}
+								{t('service.sampleCount', { n: uptimeRawData.length })}
 							</span>
 						</span>
 					)}
@@ -405,13 +477,21 @@ export default function ServiceDetailPage() {
 						{t('service.dataCoverage', uptimeCoverage)}
 					</p>
 				)}
+				{uptimeAggregated && (
+					<p className="mt-1 text-xs text-muted">
+						{t(
+							range === '24h' ? 'service.aggregatedHourly' : 'service.aggregatedDaily',
+							{ samples: uptimeRawData.length, buckets: uptimeChartData.length },
+						)}
+					</p>
+				)}
 				<div className="mt-4 h-64">
 					{uptimeLoading ? (
 						<div className="flex h-full items-center justify-center">
 							<div className="h-4 w-32 animate-pulse rounded-xs bg-neutral-200" />
 						</div>
 					) : uptimeChartData.length > 0 ? (
-						<UptimeChart data={uptimeChartData || []} tooltipLabel={t('service.uptimeTooltip')} />
+						<UptimeChart data={uptimeChartData} tooltipLabel={t('service.uptimeTooltip')} />
 					) : (
 						<div className="flex h-full flex-col items-center justify-center text-muted">
 							<Activity size={32} />
@@ -430,13 +510,13 @@ export default function ServiceDetailPage() {
 
 			{/* Latency Chart */}
 			<div className="mt-6 rounded-lg border border-neutral-200 bg-neutral-0 p-6 shadow-card">
-				<div className="flex items-center justify-between">
-					<h2 className="text-lg font-bold text-neutral-900">
+				<div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+					<h2 className="min-w-0 text-lg font-bold text-neutral-900">
 						{t('service.latencyTitle', { range })}
 					</h2>
-					<div className="flex items-center gap-2">
+					<div className="flex shrink-0 flex-wrap items-center gap-2">
 						{avgLatency !== null && (
-							<span className="flex items-center gap-1 text-sm font-medium text-neutral-600">
+							<span className="flex flex-wrap items-center gap-1 text-sm font-medium text-neutral-600">
 								{t('service.latencyAvg')} {avgLatency}ms
 								<span className="text-xs font-normal text-muted">
 									{t('service.sampleCount', { n: latencyChartData.length })}

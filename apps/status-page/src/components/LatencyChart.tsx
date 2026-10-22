@@ -61,7 +61,12 @@ export default function LatencyChart({ data }: LatencyChartProps) {
 	const sparse = data.length <= 40;
 
 	return (
-		<ResponsiveContainer width="100%" height="100%" minWidth={1}>
+		<ResponsiveContainer
+			width="100%"
+			height="100%"
+			minWidth={1}
+			initialDimension={{ width: 480, height: 260 }}
+		>
 			<LineChart data={data} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
 				<CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
 				<XAxis

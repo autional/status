@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
@@ -19,10 +19,10 @@ import {
 	Rss,
 	XCircle,
 	Settings,
-	KeyRound,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Toggle, Input } from '@autional/ui';
+import { usePageMeta } from '@/lib/page-meta';
 
 const emailSchema = z.object({
 	email: z.string().email(),
@@ -41,6 +41,12 @@ type PrefTokenForm = z.infer<typeof prefTokenSchema>;
 
 type SubscribeMode = 'subscribe' | 'unsubscribe' | 'preferences';
 
+const TABS: { value: SubscribeMode; id: string; label: string }[] = [
+	{ value: 'subscribe', id: 'tab-subscribe', label: 'subscribe.subscribeTab' },
+	{ value: 'unsubscribe', id: 'tab-unsubscribe', label: 'subscribe.unsubscribeTab' },
+	{ value: 'preferences', id: 'tab-preferences', label: 'subscribe.preferencesTab' },
+];
+
 const DIGEST_OPTIONS = [
 	{ value: 'immediate', label: 'subscribe.preferences.digestImmediate' },
 	{ value: 'daily', label: 'subscribe.preferences.digestDaily' },
@@ -49,9 +55,49 @@ const DIGEST_OPTIONS = [
 
 export default function SubscribePage() {
 	const { t } = useTranslation();
+	// /subscribe/manage 是带管理令牌的入口，与验证页同理：不索引、canonical 落回订阅页。
+	const isManageEntry = window.location.pathname.startsWith('/subscribe/manage');
+	usePageMeta(t('subscribe.title'), t('subscribe.desc'), '/subscribe', {
+		noindex: isManageEntry,
+	});
 	const [loading, setLoading] = useState(false);
 	const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
 	const [mode, setMode] = useState<SubscribeMode>('subscribe');
+	const tabRefs = useRef<Record<SubscribeMode, HTMLButtonElement | null>>({
+		subscribe: null,
+		unsubscribe: null,
+		preferences: null,
+	});
+
+	const selectMode = (next: SubscribeMode) => {
+		setMode(next);
+		setResult(null);
+	};
+
+	// APG tabs：左右箭头循环、Home/End 跳首尾，并与选中态同步移动焦点（ST2-13）。
+	const onTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+		let nextIndex: number;
+		switch (event.key) {
+			case 'ArrowRight':
+				nextIndex = (index + 1) % TABS.length;
+				break;
+			case 'ArrowLeft':
+				nextIndex = (index - 1 + TABS.length) % TABS.length;
+				break;
+			case 'Home':
+				nextIndex = 0;
+				break;
+			case 'End':
+				nextIndex = TABS.length - 1;
+				break;
+			default:
+				return;
+		}
+		event.preventDefault();
+		const next = TABS[nextIndex];
+		selectMode(next.value);
+		tabRefs.current[next.value]?.focus();
+	};
 
 	const emailForm = useForm<EmailForm>({
 		resolver: zodResolver(emailSchema),
@@ -66,10 +112,6 @@ export default function SubscribePage() {
 		resolver: zodResolver(prefTokenSchema),
 		defaultValues: { prefToken: '' },
 	});
-	// getValues 不触发重渲染 ⇒ 加载按钮的 disabled 恒为初始值（S-01）。
-	// useWatch 订阅表单值变化，setValue/输入/自动回填都能实时解除禁用。
-	const watchedPrefToken = useWatch({ control: prefForm.control, name: 'prefToken' });
-
 	// Preferences state
 	const [prefsLoading, setPrefsLoading] = useState(false);
 	const [prefsLoaded, setPrefsLoaded] = useState(false);
@@ -234,70 +276,42 @@ export default function SubscribePage() {
 			<div className="mt-8 flex justify-center">
 				<div
 					role="tablist"
+					aria-label={t('subscribe.modeLabel')}
 					className="inline-flex rounded-lg border border-neutral-200 bg-neutral-0 p-1"
 				>
-					<button
-						role="tab"
-						id="tab-subscribe"
-						aria-selected={mode === 'subscribe'}
-						aria-controls="panel-subscribe"
-						onClick={() => {
-							setMode('subscribe');
-							setResult(null);
-						}}
-						className={`inline-flex min-h-[var(--a11y-touch-target)] items-center rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-							mode === 'subscribe'
-								? 'bg-primary-600 text-white'
-								: 'text-neutral-600 hover:text-neutral-900'
-						}`}
-					>
-						{t('subscribe.subscribeTab')}
-					</button>
-					<button
-						role="tab"
-						id="tab-unsubscribe"
-						aria-selected={mode === 'unsubscribe'}
-						aria-controls="panel-unsubscribe"
-						onClick={() => {
-							setMode('unsubscribe');
-							setResult(null);
-						}}
-						className={`inline-flex min-h-[var(--a11y-touch-target)] items-center rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-							mode === 'unsubscribe'
-								? 'bg-primary-600 text-white'
-								: 'text-neutral-600 hover:text-neutral-900'
-						}`}
-					>
-						{t('subscribe.unsubscribeTab')}
-					</button>
-					<button
-						role="tab"
-						id="tab-preferences"
-						aria-selected={mode === 'preferences'}
-						aria-controls="panel-preferences"
-						onClick={() => {
-							setMode('preferences');
-							setResult(null);
-						}}
-						className={`inline-flex min-h-[var(--a11y-touch-target)] items-center rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-							mode === 'preferences'
-								? 'bg-primary-600 text-white'
-								: 'text-neutral-600 hover:text-neutral-900'
-						}`}
-					>
-						{t('subscribe.preferencesTab')}
-					</button>
+					{TABS.map((tab, index) => (
+						<button
+							key={tab.value}
+							ref={(el) => {
+								tabRefs.current[tab.value] = el;
+							}}
+							role="tab"
+							id={tab.id}
+							aria-selected={mode === tab.value}
+							aria-controls={`panel-${tab.value}`}
+							tabIndex={mode === tab.value ? 0 : -1}
+							onClick={() => selectMode(tab.value)}
+							onKeyDown={(event) => onTabKeyDown(event, index)}
+							className={`inline-flex min-h-[var(--a11y-touch-target)] items-center rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
+								mode === tab.value
+									? 'bg-primary-600 text-white'
+									: 'text-neutral-600 hover:text-neutral-900'
+							}`}
+						>
+							{t(tab.label)}
+						</button>
+					))}
 				</div>
 			</div>
 
 			<div
 				role="tabpanel"
-				id={`panel-${mode}`}
-				aria-labelledby={`tab-${mode}`}
+				id="panel-subscribe"
+				aria-labelledby="tab-subscribe"
+				hidden={mode !== 'subscribe'}
 				className="mt-6 rounded-lg border border-neutral-200 bg-neutral-0 p-6 shadow-card"
 			>
-				{mode === 'subscribe' ? (
-					<form onSubmit={emailForm.handleSubmit(handleSubscribe)} className="space-y-4">
+				<form onSubmit={emailForm.handleSubmit(handleSubscribe)} className="space-y-4">
 						<div>
 							<label
 								htmlFor="email"
@@ -341,7 +355,15 @@ export default function SubscribePage() {
 							)}
 						</button>
 					</form>
-				) : mode === 'unsubscribe' ? (
+			</div>
+
+			<div
+				role="tabpanel"
+				id="panel-unsubscribe"
+				aria-labelledby="tab-unsubscribe"
+				hidden={mode !== 'unsubscribe'}
+				className="mt-6 rounded-lg border border-neutral-200 bg-neutral-0 p-6 shadow-card"
+			>
 					<form onSubmit={tokenForm.handleSubmit(handleUnsubscribe)} className="space-y-4">
 						<div>
 							<label
@@ -387,15 +409,23 @@ export default function SubscribePage() {
 							)}
 						</button>
 					</form>
-				) : (
-					/* ─── Preferences Form ─── */
-					<div className="space-y-4">
-						<h3 className="text-base font-semibold text-neutral-900">
-							{t('subscribe.preferences.title')}
-						</h3>
-						<p className="text-xs text-muted">
-							{t('subscribe.preferences.desc')}
-						</p>
+			</div>
+
+			<div
+				role="tabpanel"
+				id="panel-preferences"
+				aria-labelledby="tab-preferences"
+				hidden={mode !== 'preferences'}
+				className="mt-6 rounded-lg border border-neutral-200 bg-neutral-0 p-6 shadow-card"
+			>
+				{/* ─── Preferences Form ─── */}
+				<div className="space-y-4">
+					<h2 className="text-base font-semibold text-neutral-900">
+						{t('subscribe.preferences.title')}
+					</h2>
+					<p className="text-xs text-muted">
+						{t('subscribe.preferences.desc')}
+					</p>
 
 						{/* Management token（U349：偏好以令牌为键，不再凭邮箱读取） */}
 						<div>
@@ -581,9 +611,9 @@ export default function SubscribePage() {
 							</button>
 						)}
 					</div>
-				)}
+			</div>
 
-				{result && (
+			{result && (
 					<div
 						className={`mt-4 flex items-center gap-2 rounded-md p-3 text-sm ${
 							result.success
@@ -595,9 +625,9 @@ export default function SubscribePage() {
 						{result.message}
 					</div>
 				)}
-			</div>
 
 			{/* Subscription Benefits */}
+			<h2 className="sr-only">{t('subscribe.benefitsTitle')}</h2>
 			<div className="mt-8 grid gap-4 sm:grid-cols-3">
 				<div className="rounded-lg border border-neutral-200 bg-neutral-0 p-4 text-center">
 					<div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-success-soft text-success-text dark:bg-success-soft/30 dark:text-success-text">

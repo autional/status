@@ -13,6 +13,7 @@ import StatusIndicator from '@/components/StatusIndicator';
 import RefreshCountdown from '@/components/RefreshCountdown';
 import { buildGroupStructure } from '@/lib/api';
 import { formatTimeWithSeconds } from '@/lib/format';
+import { usePageMeta } from '@/lib/page-meta';
 import { Shield, AlertTriangle, Clock, ArrowRight, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
@@ -67,10 +68,15 @@ export default function DashboardPage() {
 		isLoading: statusLoading,
 		refetch: refetchStatus,
 	} = useServiceStatuses();
-	const { data: incidents, isError: incidentsError } = useIncidents();
+	const { data: incidents, isLoading: incidentsLoading, isError: incidentsError } = useIncidents();
 	const { data: overview } = useOverview();
-	const { data: maintenances, isError: maintenancesError } = useMaintenances();
+	const {
+		data: maintenances,
+		isLoading: maintenancesLoading,
+		isError: maintenancesError,
+	} = useMaintenances();
 	const { data: catalog, isLoading: catalogLoading } = useServiceCatalog();
+	usePageMeta(t('app.title'), t('app.metaDesc'), '/');
 
 	// 分组：catalog.groups（权威 6 组 25 服务）× 派生 services。
 	// 历史上用 SERVICE_GROUPS 硬编码 5 组 15 服务做交集，导致 access-control 组永不渲染。
@@ -141,6 +147,9 @@ export default function DashboardPage() {
 
 	return (
 		<div className="mx-auto max-w-6xl px-4 py-8">
+			{/* 页面级标题：视觉上由头部品牌横幅承载，语义层级仍需要唯一的 H1（ST2-09）。 */}
+			<h1 className="sr-only">{t('app.title')}</h1>
+
 			{/* Summary Stats */}
 			<div className="mb-8 grid gap-4 sm:grid-cols-4">
 				{statusLoading ? (
@@ -205,7 +214,9 @@ export default function DashboardPage() {
 							</div>
 							<p className="mt-2 text-xs text-muted">
 								{activeIncidents == null
-									? t('stat.incidents.unavailable')
+									? incidentsLoading
+										? t('stat.loading')
+										: t('stat.incidents.unavailable')
 									: activeIncidents > 0
 										? t('stat.incidents.active')
 										: t('stat.incidents.none')}
@@ -228,7 +239,9 @@ export default function DashboardPage() {
 							</div>
 							<p className="mt-2 text-xs text-muted">
 								{plannedMaintenances == null
-									? t('stat.maintenance.unavailable')
+									? maintenancesLoading
+										? t('stat.loading')
+										: t('stat.maintenance.unavailable')
 									: plannedMaintenances.length
 										? t('stat.maintenance.upcoming')
 										: t('stat.maintenance.none')}
@@ -338,7 +351,7 @@ export default function DashboardPage() {
 					</h2>
 					<Link
 						to="/incidents"
-						className="flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
+						className="-mx-2 flex min-h-[var(--a11y-touch-target)] items-center gap-1 px-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
 					>
 						{t('incidents.viewAll')}
 						<ArrowRight size={14} />
@@ -353,9 +366,9 @@ export default function DashboardPage() {
 						<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft">
 							<AlertTriangle size={20} className="text-warning-text" />
 						</div>
-						<h3 className="text-sm font-medium text-neutral-900">
+						<h2 className="text-sm font-medium text-neutral-900">
 							{t('incidents.error')}
-						</h3>
+						</h2>
 						<p className="mt-1 text-xs text-muted">{t('incidents.errorHint')}</p>
 					</div>
 				) : (
@@ -368,9 +381,9 @@ export default function DashboardPage() {
 				<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50 dark:bg-primary-900/30">
 					<Clock size={20} className="text-primary-600 dark:text-primary-400" />
 				</div>
-				<h3 className="text-base font-semibold text-neutral-900">
+				<h2 className="text-base font-semibold text-neutral-900">
 					{t('uptime.title')}
-				</h3>
+				</h2>
 				<p className="mx-auto mt-1 max-w-lg text-sm text-muted">
 					{t('uptime.desc')}
 				</p>

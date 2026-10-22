@@ -147,10 +147,10 @@ export function useServiceCatalog() {
 	});
 }
 
-export function useRssXml() {
+export function useRssXml(lang: 'zh' | 'en' = 'zh') {
 	return useQuery({
-		queryKey: ['rss-feed'],
-		queryFn: fetchRssXml,
+		queryKey: ['rss-feed', lang],
+		queryFn: () => fetchRssXml(lang),
 		staleTime: 5 * 60 * 1000,
 	});
 }

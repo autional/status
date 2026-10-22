@@ -4,11 +4,14 @@ import { verifySubscription } from '@/lib/api';
 import { CheckCircle, XCircle, Loader2, Mail, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { usePageMeta } from '@/lib/page-meta';
 
 const VERIFY_TIMEOUT_MS = 20000;
 
 function VerifyContent() {
 	const { t } = useTranslation();
+	// 验证页 URL 带一次性 token，绝不索引也不进 canonical。
+	usePageMeta(t('verify.title'), t('verify.subtitle'), '/subscribe/verify', { noindex: true });
 	const [searchParams] = useSearchParams();
 	const token = searchParams.get('token');
 	const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
