@@ -9,7 +9,8 @@
     "preview": "pnpm --filter @autional/status-page preview",
     "typecheck": "pnpm --filter @autional/status-page typecheck",
     "lint": "pnpm --filter @autional/status-page lint",
-    "test": "pnpm --filter @autional/status-page test"
+    "test": "pnpm --filter @autional/status-page test",
+    "test:e2e": "pnpm --filter @autional/status-page test:e2e"
   },
   "packageManager": "pnpm@11.0.8",
   "engines": {

@@ -13,7 +13,12 @@ pnpm install
 pnpm dev      # http://localhost:13106（构建前自动生成 env.js/robots/sitemap/security.txt）
 pnpm build    # 构建产物：apps/status-page/dist/
 pnpm test     # Vitest 单元测试
+pnpm test:e2e # Playwright 生产只读回归（默认 com；BASE_URL 可指 cn 或本地）
 ```
+
+E2E 覆盖四条审计断言：订阅 tabs 键盘语义、路由级 page meta（含 EN）、
+404 未找到三态、RSS `?lang` 频道语言。只读，不写入任何接口。首次运行前需
+`pnpm --filter @autional/status-page exec playwright install chromium`。
 
 ## 部署（单源双区）
 
