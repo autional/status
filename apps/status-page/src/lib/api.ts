@@ -271,10 +271,11 @@ export async function fetchMaintenance(id: string): Promise<Maintenance | null> 
 	}
 }
 
-// 说明（T43）：本文件另有若干 fetch（overview / catalog / metrics / rss / 订阅偏好）仍保留
+// 说明（T43）：本文件另有若干 fetch（overview / metrics / rss / 订阅偏好）仍保留
 // "catch ⇒ return null" 的吞错写法 —— 其调用方（页面）目前都以 null 为正常缺省、**不**依赖
 // `isError`，故本次不动（改动它们会影响各页的 null 分支）。若将来要给这些入口加失败态，
 // **必须**先让错误抛出，否则同样会得到死代码。
+// 例外：fetchServiceCatalog 已改为抛出（ST2-01），因为服务详情必须区分「取不到」与「不存在」。
 
 export interface LatencyMetricsResult {
 	service: string;
@@ -322,13 +323,13 @@ export async function fetchUptimeMetrics(
 	}
 }
 
-export async function fetchServiceCatalog(): Promise<ServiceCatalogResponse | null> {
-	try {
-		return (await Generated.statusServices()) as ServiceCatalogResponse;
-	} catch (err) {
-		devWarn('[StatusPage] service catalog fetch failed:', err);
-		return null;
-	}
+/**
+ * 服务目录：**不吞错**。catalog 是服务详情的唯一清单来源，
+ * 吞错返回 null 会让 react-query 的 isError 恒为 false ⇒ 页面无法区分
+ * 「清单取不到」与「服务不存在」（ST2-01）。
+ */
+export async function fetchServiceCatalog(): Promise<ServiceCatalogResponse> {
+	return (await Generated.statusServices()) as ServiceCatalogResponse;
 }
 
 export async function fetchRssXml(): Promise<string | null> {

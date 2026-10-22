@@ -16,7 +16,7 @@ import { formatTimeWithSeconds } from '@/lib/format';
 import { Shield, AlertTriangle, Clock, ArrowRight, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
-import type { ServiceGroup as ServiceGroupType, ServiceStatus } from '@/types';
+import type { Maintenance, ServiceGroup as ServiceGroupType, ServiceStatus } from '@/types';
 
 function StatCardSkeleton() {
 	return (
@@ -24,6 +24,38 @@ function StatCardSkeleton() {
 			<div className="h-3 w-20 animate-pulse rounded-xs bg-neutral-200" />
 			<div className="mt-2 h-8 w-16 animate-pulse rounded-xs bg-neutral-200" />
 			<div className="mt-2 h-3 w-32 animate-pulse rounded-xs bg-neutral-200" />
+		</div>
+	);
+}
+
+/**
+ * 服务组磁贴数镜像 catalog（6 组 27 服务：4/2/5/10/4/2）。
+ * 只影响加载骨架高度；catalog 变更后这里失配也只会产生轻微位移，不影响功能。
+ * 旧骨架 3×64px，加载完成后整块长高，是首页 CLS 的主源（ST2-05）。
+ */
+const SKELETON_GROUP_TILES = [4, 2, 5, 10, 4, 2];
+
+function ServiceGroupSkeleton({ tiles }: { tiles: number }) {
+	return (
+		<div className="overflow-hidden rounded-xl border border-neutral-200">
+			<div className="flex items-center justify-between gap-3 px-4 py-3">
+				<div className="flex items-center gap-3">
+					<div className="h-9 w-9 animate-pulse rounded-lg bg-neutral-100" />
+					<div>
+						<div className="h-4 w-24 animate-pulse rounded-xs bg-neutral-100" />
+						<div className="mt-2 h-4 w-40 animate-pulse rounded-xs bg-neutral-100" />
+					</div>
+				</div>
+				<div className="h-3 w-16 animate-pulse rounded-xs bg-neutral-100" />
+			</div>
+			<div className="px-3 py-3">
+				<div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 sm:grid-cols-3 xl:grid-cols-4">
+					{Array.from({ length: tiles }).map((_, i) => (
+						// 真实磁贴高 53px（实测），旧骨架写 48px ⇒ 每行差 5px、整块加载后长高。
+						<div key={i} className="h-[3.3125rem] animate-pulse rounded-lg bg-neutral-100" />
+					))}
+				</div>
+			</div>
 		</div>
 	);
 }
@@ -37,7 +69,7 @@ export default function DashboardPage() {
 	} = useServiceStatuses();
 	const { data: incidents, isError: incidentsError } = useIncidents();
 	const { data: overview } = useOverview();
-	const { data: maintenances } = useMaintenances();
+	const { data: maintenances, isError: maintenancesError } = useMaintenances();
 	const { data: catalog, isLoading: catalogLoading } = useServiceCatalog();
 
 	// 分组：catalog.groups（权威 6 组 25 服务）× 派生 services。
@@ -85,22 +117,23 @@ export default function DashboardPage() {
 	const servicesUnknown = hasLiveServices
 		? services.filter((s) => s.status === 'unknown' && !s.noProbe).length
 		: 0;
-	const activeIncidents = useMemo(() => {
+	// 三态：数字 = 已知；null = 取数中/失败。失败时不得回落 0（ST2-02 假零）。
+	const activeIncidents = useMemo<number | null>(() => {
 		if (overview?.activeIncidents != null) return overview.activeIncidents;
-		return (
-			incidents?.filter(
-				(i) => i.status !== 'resolved' && i.status !== 'draft' && i.severity !== 'maintenance',
-			).length ?? 0
-		);
+		if (!incidents) return null;
+		return incidents.filter(
+			(i) => i.status !== 'resolved' && i.status !== 'draft' && i.severity !== 'maintenance',
+		).length;
 	}, [overview, incidents]);
 	const lastUpdated = overview?.lastUpdated ?? services?.[0]?.lastChecked;
 
 	// 维护走独立 API（status_maintenances），不能从 incidents 推导。
 	// 计划维护 = scheduled + in_progress（排除 completed / cancelled）。
-	const plannedMaintenances = useMemo(
-		() => (maintenances || []).filter((m) => m.status !== 'completed' && m.status !== 'cancelled'),
-		[maintenances],
-	);
+	// 同上：失败/加载中为 null（显示 —），只有成功拿到数组才允许报 0（ST2-02）。
+	const plannedMaintenances = useMemo<Maintenance[] | null>(() => {
+		if (maintenancesError || !maintenances) return null;
+		return maintenances.filter((m) => m.status !== 'completed' && m.status !== 'cancelled');
+	}, [maintenances, maintenancesError]);
 
 	// 拿不到逐服务数据（catalog 挂了）才算"不可用"：空数组是真值，`!services` 永远为 false
 	// ⇒ 原来的写法让下方的"无法获取实时服务状态"警示成了死代码。
@@ -163,7 +196,7 @@ export default function DashboardPage() {
 										{t('stat.incidents')}
 									</p>
 									<p className="mt-1 text-2xl font-bold text-neutral-900">
-										{activeIncidents}
+										{activeIncidents ?? '—'}
 									</p>
 								</div>
 								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-danger-soft text-danger-text dark:bg-danger-soft/30 dark:text-danger-text">
@@ -171,7 +204,11 @@ export default function DashboardPage() {
 								</div>
 							</div>
 							<p className="mt-2 text-xs text-muted">
-								{activeIncidents > 0 ? t('stat.incidents.active') : t('stat.incidents.none')}
+								{activeIncidents == null
+									? t('stat.incidents.unavailable')
+									: activeIncidents > 0
+										? t('stat.incidents.active')
+										: t('stat.incidents.none')}
 							</p>
 						</div>
 
@@ -182,7 +219,7 @@ export default function DashboardPage() {
 										{t('stat.maintenance')}
 									</p>
 									<p className="mt-1 text-2xl font-bold text-neutral-900">
-										{plannedMaintenances.length}
+										{plannedMaintenances?.length ?? '—'}
 									</p>
 								</div>
 								<div className="flex h-10 w-10 items-center justify-center rounded-md bg-info-soft text-info-text dark:bg-info-soft/30 dark:text-info-text">
@@ -190,9 +227,11 @@ export default function DashboardPage() {
 								</div>
 							</div>
 							<p className="mt-2 text-xs text-muted">
-								{plannedMaintenances.length
-									? t('stat.maintenance.upcoming')
-									: t('stat.maintenance.none')}
+								{plannedMaintenances == null
+									? t('stat.maintenance.unavailable')
+									: plannedMaintenances.length
+										? t('stat.maintenance.upcoming')
+										: t('stat.maintenance.none')}
 							</p>
 						</div>
 
@@ -236,7 +275,10 @@ export default function DashboardPage() {
 			</div>
 
 			{/* Fleet Overview Strip —— 27 个服务图标一览，一眼看全 */}
-			{services && services.length > 0 && (
+			{statusLoading || catalogLoading ? (
+				// 按实测最终高度预留（ST2-05）：移动端 4 行图标 ≈ 297px，桌面 2 行 ≈ 153px。
+				<div className="mb-6 h-[18.5rem] animate-pulse rounded-lg bg-neutral-100 sm:h-[9.5rem]" />
+			) : services && services.length > 0 ? (
 				<div className="mb-6 rounded-lg border border-neutral-200 bg-neutral-0 p-4 shadow-card">
 					<div className="mb-3 flex items-center justify-between gap-3">
 						<p className="text-xs font-medium text-muted uppercase tracking-wide">
@@ -248,22 +290,23 @@ export default function DashboardPage() {
 					</div>
 					<FleetStrip services={services} />
 				</div>
-			)}
+			) : null}
 
 			{/* Service Groups */}
 			<div className="mb-8 space-y-4">
 				{statusLoading || catalogLoading ? (
+					// 与真实结构同形：6 组、逐组磁贴数与 catalog 一致；
+					// 行数在 1/2/3/4 列断点下都与真实布局相同（ST2-05）。
 					<div className="space-y-4">
-						{Array.from({ length: 3 }).map((_, i) => (
-							<div
-								key={i}
-								className="h-16 animate-pulse rounded-xl bg-neutral-100"
-							/>
+						{SKELETON_GROUP_TILES.map((tiles, i) => (
+							<ServiceGroupSkeleton key={i} tiles={tiles} />
 						))}
 					</div>
 				) : healthUnavailable ? (
 					<div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
-						{t('dashboard.healthUnavailable')}
+						{overview
+							? t('dashboard.healthUnavailable')
+							: t('dashboard.healthUnavailableNoOverview')}
 					</div>
 				) : (
 					displayGroups.map((group) => {

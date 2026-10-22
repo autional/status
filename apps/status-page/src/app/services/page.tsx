@@ -21,6 +21,7 @@ import {
 	TrendingUp,
 	TrendingDown,
 	Minus,
+	RefreshCw,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,10 +33,76 @@ const RANGE_OPTIONS = [
 	{ value: '30d', label: 'service.range.30d' },
 ];
 
-export default function ServiceDetailPage() {
+function BackToStatus() {
 	const { t } = useTranslation();
+	return (
+		<Link
+			to="/"
+			className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-neutral-800"
+		>
+			<ArrowLeft size={14} />
+			{t('service.back')}
+		</Link>
+	);
+}
+
+/**
+ * 加载骨架：高度按最终结构预留（头部卡 + 范围条 + 两张图表卡）。
+ * 旧实现加载中直接渲染「Service Not Found」卡，加载完成后整页替换，
+ * 实测产生 0.362 的布局位移（ST2-05）；骨架把这段高度先占住。
+ */
+function ServiceDetailSkeleton() {
+	return (
+		<>
+			{/* 头部卡：移动端三项指标竖排（449px），sm 起横排（247px）。 */}
+			<div className="mt-6 h-[28rem] animate-pulse rounded-xl bg-neutral-100 sm:h-[15.5rem]" />
+			<div className="mt-6 flex flex-wrap items-center gap-2">
+				<div className="h-4 w-20 animate-pulse rounded-xs bg-neutral-100" />
+				{Array.from({ length: 4 }).map((_, i) => (
+					<div
+						key={i}
+						className="h-[var(--a11y-touch-target)] w-14 animate-pulse rounded-md bg-neutral-100"
+					/>
+				))}
+			</div>
+			{/* 图表卡按实测高度预留：移动端 397/417px，桌面 369/389px。 */}
+			<div className="mt-6 h-[24.75rem] animate-pulse rounded-lg bg-neutral-100 sm:h-[23rem]" />
+			<div className="mt-6 h-[26rem] animate-pulse rounded-lg bg-neutral-100 sm:h-[24.25rem]" />
+			{/* 关联事件区（空态 241px）——漏掉它会让整块在取数后下推。 */}
+			<div className="mt-6 h-[15rem] animate-pulse rounded-lg bg-neutral-100" />
+		</>
+	);
+}
+
+function ServiceDetailError({ onRetry }: { onRetry: () => void }) {
+	const { t } = useTranslation();
+	return (
+		<div className="mt-6 rounded-lg border border-warning-soft bg-neutral-0 p-8 text-center">
+			<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-warning-soft">
+				<AlertTriangle size={20} className="text-warning-text" />
+			</div>
+			<h2 className="text-sm font-medium text-neutral-900">{t('service.loadError')}</h2>
+			<p className="mt-1 text-xs text-muted">{t('service.loadErrorHint')}</p>
+			<button
+				onClick={onRetry}
+				className="mt-4 inline-flex min-h-[var(--a11y-touch-target)] items-center justify-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-0 px-4 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-50"
+			>
+				<RefreshCw size={13} />
+				{t('service.retry')}
+			</button>
+		</div>
+	);
+}
+
+export default function ServiceDetailPage() {
+	const { t, i18n } = useTranslation();
 	const { serviceId } = useParams<{ serviceId: string }>();
-	const { data: services } = useServiceStatuses();
+	const {
+		data: services,
+		isLoading: servicesLoading,
+		isError: servicesError,
+		refetchAll,
+	} = useServiceStatuses();
 	const [range, setRange] = useState('24h');
 
 	// 「关联事件」数据源与 `/incidents` 列表页同口径（§4.1(b)/(c) 同型缺陷修复）：
@@ -85,13 +152,13 @@ export default function ServiceDetailPage() {
 			// 这样 99.9（本是**自然月口径**的那个数）只留在图上，不再被套到 24h 滚动均值上做判定（§2.3 第 4 条）。
 			if (value < 95) status = 'unhealthy';
 			else if (value < 99.9) status = 'degraded';
-			// HH:mm（含分钟）——只给小时会在细粒度采样下把多个点压成重复刻度（Q-02）
+			// 保留真实时间戳：图表用数值时间轴，稀疏采样不会被等距分类轴拉成「连续趋势」（ST2-04）。
 			return {
-				time: `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`,
+				ts: date.getTime(),
 				uptime: Math.round(value * 100) / 100,
 				status,
 			};
-		});
+		}).sort((a, b) => a.ts - b.ts);
 	}, [uptimeResult]);
 
 	// Transform Prometheus latency data
@@ -104,11 +171,11 @@ export default function ServiceDetailPage() {
 			if (valueMs > 1000) status = 'unhealthy';
 			else if (valueMs > 500) status = 'degraded';
 			return {
-				time: `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`,
+				ts: date.getTime(),
 				latency: Math.round(valueMs * 100) / 100,
 				status,
 			};
-		});
+		}).sort((a, b) => a.ts - b.ts);
 	}, [latencyResult]);
 
 	// Stats
@@ -136,25 +203,49 @@ export default function ServiceDetailPage() {
 		return 'stable' as const;
 	}, [latencyChartData]);
 
+	// 覆盖口径：稀疏采样时读者必须知道「首末点与样本数」，
+	// 否则会把 10 个点读成连续 30 天的趋势（ST2-04）。
+	const formatCoverage = (points: { ts: number }[]) => {
+		if (!points.length) return null;
+		const fmt = (ts: number) =>
+			new Date(ts).toLocaleString(i18n.language, {
+				month: '2-digit',
+				day: '2-digit',
+				hour: '2-digit',
+				minute: '2-digit',
+			});
+		return {
+			from: fmt(points[0].ts),
+			to: fmt(points[points.length - 1].ts),
+			n: points.length,
+		};
+	};
+	const uptimeCoverage = formatCoverage(uptimeChartData);
+	const latencyCoverage = formatCoverage(latencyChartData);
+
+	// 三态拆分（ST2-01）：加载中 → 骨架；取数失败 → 错误卡 + 重试；成功但未命中 → 未找到。
+	// 旧实现只有 `!service` 一个分支，把「请求失败」说成「服务已被移除」。
 	if (!service) {
 		return (
-			<div className="mx-auto max-w-4xl px-4 py-12 text-center">
-				<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
-					<Server size={32} className="text-muted" />
-				</div>
-				<h2 className="text-lg font-semibold text-neutral-900">
-					{t('service.notFound')}
-				</h2>
-				<p className="mt-2 text-sm text-muted">
-					{t('service.notFoundDesc')}
-				</p>
-				<Link
-					to="/"
-					className="mt-6 inline-flex items-center gap-1 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700"
-				>
-					<ArrowLeft size={14} />
-					{t('service.back')}
-				</Link>
+			<div className="mx-auto max-w-4xl px-4 py-8">
+				<BackToStatus />
+				{servicesLoading ? (
+					<ServiceDetailSkeleton />
+				) : servicesError ? (
+					<ServiceDetailError onRetry={() => void refetchAll()} />
+				) : (
+					<div className="mt-6 rounded-xl border border-neutral-200 bg-neutral-0 px-4 py-12 text-center">
+						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100">
+							<Server size={32} className="text-muted" />
+						</div>
+						<h2 className="text-lg font-semibold text-neutral-900">
+							{t('service.notFound')}
+						</h2>
+						<p className="mt-2 text-sm text-muted">
+							{t('service.notFoundDesc')}
+						</p>
+					</div>
+				)}
 			</div>
 		);
 	}
@@ -193,14 +284,7 @@ export default function ServiceDetailPage() {
 
 	return (
 		<div className="mx-auto max-w-4xl px-4 py-8">
-			{/* Back link */}
-			<Link
-				to="/"
-				className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-neutral-800"
-			>
-				<ArrowLeft size={14} />
-				{t('service.back')}
-			</Link>
+			<BackToStatus />
 
 			{/* Service Header */}
 			<div className={`mt-6 rounded-xl border p-6 ${cfg.bg} ${cfg.border}`}>
@@ -285,6 +369,7 @@ export default function ServiceDetailPage() {
 					<button
 						key={opt.value}
 						onClick={() => setRange(opt.value)}
+						aria-pressed={range === opt.value}
 						className={`inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center rounded-md px-3 text-xs font-medium transition-colors ${
 							range === opt.value
 								? 'bg-primary-600 text-white'
@@ -309,9 +394,17 @@ export default function ServiceDetailPage() {
 						// 不在数字旁下结论 —— 故此处恒用中性色，数字只陈述事实。
 						<span className="flex items-center gap-1 text-sm font-medium text-neutral-600">
 							{t('service.uptimeAvg')} {avgUptime}%
+							<span className="text-xs font-normal text-muted">
+								{t('service.sampleCount', { n: uptimeChartData.length })}
+							</span>
 						</span>
 					)}
 				</div>
+				{uptimeCoverage && (
+					<p className="mt-1 text-xs text-muted">
+						{t('service.dataCoverage', uptimeCoverage)}
+					</p>
+				)}
 				<div className="mt-4 h-64">
 					{uptimeLoading ? (
 						<div className="flex h-full items-center justify-center">
@@ -343,8 +436,11 @@ export default function ServiceDetailPage() {
 					</h2>
 					<div className="flex items-center gap-2">
 						{avgLatency !== null && (
-							<span className="text-sm font-medium text-neutral-600">
+							<span className="flex items-center gap-1 text-sm font-medium text-neutral-600">
 								{t('service.latencyAvg')} {avgLatency}ms
+								<span className="text-xs font-normal text-muted">
+									{t('service.sampleCount', { n: latencyChartData.length })}
+								</span>
 							</span>
 						)}
 						<TrendIcon size={16} className={trendColor} />
@@ -353,6 +449,11 @@ export default function ServiceDetailPage() {
 				{/* 口径小字：这里画的是 Prometheus 直方图的 P95 聚合（与头部"网关探测延迟"不同口径），
 				    标出来源与统计量，读者才不会把两处数字读成互相矛盾。 */}
 				<p className="mt-1 text-xs text-muted">{t('service.latencySourceHint', { range })}</p>
+				{latencyCoverage && (
+					<p className="mt-1 text-xs text-muted">
+						{t('service.dataCoverage', latencyCoverage)}
+					</p>
+				)}
 				<div className="mt-4 h-64">
 					{latencyLoading ? (
 						<div className="flex h-full items-center justify-center">

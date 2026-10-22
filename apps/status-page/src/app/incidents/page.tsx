@@ -97,6 +97,7 @@ export default function IncidentsPage() {
 								<button
 									key={f.value}
 									onClick={() => setSeverityFilter(f.value)}
+									aria-pressed={severityFilter === f.value}
 									className={`inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center rounded-full px-3 text-xs font-medium transition-colors ${
 										severityFilter === f.value
 											? 'bg-primary-600 text-white'
@@ -112,6 +113,7 @@ export default function IncidentsPage() {
 								<button
 									key={f.value}
 									onClick={() => setStatusFilter(f.value)}
+									aria-pressed={statusFilter === f.value}
 									className={`inline-flex min-h-[var(--a11y-touch-target)] min-w-[var(--a11y-touch-target)] items-center justify-center rounded-full px-3 text-xs font-medium transition-colors ${
 										statusFilter === f.value
 											? 'bg-primary-600 text-white'

@@ -44,6 +44,11 @@ export function useServiceStatuses() {
 		isLoading: catalog.isLoading || health.isLoading,
 		isFetching: health.isFetching,
 		refetch: health.refetch,
+		// 失败态重试必须连 catalog 一起重取：catalog 才是服务清单来源，
+		// 只重取 health 会在「清单请求失败」时永远重试不出来（ST2-01）。
+		refetchAll: async () => {
+			await Promise.all([catalog.refetch(), health.refetch()]);
+		},
 		isError: catalog.isError || health.isError,
 	};
 }

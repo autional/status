@@ -10,7 +10,7 @@ import {
 import { useTranslation } from 'react-i18next';
 
 interface LatencyData {
-	time: string;
+	ts: number;
 	latency: number;
 	status: 'healthy' | 'degraded' | 'unhealthy';
 }
@@ -35,20 +35,45 @@ const chartColors = {
 };
 
 export default function LatencyChart({ data }: LatencyChartProps) {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 	const c = chartColors;
+	// 数值时间轴：稀疏采样按真实时间间隔摆放，空档不再被等距分类轴抹平（ST2-04）。
+	const span = data.length > 1 ? data[data.length - 1].ts - data[0].ts : 0;
+	const tickFormatter = (value: number) =>
+		span > 48 * 3600_000
+			? new Date(value).toLocaleDateString(i18n.language, {
+					month: '2-digit',
+					day: '2-digit',
+				})
+			: new Date(value).toLocaleTimeString(i18n.language, {
+					hour: '2-digit',
+					minute: '2-digit',
+					hour12: false,
+				});
+	const labelFormatter = (value: unknown) =>
+		new Date(Number(value)).toLocaleString(i18n.language, {
+			month: '2-digit',
+			day: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+	// 稀疏样本必须看得见真实点位；点太密时再隐藏，避免连成噪点墙。
+	const sparse = data.length <= 40;
 
 	return (
 		<ResponsiveContainer width="100%" height="100%" minWidth={1}>
 			<LineChart data={data} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
 				<CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
 				<XAxis
-					dataKey="time"
+					dataKey="ts"
+					type="number"
+					scale="time"
+					domain={['dataMin', 'dataMax']}
 					tick={{ fontSize: 11, fill: c.tick }}
 					axisLine={false}
 					tickLine={false}
-					interval="preserveStartEnd"
-					minTickGap={28}
+					tickFormatter={tickFormatter}
+					minTickGap={36}
 				/>
 				<YAxis
 					tick={{ fontSize: 11, fill: c.tick }}
@@ -57,6 +82,7 @@ export default function LatencyChart({ data }: LatencyChartProps) {
 					tickFormatter={(v) => `${v}ms`}
 				/>
 				<Tooltip
+					labelFormatter={labelFormatter}
 					formatter={(value) => [`${value}ms`, t('service.latencyP95')]}
 					contentStyle={{
 						borderRadius: '8px',
@@ -65,11 +91,11 @@ export default function LatencyChart({ data }: LatencyChartProps) {
 					}}
 				/>
 				<Line
-					type="monotone"
+					type="linear"
 					dataKey="latency"
 					stroke="var(--color-chart-1)"
 					strokeWidth={2}
-					dot={false}
+					dot={sparse ? { r: 2, fill: 'var(--color-chart-1)' } : false}
 					activeDot={{ r: 4, fill: 'var(--color-chart-1)' }}
 				/>
 			</LineChart>
