@@ -5,8 +5,10 @@ allowBuilds:
   esbuild: true
   sharp: true
 overrides:
+  fast-uri: 3.1.9
   react: 19.2.5
   'react-dom': 19.2.5
+  vite: 6.4.4
 # @hookform/resolvers 3.10 未声明 zod 依赖，仅按 hoist 位置解析：
 # 共享 eslint 配置带入 zod@4 后，Vercel 增量安装会把 v4 提升给它，导致
 # schema（zod@3）与 resolver 类型不匹配而构建失败。钉死其 zod 为应用版本。
