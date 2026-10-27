@@ -49,7 +49,6 @@ export const config: VercelConfig = {
     routes.rewrite('/bff/:path*', `${ORIGIN}/bff/:path*`),
     routes.rewrite('/api/v1/:path*', `${ORIGIN}/api/v1/:path*`),
     routes.rewrite('/oauth/:path*', `${ORIGIN}/oauth/:path*`),
-    routes.rewrite('/tenant/:path*', `${ORIGIN}/tenant/:path*`),
     routes.rewrite('/ready', `${ORIGIN}/ready`),
     routes.rewrite('/feed.xml', `${ORIGIN}/bff/status/api/v1/status/rss`),
     spaFallback,
