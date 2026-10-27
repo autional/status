@@ -5,6 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { readFileSync } from 'node:fs';
 import path from 'path';
 import { CDN_PIN, readBuildEnv } from '../../scripts/env.mjs';
+import { cdnHeadPlugin } from '../../scripts/vite-cdn.mjs';
 import { REGION_COPY } from '../../scripts/region-copy.mjs';
 
 const buildEnv = readBuildEnv();
@@ -30,7 +31,6 @@ function regionPlugin(): Plugin {
     TITLE: copy.title,
     DESCRIPTION: copy.description,
     KEYWORDS: copy.keywords,
-    CDN_ORIGIN: buildEnv.cdnHost,
     OG_TITLE: copy.ogTitle,
     OG_DESCRIPTION: copy.ogDescription,
     OG_LOCALE: copy.ogLocale,
@@ -92,6 +92,7 @@ export default defineConfig({
   base: BASE,
   plugins: [
     react(),
+    cdnHeadPlugin({ cdnHost: buildEnv.cdnHost }),
     inlineEnvPlugin(),
     regionPlugin(),
     VitePWA({
