@@ -30,6 +30,7 @@ function regionPlugin(): Plugin {
     TITLE: copy.title,
     DESCRIPTION: copy.description,
     KEYWORDS: copy.keywords,
+    CDN_ORIGIN: buildEnv.cdnHost,
     OG_TITLE: copy.ogTitle,
     OG_DESCRIPTION: copy.ogDescription,
     OG_LOCALE: copy.ogLocale,
@@ -129,8 +130,11 @@ export default defineConfig({
       injectManifest: {
         // index.html 是离线壳，必须进预缓存；env.js 已内联进页面，不再作为独立缓存项。
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
-        globIgnores: ['**/env.js', '**/android-chrome-*.png'],
+        // 安装图标不参与离线壳；includeManifestIcons:false 才能关掉插件对 manifest.icons
+        // 的强制注入（它绕过 globIgnores）。
+        globIgnores: ['**/env.js', '**/android-chrome-*.png', '**/apple-touch-icon.png'],
       },
+      includeManifestIcons: false,
       devOptions: {
         enabled: false,
       },
