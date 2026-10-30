@@ -15,6 +15,8 @@ export const REGION_COPY = {
     robotsComment: '公开服务状态页，欢迎收录。',
     preferredLanguages: 'zh-CN, en',
     manifestDescription: 'Autional 系统状态页面 — 实时查看所有服务运行状态与维护公告',
+    // RSS 自动发现链接的 title（浏览器/阅读器订阅菜单里显示的名字，必须与频道语言一致）
+    rssTitle: 'Autional Status — 系统事件通知',
   },
   en: {
     locale: 'en-US',
@@ -28,5 +30,6 @@ export const REGION_COPY = {
     robotsComment: 'public service status page; indexing welcome.',
     preferredLanguages: 'en',
     manifestDescription: 'Autional system status page — live service health and maintenance announcements',
+    rssTitle: 'Autional Status — System Event Notifications',
   },
 };

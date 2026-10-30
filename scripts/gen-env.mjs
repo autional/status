@@ -15,6 +15,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readBuildEnv } from './env.mjs';
 import { REGION_COPY } from './region-copy.mjs';
+import { PUBLIC_ROUTES } from './routes.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const buildEnv = readBuildEnv();
@@ -63,12 +64,11 @@ write(
   `# ${buildEnv.siteHost} — ${copy.robotsComment}\nUser-agent: *\nAllow: /\n\nSitemap: ${buildEnv.siteUrl}/sitemap.xml\n`,
 );
 
-// ── 3. sitemap.xml（3 条公开路由；/rss 展示页不入 sitemap）───────────────────
-const ROUTES = ['/', '/incidents', '/maintenance'];
+// ── 3. sitemap.xml（路由单点 = scripts/routes.mjs；/rss 展示页不入 sitemap）────────
 write(
   'sitemap.xml',
-  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${ROUTES.map(
-    (p) => `  <url><loc>${buildEnv.siteUrl}${p}</loc></url>`,
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PUBLIC_ROUTES.map(
+    (r) => `  <url><loc>${buildEnv.siteUrl}${r.path}</loc></url>`,
   ).join('\n')}\n</urlset>\n`,
 );
 

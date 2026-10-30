@@ -17,9 +17,9 @@ function RssFeedContent() {
 	const { t, i18n } = useTranslation();
 	usePageMeta(t('rss.pageTitle'), t('rss.desc'), '/rss');
 
-	// ST2-12：.com 阅读器不应拉取中文频道；语言随门户切换，并与 canonical/alternate 链接一致。
+	// 区域决定频道语言（.cn 中文 / .com 英文）：对外只有一个 feed URL，不再拼 ?lang。
 	const rssLang: 'zh' | 'en' = i18n.resolvedLanguage?.startsWith('en') ? 'en' : 'zh';
-	const feedUrl = `${SITE_URL}/feed.xml${rssLang === 'en' ? '?lang=en' : ''}`;
+	const feedUrl = `${SITE_URL}/feed.xml`;
 
 	const { data: rssXml, isLoading: rssLoading, isError: rssError } = useRssXml(rssLang);
 	const { data: incidents } = useIncidents();

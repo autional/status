@@ -8,8 +8,8 @@ import { routes, type Rewrite, type VercelConfig } from '@vercel/config/v1';
  * 未设置时 **故意抛错**（fail-closed），避免静默产出坏路由。
  *
  * rewrites 承接原 vercel.json 全集；`/ready` 与 `/feed.xml` 为 com 线旧版缺失的两条
- * （cn 形态为准，支线 #24 回正）。SPA 兜底只在 Accept 含 text/html 时生效——缺失的
- * `/assets/*.js` 返回 404，不会被兜底成 200 的 index.html。
+ * （cn 形态为准，支线 #24 回正）。SPA 兜底指向 `/spa.html`、放行 text/html 与 * / *、
+ * 并排除资产/带扩展名路径（缺失资产仍是真 404）——详见 spaFallback 上方注释。
  */
 const rawOrigin = process.env.API_ORIGIN;
 
@@ -24,11 +24,41 @@ const ORIGIN = rawOrigin.replace(/\/+$/, '');
 const NO_CACHE = 'public, max-age=0, must-revalidate';
 const IMMUTABLE = 'public, max-age=31536000, immutable';
 
+/**
+ * SPA 兜底（2026-10-30 修订，两处必读）。
+ *
+ * 1) 目的文件 `/index.html` → `/spa.html`。
+ *    构建期已按路由生成 `dist/<route>/index.html`（vite.config.ts staticRouteHtmlPlugin），
+ *    sitemap 里的公开路由由文件系统直接命中；本兜底只服务**动态路由**
+ *    （/incidents/:id、/maintenance/:id、/services/:id）与未知路径。
+ *    `spa.html` 不含 canonical / og:url —— 静态壳不知道真实路径，
+ *    「没有 canonical」远好过「错误 canonical（每页都指首页）」。
+ *
+ * 2) Accept 条件从 `text/html` 放宽到 `text/html` 或 `* / *`，并排除资产/带扩展名的路径。
+ *    旧条件只认 text/html ⇒ 社交/IM/AI 抓取器（facebookexternalhit / Twitterbot / Slack，
+ *    以及 curl 默认）请求深链一律 404 text/plain，分享卡片全挂（实测线上）。
+ *    排除正则保证缺失的 `/assets/*.js`（浏览器请求带 `* / *`）仍是真 404，
+ *    不会被兜成 200 的 HTML —— 这正是旧条件原本要防的事。
+ */
 const spaFallback: Rewrite = {
-  source: '/(.*)',
-  destination: '/index.html',
-  has: [{ type: 'header', key: 'accept', value: { re: 'text/html' } }],
+  // ^/(?!assets/|.*\.[a-zA-Z0-9]+$).*$  —— 排除 /assets/* 与一切带扩展名的路径。
+  source: '^/(?!assets/|.*\\.[a-zA-Z0-9]+$).*$',
+  destination: '/spa.html',
+  has: [{ type: 'header', key: 'accept', value: { re: 'text/html|\\*/\\*' } }],
 };
+
+// 守卫自证：兜底必须排最后、必须排除资产、必须放行非 text/html 抓取器。
+// 改这三行之前先读上面的注释（线上分享卡片曾因此整片 404）。
+if (!spaFallback.source?.startsWith('^/')) {
+  throw new Error('[status] SPA 兜底 source 必须是锚定正则（^/…），否则资产排除失效');
+}
+if (spaFallback.destination !== '/spa.html') {
+  throw new Error('[status] SPA 兜底必须指向 /spa.html（不含 canonical 的壳）');
+}
+const acceptRule = JSON.stringify(spaFallback.has ?? []);
+if (!acceptRule.includes('text/html') || !acceptRule.includes('*')) {
+  throw new Error('[status] SPA 兜底必须同时放行 text/html 与 */*（否则社交抓取器 404）');
+}
 
 export const config: VercelConfig = {
   framework: 'vite',

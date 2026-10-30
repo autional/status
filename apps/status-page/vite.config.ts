@@ -2,16 +2,76 @@ import type { Plugin } from 'vite';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import path from 'path';
 import { CDN_PIN, readBuildEnv } from '../../scripts/env.mjs';
 import { cdnHeadPlugin } from '../../scripts/vite-cdn.mjs';
 import { REGION_COPY } from '../../scripts/region-copy.mjs';
+import { PUBLIC_ROUTES } from '../../scripts/routes.mjs';
+import { applyRouteHead, siblingSiteUrl, stripRouteIdentity } from '../../scripts/route-html.mjs';
 
 const buildEnv = readBuildEnv();
 const copy = REGION_COPY[buildEnv.defaultLang];
 const CDN_ASSET_BASE = `${buildEnv.cdnHost}/ui/${CDN_PIN}`;
 const ROOT_URL = `https://www.${buildEnv.rootDomain}`;
+
+/**
+ * 构建期「按路由出静态 HTML」（2026-10-30）。
+ *
+ * 纯 SPA 的所有路径都回同一份 index.html ⇒ 每页静态 canonical/og:url 都是首页，
+ * 与 sitemap 声明的 URL 直接冲突，且不跑 JS 的抓取器（社交/IM/AI）只能看到首页身份。
+ * 本插件在构建后生成：
+ *   - dist/<route>/index.html：sitemap 里的每条公开路由各一份，头部（canonical /
+ *     og:url / hreflang / title / description / RSS alternate）逐页正确；
+ *   - dist/spa.html：动态路由（/incidents/:id 等）兜底壳，**不含** canonical / og:url
+ *     （「没有 canonical」比「错误 canonical」安全），运行期由 page-meta 补。
+ * 路由单点 = scripts/routes.mjs（与 sitemap 生成共用）。
+ */
+function staticRouteHtmlPlugin(): Plugin {
+  return {
+    name: 'static-route-html',
+    apply: 'build',
+    // 放在最后：PWA 插件已在先前的 closeBundle 里写完 sw.js/manifest，
+    // 我们要读的是最终 dist/index.html。
+    closeBundle() {
+      const outDir = path.resolve(__dirname, 'dist');
+      const indexPath = path.join(outDir, 'index.html');
+      if (!existsSync(indexPath)) {
+        throw new Error('[status] 构建产物缺少 dist/index.html，静态路由 HTML 无法生成');
+      }
+      const base = readFileSync(indexPath, 'utf8');
+      const localePath = path.resolve(__dirname, `src/i18n/locales/${copy.locale}.json`);
+      const locale = JSON.parse(readFileSync(localePath, 'utf8')) as Record<string, string>;
+      const siteUrl = buildEnv.siteUrl;
+      const siblingUrl = siblingSiteUrl(siteUrl);
+      const rssTitle = copy.rssTitle;
+
+      const home = applyRouteHead(base, { siteUrl, siblingUrl, path: '/', rssTitle });
+      writeFileSync(indexPath, home);
+
+      let generated = 1;
+      for (const route of PUBLIC_ROUTES) {
+        if (route.path === '/') continue;
+        const html = applyRouteHead(base, {
+          siteUrl,
+          siblingUrl,
+          path: route.path,
+          title: route.titleKey ? locale[route.titleKey] : undefined,
+          description: route.descriptionKey ? locale[route.descriptionKey] : undefined,
+          rssTitle,
+        });
+        const dir = path.join(outDir, route.path);
+        mkdirSync(dir, { recursive: true });
+        writeFileSync(path.join(dir, 'index.html'), html);
+        generated += 1;
+      }
+
+      writeFileSync(path.join(outDir, 'spa.html'), stripRouteIdentity(home));
+
+      console.log(`[status] static route html: ${generated} pages (+ spa.html)`);
+    },
+  };
+}
 
 function normalizeViteBase(p: string | undefined): string {
   if (!p || p === '/') return '/';
@@ -39,6 +99,7 @@ function regionPlugin(): Plugin {
     SITE_URL: buildEnv.siteUrl,
     ROOT_URL,
     CDN_ASSET_BASE,
+    RSS_TITLE: copy.rssTitle,
   };
   return {
     name: 'region-plugin',
@@ -140,6 +201,8 @@ export default defineConfig({
         enabled: false,
       },
     }),
+    // 必须最后：读取 PWA 处理完的 dist/index.html，再派生静态路由 HTML。
+    staticRouteHtmlPlugin(),
   ],
   worker: {
     format: 'es',

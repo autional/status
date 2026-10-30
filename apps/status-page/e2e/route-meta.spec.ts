@@ -32,7 +32,17 @@ test('EN：OG / Twitter / JSON-LD / og:locale / RSS alternate 全英文', async 
 	expect(jsonLd.inLanguage).toBe('en-US');
 	expect(jsonLd.name).toBe('Autional System Status');
 
+	// RSS 自动发现链接：区域决定语言，URL 恒为本站 /feed.xml（不再拼 ?lang）。
 	await expect(
 		page.locator('link[rel="alternate"][type="application/rss+xml"]'),
-	).toHaveAttribute('href', /[?&]lang=en$/);
+	).toHaveAttribute('href', /\/feed\.xml$/);
+
+	// hreflang：必须同时声明 zh-CN / en-US / x-default，且互指两区同名路径。
+	for (const code of ['zh-CN', 'en-US', 'x-default']) {
+		await expect(page.locator(`link[rel="alternate"][hreflang="${code}"]`)).toHaveCount(1);
+	}
+	const zhHref = await page.locator('link[rel="alternate"][hreflang="zh-CN"]').getAttribute('href');
+	const enHref = await page.locator('link[rel="alternate"][hreflang="en-US"]').getAttribute('href');
+	expect(new URL(zhHref!).host).toMatch(/\.cn$/);
+	expect(new URL(enHref!).host).toMatch(/\.com$/);
 });
