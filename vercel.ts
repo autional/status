@@ -41,16 +41,21 @@ const IMMUTABLE = 'public, max-age=31536000, immutable';
  *    不会被兜成 200 的 HTML —— 这正是旧条件原本要防的事。
  */
 const spaFallback: Rewrite = {
-  // ^/(?!assets/|.*\.[a-zA-Z0-9]+$).*$  —— 排除 /assets/* 与一切带扩展名的路径。
-  source: '^/(?!assets/|.*\\.[a-zA-Z0-9]+$).*$',
+  // 排除「任一段带点」的路径（/assets/*.js、/sitemap.xml、/favicon.ico…），其余交给 SPA 壳。
+  //
+  // ⚠ 不要用负向前瞻：`^/(?!assets/|.*\.[a-z0-9]+$).*$` 会被 @vercel/config 拒绝 ——
+  //   `Invalid path-to-regexp pattern: Negative lookaheads must be wrapped in a group`，
+  //   而「包一层」的写法在 path-to-regexp v6 里又匹配不到普通路径（实测全 skip）。
+  //   正确做法 = 用参数内联正则表达「非点段」：`(?:[^./]+/)*[^./]*`。
+  source: '/:path((?:[^./]+/)*[^./]*)',
   destination: '/spa.html',
   has: [{ type: 'header', key: 'accept', value: { re: 'text/html|\\*/\\*' } }],
 };
 
-// 守卫自证：兜底必须排最后、必须排除资产、必须放行非 text/html 抓取器。
-// 改这三行之前先读上面的注释（线上分享卡片曾因此整片 404）。
-if (!spaFallback.source?.startsWith('^/')) {
-  throw new Error('[status] SPA 兜底 source 必须是锚定正则（^/…），否则资产排除失效');
+// 守卫自证：兜底必须排最后、必须排除「带点的段」、必须放行非 text/html 抓取器。
+// 改这三行之前先读上面的注释（线上分享卡片曾因此整片 404；负向前瞻会被平台拒绝）。
+if (!String(spaFallback.source ?? '').includes('[^./]')) {
+  throw new Error('[status] SPA 兜底 source 必须排除「带点的段」（见 spaFallback 注释）');
 }
 if (spaFallback.destination !== '/spa.html') {
   throw new Error('[status] SPA 兜底必须指向 /spa.html（不含 canonical 的壳）');
