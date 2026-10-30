@@ -55,6 +55,13 @@ E2E 覆盖四条审计断言：订阅 tabs 键盘语义、路由级 page meta（
 - **hreflang**：`zh-CN` ↔ `.cn`、`en-US` ↔ `.com`、`x-default` → `.com`；构建期写静态，运行期 `page-meta` 补动态路由。
 - `/rss` 是展示页，**不进** sitemap（内链可达）。
 
+> ⚠ **改 `vercel.ts` 的必读**：`rewrites[].source` 由 `@vercel/config` 按 path-to-regexp 解析，
+> **负向前瞻会被直接拒绝**（`Invalid path-to-regexp pattern: Negative lookaheads must be wrapped in a group`），
+> 表现为「部署整包失败、自定义域停留在上一版」，而本地 `tsc`/`vite build` 完全看不出来。
+> 兜底规则因此写成 `/:path((?:[^./]+/)*[^./]*)`（排除"带点的段"）。
+> 改完先在本地求值：`API_ORIGIN=https://api.autional.cn node --experimental-strip-types vercel.ts`。
+> 详见 `docs/SEO-FEED-REGION-ISOLATION-2026-10-30.md` §11.5（R5）。
+
 ## PWA
 
 - **外壳缓存**：`vite-plugin-pwa` injectManifest + Workbox precache；manifest 按区域在构建期生成。
