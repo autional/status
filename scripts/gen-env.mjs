@@ -64,12 +64,14 @@ write(
   `# ${buildEnv.siteHost} — ${copy.robotsComment}\nUser-agent: *\nAllow: /\n\nSitemap: ${buildEnv.siteUrl}/sitemap.xml\n`,
 );
 
-// ── 3. sitemap.xml（路由单点 = scripts/routes.mjs；/rss 展示页不入 sitemap）────────
+// ── 3. sitemap.xml（路由单点 = scripts/routes.mjs；`sitemap:false` 只出静态页）──────
 write(
   'sitemap.xml',
-  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PUBLIC_ROUTES.map(
-    (r) => `  <url><loc>${buildEnv.siteUrl}${r.path}</loc></url>`,
-  ).join('\n')}\n</urlset>\n`,
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${PUBLIC_ROUTES.filter(
+    (r) => r.sitemap !== false,
+  )
+    .map((r) => `  <url><loc>${buildEnv.siteUrl}${r.path}</loc></url>`)
+    .join('\n')}\n</urlset>\n`,
 );
 
 // ── 4. .well-known/security.txt（RFC 9116）───────────────────────────────────

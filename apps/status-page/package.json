@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node ../../scripts/gen-env.mjs && vite --port 13106",
     "build": "node ../../scripts/gen-env.mjs && tsc && vite build",
-    "prebuild": "node ../../scripts/check-pwa-config.mjs",
+    "prebuild": "node ../../scripts/check-pwa-config.mjs && node ../../scripts/check-vercel-config.mjs",
     "preview": "vite preview --port 13106",
     "lint": "eslint src/ e2e/",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.sw.json && tsc -p tsconfig.e2e.json",

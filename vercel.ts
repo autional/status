@@ -79,6 +79,8 @@ export const config: VercelConfig = {
     routes.header('/registerSW.js', [{ key: 'Cache-Control', value: NO_CACHE }]),
     routes.header('/manifest.webmanifest', [{ key: 'Cache-Control', value: NO_CACHE }]),
     routes.header('/env.js', [{ key: 'Cache-Control', value: NO_CACHE }]),
+    // 兜底壳（/spa.html）可被直接访问：不带 canonical，标 noindex 免得被当成独立页收录。
+    routes.header('/spa.html', [{ key: 'X-Robots-Tag', value: 'noindex' }]),
   ],
   rewrites: [
     routes.rewrite('/bff/:path*', `${ORIGIN}/bff/:path*`),
