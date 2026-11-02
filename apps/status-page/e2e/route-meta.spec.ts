@@ -50,14 +50,17 @@ test('EN：OG / Twitter / JSON-LD / og:locale / RSS alternate 全英文', async 
 /**
  * 页脚站外出口（2026-11-02）：状态页是可索引公开页，此前只有站内链接 + mailto，
  * 看完故障的人去不了官网/文档/合规页，爬虫也在这里断头。
- * 断言 lock 住四条外链的存在与目标 host —— 否则下次改页脚无人察觉。
+ * 断言 lock 住三条外链的存在与目标 host —— 否则下次改页脚无人察觉。
+ *
+ * 刻意**不含**登录：状态页访客是来查故障的客户，本身无需登录；裸登录还会落到
+ * auth 根 → 选品牌 → 选租户，比「官网 → 登录」只少一跳。
  */
-test('页脚：四个站外出口且 host 正确', async ({ page }) => {
+test('页脚：三个站外出口且 host 正确', async ({ page }) => {
 	await useLang(page, 'zh-CN');
 	await page.goto('/');
 
 	const footer = page.locator('footer');
-	await expect(footer.locator('a[href^="http"]').filter({ hasNotText: '' })).toHaveCount(4);
+	await expect(footer.locator('a[href^="http"]')).toHaveCount(3);
 
 	const hrefs = await footer.locator('a[href^="http"]').evaluateAll((els) =>
 		els.map((el) => (el as HTMLAnchorElement).href),
@@ -66,5 +69,5 @@ test('页脚：四个站外出口且 host 正确', async ({ page }) => {
 	expect(hosts.some((h) => h.startsWith('www.'))).toBe(true);
 	expect(hosts.some((h) => h.startsWith('developer.'))).toBe(true);
 	expect(hosts.some((h) => h.startsWith('trust.'))).toBe(true);
-	expect(hosts.some((h) => h.startsWith('auth.'))).toBe(true);
+	expect(hosts.some((h) => h.startsWith('auth.'))).toBe(false);
 });
