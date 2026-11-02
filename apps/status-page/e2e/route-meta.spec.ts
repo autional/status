@@ -46,3 +46,25 @@ test('EN：OG / Twitter / JSON-LD / og:locale / RSS alternate 全英文', async 
 	expect(new URL(zhHref!).host).toMatch(/\.cn$/);
 	expect(new URL(enHref!).host).toMatch(/\.com$/);
 });
+
+/**
+ * 页脚站外出口（2026-11-02）：状态页是可索引公开页，此前只有站内链接 + mailto，
+ * 看完故障的人去不了官网/文档/合规页，爬虫也在这里断头。
+ * 断言 lock 住四条外链的存在与目标 host —— 否则下次改页脚无人察觉。
+ */
+test('页脚：四个站外出口且 host 正确', async ({ page }) => {
+	await useLang(page, 'zh-CN');
+	await page.goto('/');
+
+	const footer = page.locator('footer');
+	await expect(footer.locator('a[href^="http"]').filter({ hasNotText: '' })).toHaveCount(4);
+
+	const hrefs = await footer.locator('a[href^="http"]').evaluateAll((els) =>
+		els.map((el) => (el as HTMLAnchorElement).href),
+	);
+	const hosts = hrefs.map((h) => new URL(h).hostname);
+	expect(hosts.some((h) => h.startsWith('www.'))).toBe(true);
+	expect(hosts.some((h) => h.startsWith('developer.'))).toBe(true);
+	expect(hosts.some((h) => h.startsWith('trust.'))).toBe(true);
+	expect(hosts.some((h) => h.startsWith('auth.'))).toBe(true);
+});
