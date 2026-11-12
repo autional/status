@@ -506,6 +506,7 @@ export default function SubscribePage() {
 										checked={prefs.notifyIncidents}
 										onChange={() => handleTogglePref('notifyIncidents')}
 										size="sm"
+										ariaLabel={t('subscribe.preferences.notifyIncidents')}
 									/>
 								</div>
 
@@ -523,6 +524,7 @@ export default function SubscribePage() {
 										checked={prefs.notifyMaintenance}
 										onChange={() => handleTogglePref('notifyMaintenance')}
 										size="sm"
+										ariaLabel={t('subscribe.preferences.notifyMaintenance')}
 									/>
 								</div>
 
@@ -540,6 +542,7 @@ export default function SubscribePage() {
 										checked={prefs.notifyRecovery}
 										onChange={() => handleTogglePref('notifyRecovery')}
 										size="sm"
+										ariaLabel={t('subscribe.preferences.notifyRecovery')}
 									/>
 								</div>
 
