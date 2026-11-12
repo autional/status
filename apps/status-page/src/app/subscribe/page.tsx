@@ -493,7 +493,7 @@ export default function SubscribePage() {
 						{prefsLoaded && prefs && (
 							<div className="space-y-3 rounded-md border border-neutral-100 bg-neutral-50 p-4">
 								{/* Notify Incidents */}
-								<label className="flex items-center justify-between cursor-pointer">
+								<div className="flex items-center justify-between">
 									<div>
 										<span className="text-sm font-medium text-neutral-800">
 											{t('subscribe.preferences.notifyIncidents')}
@@ -507,10 +507,10 @@ export default function SubscribePage() {
 										onChange={() => handleTogglePref('notifyIncidents')}
 										size="sm"
 									/>
-								</label>
+								</div>
 
 								{/* Notify Maintenance */}
-								<label className="flex items-center justify-between cursor-pointer">
+								<div className="flex items-center justify-between">
 									<div>
 										<span className="text-sm font-medium text-neutral-800">
 											{t('subscribe.preferences.notifyMaintenance')}
@@ -524,10 +524,10 @@ export default function SubscribePage() {
 										onChange={() => handleTogglePref('notifyMaintenance')}
 										size="sm"
 									/>
-								</label>
+								</div>
 
 								{/* Notify Recovery */}
-								<label className="flex items-center justify-between cursor-pointer">
+								<div className="flex items-center justify-between">
 									<div>
 										<span className="text-sm font-medium text-neutral-800">
 											{t('subscribe.preferences.notifyRecovery')}
@@ -541,7 +541,7 @@ export default function SubscribePage() {
 										onChange={() => handleTogglePref('notifyRecovery')}
 										size="sm"
 									/>
-								</label>
+								</div>
 
 								{/* Digest Frequency */}
 								<div className="pt-2 border-t border-neutral-200">
