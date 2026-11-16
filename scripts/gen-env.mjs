@@ -52,7 +52,6 @@ write(
   VITE_PORTAL_CONFIG: {
 ${portalConfig}
   },
-  VITE_COOKIE_DOMAIN: ".${buildEnv.rootDomain}",
   VITE_API_BASE_URL: "${apiBase}"
 };
 `,
