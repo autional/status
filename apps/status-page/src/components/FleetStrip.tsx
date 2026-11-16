@@ -24,8 +24,11 @@ const STRIP_TONE: Record<HealthStatus, string> = {
 		'border-warning bg-warning-soft text-warning-text ring-1 ring-warning/40 hover:ring-warning',
 	unhealthy:
 		'border-danger bg-danger-soft text-danger-text ring-2 ring-danger/40 hover:ring-danger',
+	// 图标色用语义 token `text-muted`（dark 下自适应），与同站同语义的 ICON_TONE[unknown]
+	// （ServiceTile.tsx）与统计卡图标（page.tsx）一致；此前用的裸色阶 neutral-400 在设计系统里
+	// 已 closed（对白底仅 1.93:1，未达非文本对比度 3:1），故不再使用（KI-status-neutral400）。
 	unknown:
-		'border-dashed border-neutral-300 bg-neutral-0 text-neutral-400 hover:border-neutral-400 dark:border-neutral-600 dark:bg-surface/40 dark:text-neutral-400',
+		'border-dashed border-neutral-300 bg-neutral-0 text-muted hover:border-neutral-400 dark:border-neutral-600 dark:bg-surface/40',
 };
 
 /** 「未接入监控」：虚线 + 信息色（蓝）—— 独立于"未知"，且不冒充故障。 */
